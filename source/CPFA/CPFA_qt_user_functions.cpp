@@ -35,9 +35,12 @@ void CPFA_qt_user_functions::DrawOnRobot(CFootBotEntity& entity) {
          * See also the description in
          * $ argos3 -q foot-bot
          */
-        GetOpenGLWidget().renderText(0.0, 0.0, 0.5,             // position
-                                    entity.GetId().c_str()); // text
-        /* Restore face culling */
+        
+	// Disable for now
+	//GetOpenGLWidget().renderText(0.0, 0.0, 0.5,             // position
+	//			     entity.GetId().c_str()); // text
+        
+	/* Restore face culling */
         glEnable(GL_CULL_FACE);
         /* Restore lighting */
         glEnable(GL_LIGHTING);
@@ -155,6 +158,24 @@ void CPFA_qt_user_functions::DrawPheromones() {
 
 void CPFA_qt_user_functions::DrawTargetRays() {
 
+	//size_t tick = loopFunctions.GetSpace().GetSimulationClock();
+	//size_t tock = loopFunctions.GetSimulator().GetPhysicsEngine("default").GetInverseSimulationClockTick() / 8;
+
+    //if(tock == 0) tock = 1;
+
+    //if(tick % tock == 0) {
+
+        for(size_t j = 0; j < loopFunctions.TargetRayList.size(); j++) {
+
+            DrawRay(loopFunctions.TargetRayList[j], loopFunctions.TargetRayColorList[j]);
+      
+        }
+    //}
+}
+
+/*
+void CPFA_qt_user_functions::DrawTargetRays() {
+
     CColor c = CColor::BLUE;
 
     for(size_t j = 0; j < loopFunctions.TargetRayList.size(); j++) {
@@ -166,5 +187,6 @@ void CPFA_qt_user_functions::DrawTargetRays() {
         loopFunctions.TargetRayList.clear();
     //}
 }
+*/
 
 REGISTER_QTOPENGL_USER_FUNCTIONS(CPFA_qt_user_functions, "CPFA_qt_user_functions")

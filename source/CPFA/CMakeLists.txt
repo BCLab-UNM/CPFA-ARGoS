@@ -17,8 +17,8 @@ add_library(CPFA_controller     SHARED CPFA_controller.h
 ###############################################
 
 target_link_libraries(CPFA_controller
-					  iAntBaseController
-					  iAntPheromone)
+					  BaseController
+					  Pheromone)
 
 target_link_libraries(CPFA_loop_functions
                       CPFA_controller

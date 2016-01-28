@@ -17,9 +17,10 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
     compassSensor   = GetSensor<argos::CCI_PositioningSensor>("positioning");
     wheelActuator   = GetActuator<argos::CCI_DifferentialSteeringActuator>("differential_steering");
     proximitySensor = GetSensor<argos::CCI_FootBotProximitySensor>("footbot_proximity");
-
     argos::TConfigurationNode settings = argos::GetNode(node, "settings");
+    argos::GetNodeAttribute(settings, "FoodDistanceTolerance",   FoodDistanceTolerance);
     argos::GetNodeAttribute(settings, "TargetDistanceTolerance", TargetDistanceTolerance);
+    argos::GetNodeAttribute(settings, "TargetAngleTolerance",    TargetAngleTolerance);
     argos::GetNodeAttribute(settings, "SearchStepSize",          SearchStepSize);
     argos::GetNodeAttribute(settings, "RobotForwardSpeed",       RobotForwardSpeed);
     argos::GetNodeAttribute(settings, "RobotRotationSpeed",      RobotRotationSpeed);
@@ -27,10 +28,100 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
     argos::CVector2 p(GetPosition());
     SetStartPosition(argos::CVector3(p.GetX(), p.GetY(), 0.0));
 
+    FoodDistanceTolerance *= FoodDistanceTolerance;
+
+/********
+
+    // Name the results file with the current time and date
+ time_t t = time(0);   // get time now
+    struct tm * now = localtime( & t );
+    stringstream ss;
+
+    ss << "CPFA-"<<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-" 
+       << (now->tm_year) << '-'
+       << (now->tm_mon + 1) << '-'
+       <<  now->tm_mday << '-'
+       <<  now->tm_hour << '-'
+       <<  now->tm_min << '-'
+       <<  now->tm_sec << ".csv";
+
+    string results_file_name = ss.str();
+   results_full_path = results_path+"/"+results_file_name;        
+
+
+
+    // Only the first robot should do this:
+
+   
+    if (GetId().compare("CPFA_0") == 0)
+      {
+  
+   ofstream results_output_stream;
+ results_output_stream.open(results_full_path, ios::app);
+ results_output_stream << "NumberOfRobots, "
+		       << "TargetDistanceTolerance, "
+		       << "TargetAngleTolerance, "
+		       << "FoodDistanceTolerance, "
+		       << "RobotForwardSpeed, "
+		       << "RobotRotationSpeed, "
+		       << "RandomSeed" << endl
+                       << NumberOfRobots << ", "
+		       << TargetDistanceTolerance << ", "
+		       << TargetAngleTolerance << ", "
+		       << FoodDistanceTolerance << ", "
+		       << RobotForwardSpeed << ", "
+		       << RobotRotationSpeed << ", "
+		       << CSimulator::GetInstance().GetRandomSeed() << endl;  
+ results_output_stream.close();
+      }
+   */
+
 }
 
 void CPFA_controller::ControlStep() {
-    UpdateTargetRayList();
+
+  ofstream log_output_stream;
+  log_output_stream.open("log.txt", ios::app);
+
+      // depart from nest after food drop off or simulation start
+      if (isHoldingFood)      
+	log_output_stream << "(Carrying) ";
+  
+  switch(CPFA_state) 
+    {
+    case DEPARTING:
+      log_output_stream << "DEPARTING" << endl;
+      break;
+      // after departing(), once conditions are met, begin searching()
+    case SEARCHING:
+      if (isInformed) 
+	if (!isUsingSiteFidelity)
+	  log_output_stream << "SEARCHING: Informed (P)" << endl;
+	else
+	  log_output_stream << "SEARCHING: Informed (F)" << endl;
+      else
+	log_output_stream << "SEARCHING: UnInformed" << endl;
+      break;
+      // return to nest after food pick up or giving up searching()
+    case RETURNING:
+      log_output_stream << "RETURNING" << endl;
+      break;
+    default:
+      log_output_stream << "Unknown state" << endl;
+    }
+
+  // Add line so we can draw the trail
+
+  CVector3 position3d(GetPosition().GetX(), GetPosition().GetY(), 0.00);
+  CVector3 target3d(previous_position.GetX(), previous_position.GetY(), 0.00);
+  CRay3 targetRay(target3d, position3d);
+  myTrail.push_back(targetRay);
+  LoopFunctions->TargetRayList.push_back(targetRay);
+  LoopFunctions->TargetRayColorList.push_back(TrailColor);
+
+  previous_position = GetPosition();
+
+  //UpdateTargetRayList();
     CPFA();
     Move();
 }
@@ -54,7 +145,7 @@ void CPFA_controller::CPFA() {
             break;
         // after departing(), once conditions are met, begin searching()
         case SEARCHING:
-            Searching();
+            if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) Searching();
             break;
         // return to nest after food pick up or giving up searching()
         case RETURNING:
@@ -79,24 +170,29 @@ void CPFA_controller::Departing() {
     argos::Real randomNumber = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
     /* When not informed, continue to travel until randomly switching to the searching state. */
-    if(isInformed == false && randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching) {
-        SearchTime = 0;
-        CPFA_state = SEARCHING;
-        argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
-        argos::Real rand = RNG->Gaussian(USV);
-        argos::CRadians rotation(rand);
-        argos::CRadians angle1(rotation.UnsignedNormalize());
-        argos::CRadians angle2(GetHeading().UnsignedNormalize());
-        argos::CRadians turn_angle(angle1 + angle2);
-        argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-
-        SetTarget(turn_vector + GetPosition());
+    if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
+    if(!isInformed && randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching) 
+	{
+	  SearchTime = 0;
+	  CPFA_state = SEARCHING;
+	  argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
+	  argos::Real rand = RNG->Gaussian(USV);
+	  argos::CRadians rotation(rand);
+	  argos::CRadians angle1(rotation.UnsignedNormalize());
+	  argos::CRadians angle2(GetHeading().UnsignedNormalize());
+	  argos::CRadians turn_angle(angle1 + angle2);
+	  argos::CVector2 turn_vector(SearchStepSize, turn_angle);
+	  
+	  SetTarget(turn_vector + GetPosition());
+	}
     }
     /* Are we informed? I.E. using site fidelity or pheromones. */
-    else if(distanceToTarget < TargetDistanceTolerance) {
+      
+
+    if(isInformed && distanceToTarget < TargetDistanceTolerance) {
         SearchTime = 0;
         CPFA_state = SEARCHING;
-
+	
         if(isUsingSiteFidelity == true) {
             isUsingSiteFidelity = false;
             SetFidelityList();
@@ -107,25 +203,34 @@ void CPFA_controller::Departing() {
 
 void CPFA_controller::Searching() {
     // "scan" for food only every half of a second
-    if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
+    //if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
         SetHoldingFood();
-    }
+	//}
 
     // When not carrying food, calculate movement.
     if(IsHoldingFood() == false) {
         argos::CVector2 distance = GetPosition() - GetTarget();
         argos::Real     random   = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
-        // randomly give up searching
-        if(random < LoopFunctions->ProbabilityOfReturningToNest) {
+        // If we reached our target search location, set a new one. The 
+        // new search location calculation is different based on whether
+        // we are currently using informed or uninformed search.
+        if(distance.SquareLength() < TargetDistanceTolerance) {
+
+	  // randomly give up searching
+	  if(random < LoopFunctions->ProbabilityOfReturningToNest) {
             SetTarget(LoopFunctions->NestPosition);
             isGivingUpSearch = true;
             CPFA_state = RETURNING;
-        }
-        // If we reached our target search location, set a new one. The 
-        // new search location calculation is different based on wether
-        // we are currently using informed or uninformed search.
-        else if(distance.SquareLength() < TargetDistanceTolerance) {
+	    
+	    ofstream log_output_stream;
+	    log_output_stream.open("giveup.txt", ios::app);
+	    log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
+	    log_output_stream.close();
+
+	    return;
+	  }
+
             // uninformed search
             if(isInformed == false) {
                 argos::Real USCV = LoopFunctions->UninformedSearchVariation.GetValue();
@@ -170,7 +275,7 @@ void CPFA_controller::Searching() {
  *****/
 void CPFA_controller::Returning() {
 
-    SetHoldingFood();
+  //SetHoldingFood();
     
     argos::CVector2 distance = GetPosition() - GetTarget();
 
@@ -187,7 +292,7 @@ void CPFA_controller::Returning() {
             if(isGivingUpSearch == false) {
                 TrailToShare.push_back(LoopFunctions->NestPosition);
                 argos::Real timeInSeconds = (argos::Real)(SimulationTick() / SimulationTicksPerSecond());
-                iAntPheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay);
+                Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay);
                 LoopFunctions->PheromoneList.push_back(sharedPheromone);
                 TrailToShare.clear();
                 sharedPheromone.Deactivate(); // make sure this won't get re-added later...
@@ -216,6 +321,7 @@ void CPFA_controller::Returning() {
             isUsingSiteFidelity = false;
         }
 
+	isHoldingFood = false;
         CPFA_state = DEPARTING;
     }
 
@@ -274,9 +380,10 @@ void CPFA_controller::SetHoldingFood() {
         size_t i = 0, j = 0;
 
         for(i = 0; i < LoopFunctions->FoodList.size(); i++) {
-            if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < LoopFunctions->FoodRadiusSquared) {
+            if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance) {
                 // We found food! Calculate the nearby food density.
                 isHoldingFood = true;
+		CPFA_state = RETURNING;
                 j = i + 1;
                 break;
             } else {

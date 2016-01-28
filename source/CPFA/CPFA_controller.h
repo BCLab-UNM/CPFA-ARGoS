@@ -1,13 +1,16 @@
 #ifndef CPFA_CONTROLLER_H
 #define CPFA_CONTROLLER_H
 
-#include <source/iAntBase/iAntBaseController.h>
-#include <source/iAntBase/iAntPheromone.h>
+#include <source/Base/BaseController.h>
+#include <source/Base/Pheromone.h>
 #include <source/CPFA/CPFA_loop_functions.h>
+
+using namespace std;
+using namespace argos;
 
 class CPFA_loop_functions;
 
-class CPFA_controller : public iAntBaseController {
+class CPFA_controller : public BaseController {
 
     public:
 
@@ -21,6 +24,8 @@ class CPFA_controller : public iAntBaseController {
         bool IsHoldingFood();
         bool IsUsingSiteFidelity();
         bool IsInTheNest();
+
+	Real                FoodDistanceTolerance;
 
         void SetLoopFunctions(CPFA_loop_functions* lf);
 
@@ -36,6 +41,10 @@ class CPFA_controller : public iAntBaseController {
 
         /* robot position variables */
         argos::CVector2 SiteFidelityPosition;
+
+	vector<CRay3>       myTrail;
+        CColor              TrailColor;
+
 
         bool isInformed;
         bool isHoldingFood;
@@ -69,6 +78,7 @@ class CPFA_controller : public iAntBaseController {
 
         void UpdateTargetRayList();
 
+	CVector2 previous_position;
 };
 
 #endif /* CPFA_CONTROLLER_H */

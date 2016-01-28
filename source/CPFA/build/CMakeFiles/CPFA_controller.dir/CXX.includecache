@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/users/matthew/CPFA-ARGoS/source/CPFA/CPFA_controller.cpp
+CPFA_controller.h
+/home/users/matthew/CPFA-ARGoS/source/CPFA/CPFA_controller.h
+
+/home/users/matthew/CPFA-ARGoS/source/CPFA/CPFA_controller.h
+source/Base/BaseController.h
+-
+source/Base/Pheromone.h
+-
+source/CPFA/CPFA_loop_functions.h
+-
+
+/home/users/matthew/CPFA-ARGoS/source/CPFA/CPFA_loop_functions.cpp
+CPFA_loop_functions.h
+/home/users/matthew/CPFA-ARGoS/source/CPFA/CPFA_loop_functions.h
+argos3/plugins/simulator/entities/box_entity.h
+-
+
+/home/users/matthew/CPFA-ARGoS/source/CPFA/CPFA_loop_functions.h
+argos3/core/simulator/loop_functions.h
+-
+argos3/plugins/robots/foot-bot/simulator/footbot_entity.h
+-
+argos3/core/simulator/entity/floor_entity.h
+-
+source/CPFA/CPFA_controller.h
+-
+

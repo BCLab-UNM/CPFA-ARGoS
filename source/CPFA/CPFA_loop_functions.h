@@ -27,6 +27,10 @@ class CPFA_loop_functions : public argos::CLoopFunctions {
         void UpdatePheromoneList();
         void SetFoodDistribution();
 
+	
+        std::vector<argos::CColor>   TargetRayColorList;
+
+
     protected:
 
         argos::CRandom::CRNG* RNG;
@@ -70,7 +74,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions {
         std::vector<argos::CVector2> FoodList;
         std::vector<argos::CColor>   FoodColoringList;
         std::vector<argos::CVector2> FidelityList;
-        std::vector<iAntPheromone>   PheromoneList;
+        std::vector<Pheromone>   PheromoneList;
         std::vector<argos::CRay3>    TargetRayList;
         argos::CRange<argos::Real>   ForageRangeX;
         argos::CRange<argos::Real>   ForageRangeY;

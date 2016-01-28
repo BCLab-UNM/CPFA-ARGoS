@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 2.8.12)
-project(iAnt-ARGoS)
+project(DDSA-ARGoS)
 
 # Use C+11
+if (UNIX)
 set(CMAKE_CXX_FLAGS "-std=c++0x")
+endif()
 
 # Deactivate RPATH for MacOSX.
+if (APPLE)
 set(CMAKE_MACOSX_RPATH 0)
+endif()
 
 # Set the path where CMake will find additional scripts.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
