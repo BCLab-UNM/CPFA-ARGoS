@@ -1,4 +1,5 @@
 #include "CPFA_controller.h"
+#include <unistd.h>
 
 CPFA_controller::CPFA_controller() :
     RNG(argos::CRandom::CreateRNG("argos")),
@@ -9,7 +10,8 @@ CPFA_controller::CPFA_controller() :
     ResourceDensity(0),
     MaxTrailSize(50),
     SearchTime(0),
-    CPFA_state(DEPARTING)
+    CPFA_state(DEPARTING),
+    LoopFunctions(NULL)
 {}
 
 void CPFA_controller::Init(argos::TConfigurationNode &node) {
@@ -24,62 +26,18 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
     argos::GetNodeAttribute(settings, "SearchStepSize",          SearchStepSize);
     argos::GetNodeAttribute(settings, "RobotForwardSpeed",       RobotForwardSpeed);
     argos::GetNodeAttribute(settings, "RobotRotationSpeed",      RobotRotationSpeed);
+    argos::GetNodeAttribute(settings, "ResultsDirectoryPath",      results_path);
 
     argos::CVector2 p(GetPosition());
     SetStartPosition(argos::CVector3(p.GetX(), p.GetY(), 0.0));
 
     FoodDistanceTolerance *= FoodDistanceTolerance;
 
-/********
-
-    // Name the results file with the current time and date
- time_t t = time(0);   // get time now
-    struct tm * now = localtime( & t );
-    stringstream ss;
-
-    ss << "CPFA-"<<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-" 
-       << (now->tm_year) << '-'
-       << (now->tm_mon + 1) << '-'
-       <<  now->tm_mday << '-'
-       <<  now->tm_hour << '-'
-       <<  now->tm_min << '-'
-       <<  now->tm_sec << ".csv";
-
-    string results_file_name = ss.str();
-   results_full_path = results_path+"/"+results_file_name;        
-
-
-
-    // Only the first robot should do this:
-
-   
-    if (GetId().compare("CPFA_0") == 0)
-      {
-  
-   ofstream results_output_stream;
- results_output_stream.open(results_full_path, ios::app);
- results_output_stream << "NumberOfRobots, "
-		       << "TargetDistanceTolerance, "
-		       << "TargetAngleTolerance, "
-		       << "FoodDistanceTolerance, "
-		       << "RobotForwardSpeed, "
-		       << "RobotRotationSpeed, "
-		       << "RandomSeed" << endl
-                       << NumberOfRobots << ", "
-		       << TargetDistanceTolerance << ", "
-		       << TargetAngleTolerance << ", "
-		       << FoodDistanceTolerance << ", "
-		       << RobotForwardSpeed << ", "
-		       << RobotRotationSpeed << ", "
-		       << CSimulator::GetInstance().GetRandomSeed() << endl;  
- results_output_stream.close();
-      }
-   */
-
 }
 
 void CPFA_controller::ControlStep() {
 
+  /*
   ofstream log_output_stream;
   log_output_stream.open("log.txt", ios::app);
 
@@ -109,6 +67,8 @@ void CPFA_controller::ControlStep() {
     default:
       log_output_stream << "Unknown state" << endl;
     }
+
+  */
 
   // Add line so we can draw the trail
 
@@ -163,6 +123,67 @@ bool CPFA_controller::IsInTheNest() {
 
 void CPFA_controller::SetLoopFunctions(CPFA_loop_functions* lf) {
     LoopFunctions = lf;
+
+
+    // Create the output file here because it needs LoopFunctions
+    
+    // Name the results file with the current time and date
+ time_t t = time(0);   // get time now
+    struct tm * now = localtime( & t );
+    stringstream ss;
+
+    ss << "CPFA-"<<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-" 
+       << (now->tm_year) << '-'
+       << (now->tm_mon + 1) << '-'
+       <<  now->tm_mday << '-'
+       <<  now->tm_hour << '-'
+       <<  now->tm_min << '-'
+       <<  now->tm_sec << ".csv";
+
+    string results_file_name = ss.str();
+   results_full_path = results_path+"/"+results_file_name;        
+
+
+    // Only the first robot should do this:
+   
+    if (GetId().compare("CPFA_0") == 0)
+      {
+
+   ofstream results_output_stream;
+   results_output_stream.open(results_full_path, ios::app);
+   results_output_stream << "NumberOfRobots, "
+			 << "TargetDistanceTolerance, "
+			 << "TargetAngleTolerance, "
+			 << "FoodDistanceTolerance, "
+			 << "RobotForwardSpeed, "
+			 << "RobotRotationSpeed, "
+			 << "RandomSeed, "
+			 << "ProbabilityOfSwitchingToSearching, "
+			 << "ProbabilityOfReturningToNest, "
+			 << "UninformedSearchVariation, "   
+			 << "RateOfInformedSearchDecay, "   
+			 << "RateOfSiteFidelity, "          
+			 << "RateOfLayingPheromone, "       
+			 << "RateOfPheromoneDecay" << endl
+			 << LoopFunctions->getNumberOfRobots() << ", "
+			 << CSimulator::GetInstance().GetRandomSeed() << ", "  
+     			 << TargetDistanceTolerance << ", "
+     			 << TargetAngleTolerance << ", "
+     			 << FoodDistanceTolerance << ", "
+     			 << RobotForwardSpeed << ", "
+     			 << RobotRotationSpeed << ", "
+     			 << LoopFunctions->getProbabilityOfSwitchingToSearching() << ", "
+     			 << LoopFunctions->getProbabilityOfReturningToNest() << ", "
+     			 << LoopFunctions->getUninformedSearchVariation() << ", "
+     			 << LoopFunctions->getRateOfInformedSearchDecay() << ", "
+     			 << LoopFunctions->getRateOfSiteFidelity() << ", "
+     			 << LoopFunctions->getRateOfLayingPheromone() << ", "
+     			 << LoopFunctions->getRateOfPheromoneDecay()
+			 << endl;
+     		
+   results_output_stream.close();
+      }
+
 }
 
 void CPFA_controller::Departing() {
@@ -223,10 +244,12 @@ void CPFA_controller::Searching() {
             isGivingUpSearch = true;
             CPFA_state = RETURNING;
 	    
+	    /*
 	    ofstream log_output_stream;
 	    log_output_stream.open("giveup.txt", ios::app);
 	    log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
 	    log_output_stream.close();
+	    */
 
 	    return;
 	  }
@@ -321,8 +344,17 @@ void CPFA_controller::Returning() {
             isUsingSiteFidelity = false;
         }
 
-	isHoldingFood = false;
-        CPFA_state = DEPARTING;
+	// Record that a target has been retrieved
+	if (isHoldingFood)
+	  {
+	    ofstream results_output_stream;
+	    results_output_stream.open(results_full_path, ios::app);
+	    results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << ++num_targets_collected << ", " << "Col Count" << endl;	    
+	    results_output_stream.close();
+
+	    isHoldingFood = false;
+	    CPFA_state = DEPARTING;
+	  }
     }
 
     if(distance.SquareLength() < TargetDistanceTolerance) {
@@ -407,10 +439,12 @@ void CPFA_controller::SetHoldingFood() {
         // We dropped off food. Clear the built-up pheromone trail.
         else TrailToShare.clear();
     }
+    
+    // This shouldn't be checked here ---
     // Drop off food: We are holding food and have reached the nest.
-    else if((GetPosition() - LoopFunctions->NestPosition).SquareLength() < LoopFunctions->NestRadiusSquared) {
-        isHoldingFood = false;
-    }
+    //else if((GetPosition() - LoopFunctions->NestPosition).SquareLength() < LoopFunctions->NestRadiusSquared) {
+    //    isHoldingFood = false;
+    // }
 
     // We are carrying food and haven't reached the nest, keep building up the
     // pheromone trail attached to this found food item.

@@ -101,7 +101,7 @@ void CPFA_loop_functions::Reset() {
 }
 
 void CPFA_loop_functions::PreStep() {
-  
+
   UpdatePheromoneList();
 
   if(GetSpace().GetSimulationClock() > ResourceDensityDelay) {
@@ -381,6 +381,54 @@ bool CPFA_loop_functions::IsCollidingWithFood(argos::CVector2 p) {
   }
 
   return false;
+}
+
+unsigned int CPFA_loop_functions::getNumberOfRobots()
+{
+  return GetSpace().GetEntitiesByType("foot-bot").size();
+}
+
+double CPFA_loop_functions::getProbabilityOfSwitchingToSearching()
+{
+  return ProbabilityOfSwitchingToSearching;
+}
+
+double CPFA_loop_functions::getProbabilityOfReturningToNest()
+{
+  return ProbabilityOfReturningToNest;
+}
+
+// Value in Radians
+double CPFA_loop_functions::getUninformedSearchVariation()
+{
+  return UninformedSearchVariation.GetValue();
+}
+
+double CPFA_loop_functions::getRateOfInformedSearchDecay()
+{
+  return RateOfInformedSearchDecay;
+}
+
+double CPFA_loop_functions::getRateOfSiteFidelity()
+{
+  return RateOfSiteFidelity;
+}
+
+double CPFA_loop_functions::getRateOfLayingPheromone()
+{
+  return RateOfLayingPheromone;
+}
+
+double CPFA_loop_functions::getRateOfPheromoneDecay()
+{
+  return RateOfPheromoneDecay;
+}
+
+argos::Real CPFA_loop_functions::getSimTimeInSeconds()
+{
+  int ticks_per_second = GetSimulator().GetPhysicsEngine("Default").GetInverseSimulationClockTick();
+  float sim_time = GetSpace().GetSimulationClock();
+  return sim_time/ticks_per_second;
 }
 
 REGISTER_LOOP_FUNCTIONS(CPFA_loop_functions, "CPFA_loop_functions")

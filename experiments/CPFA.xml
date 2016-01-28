@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="0"
+    <experiment length="3600"
                 ticks_per_second="16"/>
   </framework>
 
@@ -34,8 +34,8 @@
 		  TargetAngleTolerance               = "0.1"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                  RobotRotationSpeed                = "4.0"/>
-
+                  RobotRotationSpeed                = "4.0"
+		  ResultsDirectoryPath              = "results/"/>
       </params>
 
     </CPFA_controller>

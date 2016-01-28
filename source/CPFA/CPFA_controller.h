@@ -8,6 +8,8 @@
 using namespace std;
 using namespace argos;
 
+static unsigned int num_targets_collected = 0;
+
 class CPFA_loop_functions;
 
 class CPFA_controller : public BaseController {
@@ -79,6 +81,9 @@ class CPFA_controller : public BaseController {
         void UpdateTargetRayList();
 
 	CVector2 previous_position;
+
+	string results_path;
+	string results_full_path;
 };
 
 #endif /* CPFA_CONTROLLER_H */

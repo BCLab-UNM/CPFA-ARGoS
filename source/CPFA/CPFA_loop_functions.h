@@ -27,9 +27,19 @@ class CPFA_loop_functions : public argos::CLoopFunctions {
         void UpdatePheromoneList();
         void SetFoodDistribution();
 
-	
+	argos::Real getSimTimeInSeconds();
+
         std::vector<argos::CColor>   TargetRayColorList;
 
+
+	unsigned int getNumberOfRobots();
+	double getProbabilityOfSwitchingToSearching();
+	double getProbabilityOfReturningToNest();
+	double getUninformedSearchVariation();
+	double getRateOfInformedSearchDecay();
+	double getRateOfSiteFidelity();
+	double getRateOfLayingPheromone();
+	double getRateOfPheromoneDecay();
 
     protected:
 
