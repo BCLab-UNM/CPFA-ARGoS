@@ -36,7 +36,7 @@
                   FoodDistanceTolerance   = "0.13"
                   SearcherGap             = "0.16"
                   RobotForwardSpeed       = "16.0"
-                  RobotRotationSpeed      = "16.0"/>
+                  RobotRotationSpeed      = "8.0"/>
 
       </params>
 

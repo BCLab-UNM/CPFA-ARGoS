@@ -95,7 +95,7 @@ class BaseController : public argos::CCI_Controller {
         void SetNextMovement();
         void SetTargetAngleDistance(argos::Real newAngleToTurnInDegrees);
         void SetTargetTravelDistance(argos::Real newTargetDistance);
-        void SetLeftTurn(argos::Real newTargetAngle);
+	void SetLeftTurn(argos::Real newTargetAngle);
         void SetRightTurn(argos::Real newTargetAngle);
         void SetMoveForward(argos::Real newTargetDistance);
         void SetMoveBack(argos::Real newTargetDistance);

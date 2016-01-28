@@ -11,7 +11,8 @@ CPFA_controller::CPFA_controller() :
     MaxTrailSize(50),
     SearchTime(0),
     CPFA_state(DEPARTING),
-    LoopFunctions(NULL)
+    LoopFunctions(NULL),
+    survey_count(0)
 {}
 
 void CPFA_controller::Init(argos::TConfigurationNode &node) {
@@ -37,7 +38,7 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
 
 void CPFA_controller::ControlStep() {
 
-  /*
+  
   ofstream log_output_stream;
   log_output_stream.open("log.txt", ios::app);
 
@@ -64,11 +65,14 @@ void CPFA_controller::ControlStep() {
     case RETURNING:
       log_output_stream << "RETURNING" << endl;
       break;
+   case SURVEYING:
+      log_output_stream << "SURVEYING" << endl;
+      break;
     default:
       log_output_stream << "Unknown state" << endl;
     }
 
-  */
+  
 
   // Add line so we can draw the trail
 
@@ -82,6 +86,7 @@ void CPFA_controller::ControlStep() {
   previous_position = GetPosition();
 
   //UpdateTargetRayList();
+  
     CPFA();
     Move();
 }
@@ -98,20 +103,25 @@ bool CPFA_controller::IsUsingSiteFidelity() {
 }
 
 void CPFA_controller::CPFA() {
-    switch(CPFA_state) {
-        // depart from nest after food drop off or simulation start
-        case DEPARTING:
-            Departing();
-            break;
-        // after departing(), once conditions are met, begin searching()
-        case SEARCHING:
-            if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) Searching();
-            break;
-        // return to nest after food pick up or giving up searching()
-        case RETURNING:
-            Returning();
-            break;
-    }
+  
+  switch(CPFA_state) {
+    // depart from nest after food drop off or simulation start
+  case DEPARTING:
+    Departing();
+    break;
+    // after departing(), once conditions are met, begin searching()
+  case SEARCHING:
+    if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
+      Searching();
+    break;
+    // return to nest after food pick up or giving up searching()
+  case RETURNING:
+    Returning();
+    break;
+  case SURVEYING:
+    Surveying();
+    break;
+  }
 }
 
 /*****
@@ -254,8 +264,8 @@ void CPFA_controller::Searching() {
 	    return;
 	  }
 
-            // uninformed search
-            if(isInformed == false) {
+	  // uninformed search
+	  if(isInformed == false) {
                 argos::Real USCV = LoopFunctions->UninformedSearchVariation.GetValue();
                 argos::Real rand = RNG->Gaussian(USCV);
                 argos::CRadians rotation(rand);
@@ -285,11 +295,40 @@ void CPFA_controller::Searching() {
         }
     }
     // Food has been found, change state to RETURNING and go to the nest
-    else {
-        SetTarget(LoopFunctions->NestPosition);
-        CPFA_state = RETURNING;
+    //else {
+    //    SetTarget(LoopFunctions->NestPosition);
+    //    CPFA_state = RETURNING;
+    // }
+}
+
+// Cause the robot to rotate in place as if surveying the surrounding targets
+// Turns 36 times by 10 degrees
+void CPFA_controller::Surveying() 
+{
+  if (survey_count <= 4)
+    { 
+      CRadians rotation(survey_count*3.14/2); // divide by 10 so the vecot is small and the linear motion is minimized
+      argos::CVector2 turn_vector(SearchStepSize, rotation.SignedNormalize());
+      
+      SetTarget(turn_vector + GetPosition());
+
+      ofstream log_output_stream;
+      log_output_stream.open("log.txt", ios::app);
+      log_output_stream << (GetHeading() - rotation ).SignedNormalize() << ", "  << SearchStepSize << ", "<< rotation << ", " <<  turn_vector << ", " << GetHeading() << ", " << survey_count << endl;
+      log_output_stream.close();
+
+      if ( fabs((GetHeading() - rotation ).SignedNormalize().GetValue())  < TargetAngleTolerance.GetValue() )
+	survey_count++;
+      //else Keep trying to reach the turning angle
+    }
+  else // Set the survey countdown
+    {
+      SetTarget(LoopFunctions->NestPosition);
+      CPFA_state = RETURNING;
+      survey_count = 0; // Reset
     }
 }
+
 
 /*****
  * RETURNING: Stay in this state until the robot has returned to the nest.
@@ -354,15 +393,18 @@ void CPFA_controller::Returning() {
 
 	    isHoldingFood = false;
 	    CPFA_state = DEPARTING;
+	    
+	     // We dropped off food. Clear the built-up pheromone trail.
+	    TrailToShare.clear();
 	  }
     }
 
-    if(distance.SquareLength() < TargetDistanceTolerance) {
-
-        argos::CVector2 step(SearchStepSize, GetHeading().UnsignedNormalize());
-
-        SetTarget(GetPosition() + step);
-    }
+    //if(distance.SquareLength() < TargetDistanceTolerance) {
+    //
+    //   argos::CVector2 step(SearchStepSize, GetHeading().UnsignedNormalize());
+    //
+    //    SetTarget(GetPosition() + step);
+    //}
 
 }
 
@@ -415,7 +457,7 @@ void CPFA_controller::SetHoldingFood() {
             if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance) {
                 // We found food! Calculate the nearby food density.
                 isHoldingFood = true;
-		CPFA_state = RETURNING;
+		CPFA_state = SURVEYING;
                 j = i + 1;
                 break;
             } else {
@@ -432,12 +474,11 @@ void CPFA_controller::SetHoldingFood() {
 
         // We picked up food. Update the food list minus what we picked up.
         if(IsHoldingFood() == true) {
+	  SetTarget(LoopFunctions->NestPosition);
             LoopFunctions->FoodList = newFoodList;
             SetLocalResourceDensity();
-            SetTarget(LoopFunctions->NestPosition);
         }
-        // We dropped off food. Clear the built-up pheromone trail.
-        else TrailToShare.clear();
+       
     }
     
     // This shouldn't be checked here ---
@@ -491,7 +532,7 @@ void CPFA_controller::SetLocalResourceDensity() {
     isUsingSiteFidelity = true;
 
     /* Delay for 4 seconds (simulate iAnts scannning rotation). */
-    Wait(4);
+    //  Wait(4); // This function is broken. It causes the rover to move in the wrong direction after finishing its local resource density test 
 }
 
 /*****

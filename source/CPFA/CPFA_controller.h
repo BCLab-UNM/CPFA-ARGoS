@@ -58,13 +58,14 @@ class CPFA_controller : public BaseController {
         size_t SearchTime;
 
         /* iAnt CPFA state variable */
-        enum CPFA_state { DEPARTING = 0, SEARCHING = 1, RETURNING = 2 } CPFA_state;
+        enum CPFA_state { DEPARTING = 0, SEARCHING = 1, RETURNING = 2, SURVEYING = 3 } CPFA_state;
 
         /* iAnt CPFA state functions */
         void CPFA();
         void Departing();
         void Searching();
         void Returning();
+	void Surveying();
 
         /* CPFA helper functions */
         void SetRandomSearchLocation();
@@ -84,6 +85,8 @@ class CPFA_controller : public BaseController {
 
 	string results_path;
 	string results_full_path;
+
+	unsigned int survey_count;
 };
 
 #endif /* CPFA_CONTROLLER_H */
