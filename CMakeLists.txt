@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 project(DDSA-ARGoS)
 
 # Use C+11
-if (UNIX)
+if (NOT APPLE)
 set(CMAKE_CXX_FLAGS "-std=c++0x")
 endif()
 
