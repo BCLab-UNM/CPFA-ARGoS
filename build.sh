@@ -14,5 +14,5 @@ echo "Making code..."
 make
 cd ..
 
-echo "Finished. Call run.sh to run the DDSA..."
+echo "Finished. Call run.sh to run the CPFA..."
 
