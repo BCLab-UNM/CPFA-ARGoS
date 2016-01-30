@@ -431,4 +431,18 @@ argos::Real CPFA_loop_functions::getSimTimeInSeconds()
   return sim_time/ticks_per_second;
 }
 
+void CPFA_loop_functions::SetTrial( unsigned int v )
+{
+}
+
+double CPFA_loop_functions::Performance()
+{
+  return 0;
+}
+
+void CPFA_loop_functions::ConfigureFromGenome(Real* g)
+{
+  
+}
+
 REGISTER_LOOP_FUNCTIONS(CPFA_loop_functions, "CPFA_loop_functions")

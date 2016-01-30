@@ -1,14 +1,17 @@
 #ifndef CPFA_LOOP_FUNCTIONS_H
 #define CPFA_LOOP_FUNCTIONS_H
 
-#include <GA/mpga_loop_functions.h> // Provides GA support
+
+#include <argos3/core/simulator/loop_functions.h>
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include <argos3/core/simulator/entity/floor_entity.h>
 #include <source/CPFA/CPFA_controller.h>
 
+using namespace argos;
+
 static const size_t GENOME_SIZE = 7; // There are 7 parameters to evolve
 
-class CPFA_loop_functions : public argos::CMPGALoopFunctions
+class CPFA_loop_functions : public argos::CLoopFunctions
 {
 
 friend class CPFA_controller;
@@ -25,6 +28,31 @@ public:
         bool IsExperimentFinished();
         void PostExperiment();
         argos::CColor GetFloorColor(const argos::CVector2 &c_pos_on_floor);
+
+	// GA Functions
+
+	/* Configures the robot controller from the genome */
+	void ConfigureFromGenome(Real* pf_genome);
+	
+	/* Calculates the performance of the robot in a trial */
+        Real Score();
+	
+	/**
+	 * Returns the current trial.
+	 */
+	UInt32 GetTrial() const;
+	
+	/**
+	 * Sets the current trial.
+	 * @param un_trial The trial number.
+	 */
+	void SetTrial(UInt32 un_trial);
+	
+	/**
+	 * Returns the score associated to the current trial.
+	 */
+	
+	double Performance();
 
         /* public helper functions */
         void UpdatePheromoneList();

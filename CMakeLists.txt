@@ -22,6 +22,19 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
 # Check for required libraries to compile code depending on Qt and OpenGL.
 include(ARGoSCheckQTOpenGL)
 
+# Find the ARGoS package
+find_package(PkgConfig)
+pkg_check_modules(ARGOS REQUIRED argos3_simulator)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
+
+# Look for the (optional) galib library
+find_package(GALIB)
+if(GALIB_FOUND)
+  include_directories(${GALIB_INCLUDE_DIRS})
+elseif (NOT GALIB_FOUND)
+       message( FATAL_ERROR "GALib not found. CMake will exit." )
+endif(GALIB_FOUND)
+
 # Find the GSL package.
 find_package(GSL REQUIRED)
 
@@ -36,3 +49,13 @@ link_directories(${ARGOS_LIBRARY_DIRS})
 
 # Descend into the source code directory.
 add_subdirectory(source)
+
+
+add_executable(cpfa_evolver source/main.cpp)
+
+target_link_libraries(cpfa_evolver CPFA_controller
+				   CPFA_loop_functions 
+				   ${GALIB_LIBRARIES}
+				   argos3core_simulator)
+
+

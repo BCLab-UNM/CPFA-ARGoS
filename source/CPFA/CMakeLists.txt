@@ -23,7 +23,7 @@ add_definitions("-DGIT_BRANCH=\"${GIT_BRANCH}\"")
 # define shared object files
 ###############################################
 
-add_library(CPFA_loop_functions MODULE CPFA_loop_functions.h
+add_library(CPFA_loop_functions SHARED CPFA_loop_functions.h
                                        CPFA_loop_functions.cpp
 									   CPFA_qt_user_functions.h
                                        CPFA_qt_user_functions.cpp)
