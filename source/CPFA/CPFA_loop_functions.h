@@ -1,20 +1,23 @@
 #ifndef CPFA_LOOP_FUNCTIONS_H
 #define CPFA_LOOP_FUNCTIONS_H
 
-#include <argos3/core/simulator/loop_functions.h>
+#include <GA/mpga_loop_functions.h> // Provides GA support
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include <argos3/core/simulator/entity/floor_entity.h>
 #include <source/CPFA/CPFA_controller.h>
 
-class CPFA_loop_functions : public argos::CLoopFunctions {
+static const size_t GENOME_SIZE = 7; // There are 7 parameters to evolve
 
-    friend class CPFA_controller;
-    friend class CPFA_qt_user_functions;
+class CPFA_loop_functions : public argos::CMPGALoopFunctions
+{
 
-    public:
+friend class CPFA_controller;
+friend class CPFA_qt_user_functions;
 
-        CPFA_loop_functions();
+public:
 
+       CPFA_loop_functions();
+       
         void Init(argos::TConfigurationNode &t_tree);
         void Reset();
         void PreStep();
