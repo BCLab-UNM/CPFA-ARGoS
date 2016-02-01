@@ -435,7 +435,7 @@ void CPFA_loop_functions::SetTrial( unsigned int v )
 {
 }
 
-double CPFA_loop_functions::Performance()
+double CPFA_loop_functions::Score()
 {
   return 0;
 }
