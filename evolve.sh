@@ -1,2 +1,2 @@
 #!/bin/bash
-build/cpfa_evolver
+mpirun -n 4 build/cpfa_evolver

@@ -9,6 +9,7 @@
 #include "mpi.h"
 
 float objective(GAGenome &);
+float LaunchARGoS(GAGenome &)
 
 int mpi_tasks, mpi_rank;
 
@@ -96,17 +97,49 @@ int main(int argc, char **argv)
  
 float objective(GAGenome &c)
 {
-  usleep(1000);
-
-  GABin2DecGenome &genome = (GABin2DecGenome &)c;
-  float x, y, error;
-
-  x = genome.phenotype(0);
-  y = genome.phenotype(1);
-
-  // Function with local minima. The lowest is located at (5/2*PI, 5/2*PI)
-  error = ((1.-sin(x)*sin(y))+sqrt((x-M_PI*2.5)*(x-M_PI*2.5)+(y-M_PI*2.5)*(y-M_PI*2.5))/10.0)/2.5;
-
-  return error;
+  float fitness = LaunchARGoS(c);
+  return fitness;
 }
 
+/*
+ * Launch ARGoS to evaluate a genome.
+ */
+float LaunchARGoS(GAGenome& c_genome) {
+
+/*
+   * Initialize ARGoS
+   */
+  /* The CSimulator class of ARGoS is a singleton. Therefore, to
+   * manipulate an ARGoS experiment, it is enough to get its instance */
+  argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
+  /* Set the .argos configuration file
+   * This is a relative path which assumed that you launch the executable
+   * from argos3-examples (as said also in the README) */
+  cSimulator.SetExperimentFileName("experiments/CPFA.xml");
+  /* Load it to configure ARGoS */
+  cSimulator.LoadExperiment();
+
+  /* Convert the received genome to the actual genome type */
+  GARealGenome& cRealGenome = dynamic_cast<GARealGenome&>(c_genome);
+  
+  /* Get a reference to the loop functions */
+  static CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
+
+  Real fitness;
+  Real* cpfa_genome = new Real[GENOME_SIZE];
+
+  /* Configure the controller with the genome */
+  cLoopFunctions.ConfigureFromGenome(cpfa_genome);
+
+  /* Run the experiment */
+  cSimulator.Execute();
+
+  /* Update performance */
+  fitness = cLoopFunctions.Score();
+  
+  /* This internally calls also CEvolutionLoopFunctions::Reset(). */
+  // cSimulator.Reset();
+
+/* Return the result of the evaluation */
+return fitness;
+}
