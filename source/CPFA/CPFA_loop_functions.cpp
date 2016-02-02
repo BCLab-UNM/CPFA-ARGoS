@@ -435,9 +435,14 @@ void CPFA_loop_functions::SetTrial( unsigned int v )
 {
 }
 
+void CPFA_loop_functions::setScore(double s)
+{
+  score = s;
+}
+
 double CPFA_loop_functions::Score()
 {
-  return 0;
+  return score;
 }
 
 void CPFA_loop_functions::ConfigureFromGenome(Real* g)

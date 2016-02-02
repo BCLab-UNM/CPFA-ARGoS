@@ -7,6 +7,8 @@
 #include <chrono> // For clock()
 #include <mpi.h>
 
+#include <sys/wait.h> // For wait(pid)
+
 #include <limits> // For float max
 
 // GA MPI Headers
@@ -38,16 +40,6 @@ int main(int argc, char **argv)
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
 
   printf("Hello from process %d of %d\n", mpi_rank, mpi_tasks);
-
-  // Create the argos3 environment
-  argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
-  /* Set the .argos configuration file
-   * This is a relative path which assumed that you launch the executable
-   * from argos3-examples (as said also in the README) */
-  cSimulator.SetExperimentFileName("experiments/CPFA.xml");
-  /* Load it to configure ARGoS */
- 
-  cSimulator.LoadExperiment();
 
   // See if we've been given a seed to use (for testing purposes).  When you
   // specify a random seed, the evolution will be exactly the same each time
@@ -121,14 +113,30 @@ float objective(GAGenome &c)
 /*
  * Launch ARGoS to evaluate a genome.
  */
-float LaunchARGoS(GAGenome& c_genome) {
+float LaunchARGoS(GAGenome& c_genome) 
+{
+  Real fitness;
 
-/*
+  pid_t pid = fork();
+
+  if (pid == 0)
+    {
+      // In child process - run the argos3 simulation
+
+      /*
    * Initialize ARGoS
    */
   /* The CSimulator class of ARGoS is a singleton. Therefore, to
    * manipulate an ARGoS experiment, it is enough to get its instance */
   argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
+
+  /* Set the .argos configuration file
+   * This is a relative path which assumed that you launch the executable
+   * from argos3-examples (as said also in the README) */
+  cSimulator.SetExperimentFileName("experiments/CPFA.xml");
+  /* Load it to configure ARGoS */
+ 
+  cSimulator.LoadExperiment();
 
   /* Convert the received genome to the actual genome type */
   GARealGenome& cRealGenome = dynamic_cast<GARealGenome&>(c_genome);
@@ -136,11 +144,10 @@ float LaunchARGoS(GAGenome& c_genome) {
   /* Get a reference to the loop functions */
   CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
 
-  Real fitness;
   Real* cpfa_genome = new Real[GENOME_SIZE];
 
   /* This internally calls also CEvolutionLoopFunctions::Reset(). */
-  cSimulator.Reset();
+  // cSimulator.Reset();
 
   /* Configure the controller with the genome */
   cLoopFunctions.ConfigureFromGenome(cpfa_genome);
@@ -153,8 +160,14 @@ float LaunchARGoS(GAGenome& c_genome) {
   
 
   //cLoopFunctions.Destroy();
-  //cSimulator.Destroy();
+  cSimulator.Destroy();
 
-/* Return the result of the evaluation */
-return fitness;
+  _Exit(0); 
+    }
+  
+  // In parent - wait for child to finish
+  int status = wait(&status);
+  
+  /* Return the result of the evaluation */
+  return fitness;
 }
