@@ -222,10 +222,10 @@ GA1DArrayGenome<T>(length, f, u){
   aset = new GAAlleleSet<T>[1];
   aset[0] = s;
 
-  initializer(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_INITIALIZER);
-  mutator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_MUTATOR);
-  comparator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_COMPARATOR);
-  crossover(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_CROSSOVER);
+  this->initializer(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_INITIALIZER);
+  this->mutator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_MUTATOR);
+  this->comparator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_COMPARATOR);
+  this->crossover(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_CROSSOVER);
 }
 
 template <class T> 
@@ -238,10 +238,10 @@ GA1DArrayGenome<T>(sa.size(), f, u) {
   for(int i=0; i<naset; i++)
     aset[i] = sa.set(i);
 
-  initializer(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_INITIALIZER);
-  mutator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_MUTATOR);
-  comparator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_COMPARATOR);
-  crossover(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_CROSSOVER);
+  this->initializer(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_INITIALIZER);
+  this->mutator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_MUTATOR);
+  this->comparator(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_COMPARATOR);
+  this->crossover(GA1DArrayAlleleGenome<T>::DEFAULT_1DARRAY_ALLELE_CROSSOVER);
 }
 
 
