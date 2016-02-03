@@ -1,0 +1,17 @@
+# ...silly Macs
+.DS_Store
+argos_logs
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+*.o
+build
+results
+log
+log.txt
