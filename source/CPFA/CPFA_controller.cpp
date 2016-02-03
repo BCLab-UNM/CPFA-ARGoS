@@ -391,8 +391,6 @@ void CPFA_controller::Returning() {
 	    results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << ++num_targets_collected << ", " << "Col Count" << endl;	    
 	    results_output_stream.close();
 
-	    LoopFunctions->setScore(num_targets_collected);
-
 	    isHoldingFood = false;
 	    CPFA_state = DEPARTING;
 	    

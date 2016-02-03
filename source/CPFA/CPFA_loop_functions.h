@@ -48,7 +48,13 @@ public:
 	 */
 	void SetTrial(UInt32 un_trial);
 	
-	/* public helper functions */
+	/**
+	 * Returns the score associated to the current trial.
+	 */
+	
+	double Performance();
+
+        /* public helper functions */
         void UpdatePheromoneList();
         void SetFoodDistribution();
 
@@ -67,8 +73,6 @@ public:
 	double getRateOfPheromoneDecay();
 
     protected:
-
-	void setScore(double s);
 
         argos::CRandom::CRNG* RNG;
 
@@ -127,7 +131,7 @@ public:
         bool IsOutOfBounds(argos::CVector2 p, size_t length, size_t width);
         bool IsCollidingWithNest(argos::CVector2 p);
         bool IsCollidingWithFood(argos::CVector2 p);
-	double score;
+
 };
 
 #endif /* CPFA_LOOP_FUNCTIONS_H */
