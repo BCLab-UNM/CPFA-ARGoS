@@ -59,17 +59,25 @@ int main(int argc, char **argv)
   // Declare variables for the GA parameters and set them to some default values.
   int popsize  = 20; // Population
   int ngen     = 10; // Generations
-  float pmut   = 0.03;
-  float pcross = 0.65;
+  float pmut   = 0.1;
+  float pcross = 0.00;
 
   // popsize / mpi_tasks must be an integer
   popsize = mpi_tasks * int((double)popsize/(double)mpi_tasks+0.999);
   
   // Define the genome
-  GARealAlleleSet alleles(-max_float, max_float);
+  GARealAlleleSetArray allele_array;
+  allele_array.add(0,1); // Probability of switching to search
+  allele_array.add(0,1); // Probability of returning to nest
+  allele_array.add(0,1); // Uninformed search variation
+  allele_array.add(0,exp(5)); // Rate of informed search decay
+  allele_array.add(0,20); // Rate of site fidelity
+  allele_array.add(0,20); // Rate of laying pheremone
+  allele_array.add(0,exp(10)); // Rate of pheremone decay
+
   
   // Create the template genome using the phenotype map we just made.
-  GARealGenome genome(GENOME_SIZE, alleles, objective);
+  GARealGenome genome(allele_array, objective);
 
   // Now create the GA using the genome and run it. We'll use sigma truncation
   // scaling so that we can handle negative objective scores.
@@ -111,6 +119,8 @@ int main(int argc, char **argv)
   return 0;
 }
  
+// The objective function used by GAlib
+
 float objective(GAGenome &c)
 {
   float fitness = LaunchARGoS(c);
@@ -129,6 +139,15 @@ float LaunchARGoS(GAGenome& c_genome)
   if (pid == 0)
     {
       // In child process - run the argos3 simulation
+
+      /* Convert the received genome to the actual genome type */
+      GARealGenome& cRealGenome = dynamic_cast<GARealGenome&>(c_genome);
+  
+      Real* cpfa_genome = new Real[GENOME_SIZE];
+
+      for (int i = 0; i < GENOME_SIZE; i++)
+	cpfa_genome[i] = cRealGenome.gene(i);
+       
       std::chrono::time_point<std::chrono::system_clock> start, end;
       start = std::chrono::system_clock::now();
       MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);     
@@ -136,7 +155,14 @@ float LaunchARGoS(GAGenome& c_genome)
       char hostname[1024];              
       hostname[1023] = '\0';                                          
       gethostname(hostname, 1023);     
-      printf("%s: worker %d started a genome evaluation.\n", hostname, mpi_rank);
+      printf("%s: worker %d started a genome evaluation. (%f, %f, %f, %f, %f, %f, %f)\n", hostname, mpi_rank, 
+	     cpfa_genome[0],
+	     cpfa_genome[1],
+	     cpfa_genome[2],
+	     cpfa_genome[3],
+	     cpfa_genome[4],
+	     cpfa_genome[5],
+	     cpfa_genome[6]);
 
       /* Redirect LOG and LOGERR to dedicated files to prevent clutter on the screen */
 
@@ -162,13 +188,9 @@ float LaunchARGoS(GAGenome& c_genome)
  
       cSimulator.LoadExperiment();
 
-      /* Convert the received genome to the actual genome type */
-      GARealGenome& cRealGenome = dynamic_cast<GARealGenome&>(c_genome);
-  
       /* Get a reference to the loop functions */
       CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
 
-      Real* cpfa_genome = new Real[GENOME_SIZE];
 
       /* This internally calls also CEvolutionLoopFunctions::Reset(). */
       // cSimulator.Reset();
@@ -189,7 +211,9 @@ float LaunchARGoS(GAGenome& c_genome)
       end = std::chrono::system_clock::now();
                      
       std::chrono::duration<double> elapsed_seconds = end-start;
-      printf("%s: worker %d completed a genome evaluation in %f seconds.\n", hostname, mpi_rank, elapsed_seconds.count());                                          
+      printf("%s: worker %d completed a genome evaluation in %f seconds. Fitness was %f\n", hostname, mpi_rank, elapsed_seconds.count(), fitness);                                          
+
+	delete [] cpfa_genome;
 
       _Exit(0); 
     }

@@ -36,6 +36,8 @@ CPFA_loop_functions::CPFA_loop_functions() :
 
 void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 
+  
+
   argos::CDegrees USV_InDegrees;
 
   argos::TConfigurationNode CPFA_node = argos::GetNode(node, "CPFA");
@@ -442,6 +444,7 @@ void CPFA_loop_functions::setScore(double s)
 
 double CPFA_loop_functions::Score()
 {
+  
   return score;
 }
 
