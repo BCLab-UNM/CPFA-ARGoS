@@ -38,9 +38,9 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
 
 void CPFA_controller::ControlStep() {
 
-  
+  /*
   ofstream log_output_stream;
-  log_output_stream.open("log.txt", ios::app);
+  log_output_stream.open("cpfa_log.txt", ios::app);
 
       // depart from nest after food drop off or simulation start
       if (isHoldingFood)      
@@ -71,7 +71,7 @@ void CPFA_controller::ControlStep() {
     default:
       log_output_stream << "Unknown state" << endl;
     }
-
+  */
   
 
   // Add line so we can draw the trail
@@ -142,7 +142,13 @@ void CPFA_controller::SetLoopFunctions(CPFA_loop_functions* lf) {
     struct tm * now = localtime( & t );
     stringstream ss;
 
-    ss << "CPFA-"<<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-" 
+char hostname[1024];                                                   
+hostname[1023] = '\0';                    
+gethostname(hostname, 1023);  
+
+    ss << "CPFA-"<<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-"
+       << hostname << '-'
+       << getpid() << '-'
        << (now->tm_year) << '-'
        << (now->tm_mon + 1) << '-'
        <<  now->tm_mday << '-'
@@ -311,12 +317,12 @@ void CPFA_controller::Surveying()
       argos::CVector2 turn_vector(SearchStepSize, rotation.SignedNormalize());
       
       SetTarget(turn_vector + GetPosition());
-
+/*
       ofstream log_output_stream;
       log_output_stream.open("log.txt", ios::app);
       log_output_stream << (GetHeading() - rotation ).SignedNormalize() << ", "  << SearchStepSize << ", "<< rotation << ", " <<  turn_vector << ", " << GetHeading() << ", " << survey_count << endl;
       log_output_stream.close();
-
+*/
       if ( fabs((GetHeading() - rotation ).SignedNormalize().GetValue())  < TargetAngleTolerance.GetValue() )
 	survey_count++;
       //else Keep trying to reach the turning angle
@@ -388,8 +394,10 @@ void CPFA_controller::Returning() {
 	  {
 	    ofstream results_output_stream;
 	    results_output_stream.open(results_full_path, ios::app);
-	    results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << ++num_targets_collected << ", " << "Col Count" << endl;	    
+	    results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << ++num_targets_collected << endl;	    
 	    results_output_stream.close();
+
+	    LoopFunctions->setScore(num_targets_collected);
 
 	    isHoldingFood = false;
 	    CPFA_state = DEPARTING;

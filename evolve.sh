@@ -1,2 +1,2 @@
 #!/bin/bash
-mpirun -n 4 build/cpfa_evolver
+mpirun -n $1 -machinefile $2 build/cpfa_evolver

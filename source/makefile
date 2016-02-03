@@ -1,15 +1,16 @@
 include makevars
 
-all: lib example
-
 lib:
 	cd ga-mpi; $(MAKE)
+
+all: lib example
 
 clean:
 	-rm example
 	-rm *.o
 	-cd ga-mpi
-	-rm *.o *.a
+	-rm *.o 
+	- rm *.a
 
 example: example.c
 	$(CXX) -g -Wall -I. -lm -std=c++11 -c example.c -o example.o

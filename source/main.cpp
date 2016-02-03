@@ -7,6 +7,8 @@
 #include <chrono> // For clock()
 #include <mpi.h>
 
+#include <sys/wait.h> // For wait(pid)
+
 #include <limits> // For float max
 
 // GA MPI Headers
@@ -20,6 +22,10 @@
 #include <argos3/core/simulator/loop_functions.h>
 #include <source/CPFA/CPFA_loop_functions.h>
 
+// For timing
+#include <ctime> // For clock()
+#include <chrono> // For clock()
+
 float objective(GAGenome &);
 float LaunchARGoS(GAGenome &);
 
@@ -27,27 +33,20 @@ int mpi_tasks, mpi_rank;
 
 int main(int argc, char **argv)
 {
-    std::chrono::time_point<std::chrono::system_clock> start, end;
-    start = std::chrono::system_clock::now();
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now();
 
-    float max_float = std::numeric_limits<float>::max();
+  float max_float = std::numeric_limits<float>::max();
 
   // MPI init
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_tasks);
   MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-
-  printf("Hello from process %d of %d\n", mpi_rank, mpi_tasks);
-
-  // Create the argos3 environment
-  argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
-  /* Set the .argos configuration file
-   * This is a relative path which assumed that you launch the executable
-   * from argos3-examples (as said also in the README) */
-  cSimulator.SetExperimentFileName("experiments/CPFA.xml");
-  /* Load it to configure ARGoS */
- 
-  cSimulator.LoadExperiment();
+                         
+  char hostname[1024];                                                                                                       
+  hostname[1023] = '\0';                                          
+  gethostname(hostname, 1023);                        
+  printf("%s:\tworker %d ready.\n", hostname, mpi_rank);                                          
 
   // See if we've been given a seed to use (for testing purposes).  When you
   // specify a random seed, the evolution will be exactly the same each time
@@ -58,8 +57,8 @@ int main(int argc, char **argv)
       seed = atoi(argv[i]);
 	
   // Declare variables for the GA parameters and set them to some default values.
-  int popsize  = 100; // Population
-  int ngen     = 100; // Generations
+  int popsize  = 20; // Population
+  int ngen     = 10; // Generations
   float pmut   = 0.03;
   float pcross = 0.65;
 
@@ -102,9 +101,9 @@ int main(int argc, char **argv)
 
   MPI_Finalize();
 
-   end = std::chrono::system_clock::now();
+  end = std::chrono::system_clock::now();
  
-    std::chrono::duration<double> elapsed_seconds = end-start;
+  std::chrono::duration<double> elapsed_seconds = end-start;
 
   if(mpi_rank == 0)
     printf("Run time was %f seconds\n", elapsed_seconds.count());
@@ -121,40 +120,83 @@ float objective(GAGenome &c)
 /*
  * Launch ARGoS to evaluate a genome.
  */
-float LaunchARGoS(GAGenome& c_genome) {
-
-/*
-   * Initialize ARGoS
-   */
-  /* The CSimulator class of ARGoS is a singleton. Therefore, to
-   * manipulate an ARGoS experiment, it is enough to get its instance */
-  argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
-
-  /* Convert the received genome to the actual genome type */
-  GARealGenome& cRealGenome = dynamic_cast<GARealGenome&>(c_genome);
-  
-  /* Get a reference to the loop functions */
-  CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
-
+float LaunchARGoS(GAGenome& c_genome) 
+{
   Real fitness;
-  Real* cpfa_genome = new Real[GENOME_SIZE];
 
-  /* This internally calls also CEvolutionLoopFunctions::Reset(). */
-  cSimulator.Reset();
+  pid_t pid = fork();
 
-  /* Configure the controller with the genome */
-  cLoopFunctions.ConfigureFromGenome(cpfa_genome);
+  if (pid == 0)
+    {
+      // In child process - run the argos3 simulation
+      std::chrono::time_point<std::chrono::system_clock> start, end;
+      start = std::chrono::system_clock::now();
+      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);     
+      
+      char hostname[1024];              
+      hostname[1023] = '\0';                                          
+      gethostname(hostname, 1023);     
+      printf("%s: worker %d started a genome evaluation.\n", hostname, mpi_rank);
 
-  /* Run the experiment */
-  cSimulator.Execute();
+      /* Redirect LOG and LOGERR to dedicated files to prevent clutter on the screen */
 
-  /* Update performance */
-  fitness = cLoopFunctions.Score();
+      std::ofstream cLOGFile("argos_logs/ARGoS_LOG_" + ToString(::getpid()), std::ios::out);
+      LOG.DisableColoredOutput();
+      LOG.GetStream().rdbuf(cLOGFile.rdbuf());
+      std::ofstream cLOGERRFile("argos_logs/ARGoS_LOGERR_" + ToString(::getpid()), std::ios::out);
+      LOGERR.DisableColoredOutput();
+      LOGERR.GetStream().rdbuf(cLOGERRFile.rdbuf());
+
+      /*
+       * Initialize ARGoS
+       */
+      /* The CSimulator class of ARGoS is a singleton. Therefore, to
+       * manipulate an ARGoS experiment, it is enough to get its instance */
+      argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
+
+      /* Set the .argos configuration file
+       * This is a relative path which assumed that you launch the executable
+       * from argos3-examples (as said also in the README) */
+      cSimulator.SetExperimentFileName("experiments/CPFA.xml");
+      /* Load it to configure ARGoS */
+ 
+      cSimulator.LoadExperiment();
+
+      /* Convert the received genome to the actual genome type */
+      GARealGenome& cRealGenome = dynamic_cast<GARealGenome&>(c_genome);
+  
+      /* Get a reference to the loop functions */
+      CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
+
+      Real* cpfa_genome = new Real[GENOME_SIZE];
+
+      /* This internally calls also CEvolutionLoopFunctions::Reset(). */
+      // cSimulator.Reset();
+
+      /* Configure the controller with the genome */
+      cLoopFunctions.ConfigureFromGenome(cpfa_genome);
+
+      /* Run the experiment */
+      cSimulator.Execute();
+
+      /* Update performance */
+      fitness = cLoopFunctions.Score();
   
 
-  //cLoopFunctions.Destroy();
-  //cSimulator.Destroy();
+      //cLoopFunctions.Destroy();
+      cSimulator.Destroy();
 
-/* Return the result of the evaluation */
-return fitness;
+      end = std::chrono::system_clock::now();
+                     
+      std::chrono::duration<double> elapsed_seconds = end-start;
+      printf("%s: worker %d completed a genome evaluation in %f seconds.\n", hostname, mpi_rank, elapsed_seconds.count());                                          
+
+      _Exit(0); 
+    }
+  
+  // In parent - wait for child to finish
+  int status = wait(&status);
+  
+  /* Return the result of the evaluation */
+  return fitness;
 }
