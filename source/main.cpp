@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <math.h>
-#include <stdlib.h>
+#include <cstdlib>
 #include <unistd.h> // For usleep
 
 // For shared memory management
@@ -37,10 +37,67 @@ float LaunchARGoS(GAGenome &);
 
 int mpi_tasks, mpi_rank;
 
+int n_trials = 10; // used by the objective function
+double mutation_stdev = 0.01; // Used by LaunchArgos function.
+
 int main(int argc, char **argv)
 {
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
+
+  double mutation_rate = 0.05;
+  double crossover_rate = 0.05;
+  int population_size = 100;
+  int n_generations = 100;
+  
+  char c='h';
+  // Handle command line arguments
+  while ((c = getopt (argc, argv, "tgp:")) != -1)
+    switch (c)
+      {
+      case 't':
+	n_trials = atoi(optarg);
+	break;
+      case 'g':
+        n_generations = atoi(optarg);
+        break;
+      case 'p':
+        population_size = atoi(optarg);
+        break;
+      case 'c':
+	crossover_rate = strtod(optarg, NULL);
+	break;
+      case 'm':
+        mutation_rate = strtod(optarg, NULL);
+	break;
+      case 's':
+        mutation_stdev = strtod(optarg, NULL);
+	break;
+      case '?':
+        if (optopt == 'p')
+          fprintf (stderr, "Option -%c requires an argument specifying the population size.\n", optopt);
+	else if (optopt == 'g')
+	  fprintf (stderr, "Option -%c requires an argument specifying the number of generations.\n", optopt);
+	else if (optopt == 't')
+	  fprintf (stderr, "Option -%c requires an argument specifying the number of trials.\n", optopt);
+	else if (optopt == 'c')
+	  fprintf (stderr, "Option -%c requires an argument specifying the crossover rate.\n", optopt);
+	else if (optopt == 'm')
+	  fprintf (stderr, "Option -%c requires an argument specifying the mutation rate.\n", optopt);
+	else if (optopt == 's')
+	  fprintf (stderr, "Option -%c requires an argument specifying the mutation standard deviation.\n", optopt);
+        else if (isprint (optopt))
+          fprintf (stderr, "Unknown option `-%c'.\n", optopt);
+        else
+          fprintf (stderr,
+                   "Unknown option character `\\x%x'.\n",
+                   optopt);
+        return 1;
+      default:
+	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
+        abort ();
+      }
+
 
   float max_float = std::numeric_limits<float>::max();
 
@@ -65,24 +122,18 @@ int main(int argc, char **argv)
     if(strcmp(argv[i++],"seed") == 0)
       seed = atoi(argv[i]);
 	
-  // Declare variables for the GA parameters and set them to some default values.
-  int popsize  = 50; // Population
-  int ngen     = 100; // Generations
-  float pmut   = 0.1;
-  float pcross = 0.05;
-
   // popsize / mpi_tasks must be an integer
-  popsize = mpi_tasks * int((double)popsize/(double)mpi_tasks+0.999);
+  population_size = mpi_tasks * int((double)population_size/(double)mpi_tasks+0.999);
   
   // Define the genome
   GARealAlleleSetArray allele_array;
-  allele_array.add(0,1); // Probability of switching to search
-  allele_array.add(0,1); // Probability of returning to nest
-  allele_array.add(0,1); // Uninformed search variation
-  allele_array.add(0,exp(5)); // Rate of informed search decay
-  allele_array.add(0,20); // Rate of site fidelity
-  allele_array.add(0,20); // Rate of laying pheremone
-  allele_array.add(0,exp(10)); // Rate of pheremone decay
+  allele_array.add(0,1/mutation_stdev); // Probability of switching to search
+  allele_array.add(0,1/mutation_stdev); // Probability of returning to nest
+  allele_array.add(0,1/mutation_stdev); // Uninformed search variation
+  allele_array.add(0,exp(5)/mutation_stdev); // Rate of informed search decay
+  allele_array.add(0,20/mutation_stdev); // Rate of site fidelity
+  allele_array.add(0,20/mutation_stdev); // Rate of laying pheremone
+  allele_array.add(0,exp(10)/mutation_stdev); // Rate of pheremone decay
 
   
   // Create the template genome using the phenotype map we just made.
@@ -95,18 +146,22 @@ int main(int argc, char **argv)
   GASimpleGA ga(genome);
   GALinearScaling scaling;
   ga.maximize();		// Maxamize the objective
-  ga.populationSize(popsize);
-  ga.nGenerations(ngen);
-  ga.pMutation(pmut);
-  ga.pCrossover(pcross);
+  ga.populationSize(population_size);
+  ga.nGenerations(n_generations);
+  ga.pMutation(mutation_rate);
+  ga.pCrossover(crossover_rate);
   ga.scaling(scaling);
+  ga.elitist(gaTrue);
   if(mpi_rank == 0)
     ga.scoreFilename("evolution.txt");
   else
     ga.scoreFilename("/dev/null");
+  ga.recordDiversity(gaTrue);
   ga.scoreFrequency(1);
   ga.flushFrequency(1);
   ga.selectScores(GAStatistics::AllScores);
+  
+
   // Pass MPI data to the GA class
   ga.mpi_rank(mpi_rank);
   ga.mpi_tasks(mpi_tasks);
@@ -134,9 +189,13 @@ int main(int argc, char **argv)
 
 float objective(GAGenome &c)
 {
-  float fitness = LaunchARGoS(c);
-  printf("Fitness in objective function: %f\n", fitness );
-  return fitness;
+  float avg = 0;
+  for (int i = 0; i < n_trials; i++)
+    avg += LaunchARGoS(c);
+  avg /= n_trials;
+  
+  printf("Fitness in objective function based on %d: %f\n", n_trials, avg );
+  return avg;
 }
 
 /*
@@ -160,7 +219,7 @@ float LaunchARGoS(GAGenome& c_genome)
       Real* cpfa_genome = new Real[GENOME_SIZE];
 
       for (int i = 0; i < GENOME_SIZE; i++)
-	cpfa_genome[i] = cRealGenome.gene(i);
+	cpfa_genome[i] = cRealGenome.gene(i)*mutation_stdev; // Convert back from genes transormed to simulate mutation stdev
        
       std::chrono::time_point<std::chrono::system_clock> start, end;
       start = std::chrono::system_clock::now();
