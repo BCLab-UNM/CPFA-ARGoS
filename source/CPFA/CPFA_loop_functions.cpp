@@ -2,7 +2,7 @@
 
 CPFA_loop_functions::CPFA_loop_functions() :
   RNG(argos::CRandom::CreateRNG("argos")),
-  MaxSimTime(3600 * GetSimulator().GetPhysicsEngine("default").GetInverseSimulationClockTick()),
+  MaxSimTime(3600 * GetSimulator().GetPhysicsEngine("dyn2d").GetInverseSimulationClockTick()),
   ResourceDensityDelay(0),
   RandomSeed(GetSimulator().GetRandomSeed()),
   SimCounter(0),
@@ -31,7 +31,8 @@ CPFA_loop_functions::CPFA_loop_functions() :
   NestRadius(0.25),
   NestRadiusSquared(0.0625),
   NestElevation(0.01),
-  SearchRadiusSquared((4.0 * FoodRadius) * (4.0 * FoodRadius))
+  SearchRadiusSquared((4.0 * FoodRadius) * (4.0 * FoodRadius)),
+  score(0)
 {}
 
 void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
@@ -157,11 +158,11 @@ argos::CColor CPFA_loop_functions::GetFloorColor(const argos::CVector2 &c_pos_on
 void CPFA_loop_functions::UpdatePheromoneList() {
  
   // Return if this is not a tick that lands on a 0.5 second interval
-  if ((int)(GetSpace().GetSimulationClock()) % ((int)(GetSimulator().GetPhysicsEngine("default").GetInverseSimulationClockTick()) / 2) != 0) return;
+  if ((int)(GetSpace().GetSimulationClock()) % ((int)(GetSimulator().GetPhysicsEngine("dyn2d").GetInverseSimulationClockTick()) / 2) != 0) return;
   
   std::vector<Pheromone> new_p_list; 
 
-  argos::Real t = GetSpace().GetSimulationClock() / GetSimulator().GetPhysicsEngine("default").GetInverseSimulationClockTick();
+  argos::Real t = GetSpace().GetSimulationClock() / GetSimulator().GetPhysicsEngine("dyn2d").GetInverseSimulationClockTick();
 
   //ofstream log_output_stream;
   //log_output_stream.open("time.txt", ios::app);

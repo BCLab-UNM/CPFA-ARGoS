@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <unistd.h> // For usleep
 
+// For shared memory management
+#include <sys/mman.h>
+
 #include <ctime> // For clock()
 #include <chrono> // For clock()
 #include <mpi.h>
@@ -26,6 +29,9 @@
 #include <ctime> // For clock()
 #include <chrono> // For clock()
 
+// Shared variable between child and parent process
+static float *shared_fitness;
+
 float objective(GAGenome &);
 float LaunchARGoS(GAGenome &);
 
@@ -37,6 +43,9 @@ int main(int argc, char **argv)
   start = std::chrono::system_clock::now();
 
   float max_float = std::numeric_limits<float>::max();
+
+  // Allocate the shared memory to use between us and the child argos process
+  shared_fitness = static_cast<float*>(mmap((caddr_t)NULL, sizeof (*shared_fitness), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
 
   // MPI init
   MPI_Init(&argc, &argv);
@@ -57,10 +66,10 @@ int main(int argc, char **argv)
       seed = atoi(argv[i]);
 	
   // Declare variables for the GA parameters and set them to some default values.
-  int popsize  = 20; // Population
-  int ngen     = 10; // Generations
+  int popsize  = 50; // Population
+  int ngen     = 100; // Generations
   float pmut   = 0.1;
-  float pcross = 0.00;
+  float pcross = 0.05;
 
   // popsize / mpi_tasks must be an integer
   popsize = mpi_tasks * int((double)popsize/(double)mpi_tasks+0.999);
@@ -78,6 +87,8 @@ int main(int argc, char **argv)
   
   // Create the template genome using the phenotype map we just made.
   GARealGenome genome(allele_array, objective);
+  genome.crossover(GARealUniformCrossover);
+  genome.mutator(GARealGaussianMutator);
 
   // Now create the GA using the genome and run it. We'll use sigma truncation
   // scaling so that we can handle negative objective scores.
@@ -124,6 +135,7 @@ int main(int argc, char **argv)
 float objective(GAGenome &c)
 {
   float fitness = LaunchARGoS(c);
+  printf("Fitness in objective function: %f\n", fitness );
   return fitness;
 }
 
@@ -132,7 +144,9 @@ float objective(GAGenome &c)
  */
 float LaunchARGoS(GAGenome& c_genome) 
 {
-  Real fitness;
+  float fitness = 0;
+
+  *shared_fitness = 0; // init the shared variable
 
   pid_t pid = fork();
 
@@ -202,7 +216,7 @@ float LaunchARGoS(GAGenome& c_genome)
       cSimulator.Execute();
 
       /* Update performance */
-      fitness = cLoopFunctions.Score();
+      *shared_fitness = cLoopFunctions.Score();
   
 
       //cLoopFunctions.Destroy();
@@ -211,7 +225,7 @@ float LaunchARGoS(GAGenome& c_genome)
       end = std::chrono::system_clock::now();
                      
       std::chrono::duration<double> elapsed_seconds = end-start;
-      printf("%s: worker %d completed a genome evaluation in %f seconds. Fitness was %f\n", hostname, mpi_rank, elapsed_seconds.count(), fitness);                                          
+      printf("%s: worker %d completed a genome evaluation in %f seconds. Fitness was %f\n", hostname, mpi_rank, elapsed_seconds.count(), *shared_fitness);                                          
 
 	delete [] cpfa_genome;
 
@@ -222,5 +236,7 @@ float LaunchARGoS(GAGenome& c_genome)
   int status = wait(&status);
   
   /* Return the result of the evaluation */
+  fitness = *shared_fitness;
+
   return fitness;
 }
