@@ -38,17 +38,18 @@ float LaunchARGoS(GAGenome &);
 int mpi_tasks, mpi_rank;
 
 int n_trials = 10; // used by the objective function
-double mutation_stdev = 0.01; // Used by LaunchArgos function.
+double mutation_stdev = 0.1; // Used by LaunchArgos function.
 
 int main(int argc, char **argv)
 {
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
 
-  double mutation_rate = 0.05;
-  double crossover_rate = 0.05;
-  int population_size = 100;
+  double mutation_rate = 0.1;
+  double crossover_rate = 0.1;
+  int population_size = 50;
   int n_generations = 100;
+
   
   char c='h';
   // Handle command line arguments
@@ -70,8 +71,8 @@ int main(int argc, char **argv)
       case 'm':
         mutation_rate = strtod(optarg, NULL);
 	break;
-      case 's':
-        mutation_stdev = strtod(optarg, NULL);
+      case 'h':
+	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
 	break;
       case '?':
         if (optopt == 'p')
@@ -97,7 +98,7 @@ int main(int argc, char **argv)
 	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
         abort ();
       }
-
+  
 
   float max_float = std::numeric_limits<float>::max();
 
@@ -129,7 +130,7 @@ int main(int argc, char **argv)
   GARealAlleleSetArray allele_array;
   allele_array.add(0,1/mutation_stdev); // Probability of switching to search
   allele_array.add(0,1/mutation_stdev); // Probability of returning to nest
-  allele_array.add(0,1/mutation_stdev); // Uninformed search variation
+  allele_array.add(0,4*M_PI/mutation_stdev); // Uninformed search variation
   allele_array.add(0,exp(5)/mutation_stdev); // Rate of informed search decay
   allele_array.add(0,20/mutation_stdev); // Rate of site fidelity
   allele_array.add(0,20/mutation_stdev); // Rate of laying pheremone
@@ -165,7 +166,76 @@ int main(int argc, char **argv)
   // Pass MPI data to the GA class
   ga.mpi_rank(mpi_rank);
   ga.mpi_tasks(mpi_tasks);
-  ga.evolve(seed);
+  //ga.evolve(seed);
+
+    // Name the results file with the current time and date
+ time_t t = time(0);   // get time now
+    struct tm * now = localtime( & t );
+    stringstream ss;
+
+    ss << "results/CPFA-evolution-"
+       << "powerlaw-6rovers" << '-'
+       <<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-"
+       << (now->tm_year) << '-'
+       << (now->tm_mon + 1) << '-'
+       <<  now->tm_mday << '-'
+       <<  now->tm_hour << '-'
+       <<  now->tm_min << '-'
+       <<  now->tm_sec << ".csv";
+
+    string results_file_name = ss.str();
+
+    if (mpi_rank == 0)
+      {
+    // Write output file header
+    ofstream results_output_stream;
+	results_output_stream.open(results_file_name, ios::app);
+	results_output_stream << "Generation" 
+			      << ", " << "Convergence"
+			      << ", " << "Mean"
+			      << ", " << "Maximum"
+			      << ", " << "Minimum"
+			      << ", " << "Standard Deviation"
+			      << ", " << "Diversity"
+			      << ", " << "ProbabilityOfSwitchingToSearching"
+			      << ", " << "ProbabilityOfReturningToNest"
+			      << ", " << "UninformedSearchVariation"
+			      << ", " << "RateOfInformedSearchDecay"
+			      << ", " << "RateOfSiteFidelity"
+			      << ", " << "RateOfLayingPheromone"
+			      << ", " << "RateOfPheromoneDecay";
+
+	results_output_stream << endl;
+	results_output_stream.close();
+      }
+
+	// initialize the ga since we are not using the evolve function
+	ga.initialize();
+
+  cout << "evolving...";
+  while(!ga.done()){
+    ga.step();
+
+    if(mpi_rank == 0)
+      {
+	printf("Generation %d", ga.generation());
+	ofstream results_output_stream;
+	results_output_stream.open(results_file_name, ios::app);
+       results_output_stream << ga.statistics().generation() 
+			      << ", " << ga.statistics().convergence()
+			      << ", " << ga.statistics().current(GAStatistics::Mean)
+			      << ", " << ga.statistics().current(GAStatistics::Maximum)
+			      << ", " << ga.statistics().current(GAStatistics::Minimum)
+			      << ", " << ga.statistics().current(GAStatistics::Deviation)
+			      << ", " << ga.statistics().current(GAStatistics::Diversity);
+	
+	  for (int i = 0; i < GENOME_SIZE; i++)
+	    results_output_stream << ", " << dynamic_cast<const GARealGenome&>(ga.statistics().bestIndividual()).gene(i)*mutation_stdev;
+	
+	results_output_stream << endl;
+	results_output_stream.close();
+      }
+  }
 
   // Display the GA's progress
   if(mpi_rank == 0)
@@ -183,7 +253,7 @@ int main(int argc, char **argv)
     printf("Run time was %f seconds\n", elapsed_seconds.count());
 
   return 0;
-}
+  }
  
 // The objective function used by GAlib
 
@@ -194,7 +264,7 @@ float objective(GAGenome &c)
     avg += LaunchARGoS(c);
   avg /= n_trials;
   
-  printf("Fitness in objective function based on %d: %f\n", n_trials, avg );
+  printf("Fitness in objective function (mean of %d trials): %f\n", n_trials, avg );
   return avg;
 }
 
@@ -228,6 +298,7 @@ float LaunchARGoS(GAGenome& c_genome)
       char hostname[1024];              
       hostname[1023] = '\0';                                          
       gethostname(hostname, 1023);     
+      
       printf("%s: worker %d started a genome evaluation. (%f, %f, %f, %f, %f, %f, %f)\n", hostname, mpi_rank, 
 	     cpfa_genome[0],
 	     cpfa_genome[1],
@@ -236,6 +307,7 @@ float LaunchARGoS(GAGenome& c_genome)
 	     cpfa_genome[4],
 	     cpfa_genome[5],
 	     cpfa_genome[6]);
+      
 
       /* Redirect LOG and LOGERR to dedicated files to prevent clutter on the screen */
 
