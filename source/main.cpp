@@ -212,13 +212,12 @@ int main(int argc, char **argv)
 	// initialize the ga since we are not using the evolve function
 	ga.initialize();
 
-  cout << "evolving...";
-  while(!ga.done()){
+    while(!ga.done()){
     ga.step();
 
     if(mpi_rank == 0)
       {
-	printf("Generation %d", ga.generation());
+	printf("Generation %d.\n", ga.generation());
 	ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
        results_output_stream << ga.statistics().generation() 
@@ -260,12 +259,31 @@ int main(int argc, char **argv)
 float objective(GAGenome &c)
 {
   float avg = 0;
-  for (int i = 0; i < n_trials; i++)
-    avg += LaunchARGoS(c);
-  avg /= n_trials;
   
-  printf("Fitness in objective function (mean of %d trials): %f\n", n_trials, avg );
-  return avg;
+  // For timing
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+  start = std::chrono::system_clock::now();
+
+  for (int i = 0; i < n_trials; i++) avg += LaunchARGoS(c);
+  
+  avg /= n_trials;
+  end = std::chrono::system_clock::now();
+  
+  std::chrono::duration<double> elapsed_seconds = end-start;
+
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);     
+
+      char hostname[1024];              
+      hostname[1023] = '\0';                                          
+      gethostname(hostname, 1023);     
+ 
+       
+      printf("Worker %d on %s evaluated genome [", mpi_rank, hostname);
+      for (int i = 0; i < GENOME_SIZE; i++)
+	printf("%f ",dynamic_cast<const GARealGenome&>(c).gene(i)*mutation_stdev);
+      printf("] in %f seconds. ", elapsed_seconds.count());
+      printf("Fitness: %f.\n", avg );
+      return avg;
 }
 
 /*
@@ -305,14 +323,8 @@ float LaunchARGoS(GAGenome& c_genome)
       for (int i = 0; i < GENOME_SIZE; i++)
 	cpfa_genome[i] = cRealGenome.gene(i)*mutation_stdev; // Convert back from genes transormed to simulate mutation stdev
        
-      std::chrono::time_point<std::chrono::system_clock> start, end;
-      start = std::chrono::system_clock::now();
-      MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);     
-      
-      char hostname[1024];              
-      hostname[1023] = '\0';                                          
-      gethostname(hostname, 1023);     
-      
+            
+      /*
       printf("%s: worker %d started a genome evaluation. (%f, %f, %f, %f, %f, %f, %f)\n", hostname, mpi_rank, 
 	     cpfa_genome[0],
 	     cpfa_genome[1],
@@ -321,7 +333,7 @@ float LaunchARGoS(GAGenome& c_genome)
 	     cpfa_genome[4],
 	     cpfa_genome[5],
 	     cpfa_genome[6]);
-      
+      */
 
       /* Redirect LOG and LOGERR to dedicated files to prevent clutter on the screen */
 
@@ -368,11 +380,7 @@ float LaunchARGoS(GAGenome& c_genome)
       //cLoopFunctions.Destroy();
       cSimulator.Destroy();
 
-      end = std::chrono::system_clock::now();
-                     
-      std::chrono::duration<double> elapsed_seconds = end-start;
-      printf("%s: worker %d completed a genome evaluation in %f seconds. Fitness was %f\n", hostname, mpi_rank, elapsed_seconds.count(), *ShmPTR);                                          
-
+      
 	delete [] cpfa_genome;
 
       _Exit(0); 
