@@ -134,7 +134,7 @@ int main(int argc, char **argv)
   allele_array.add(0,20/mutation_stdev); // Rate of informed search decay
   allele_array.add(0,20/mutation_stdev); // Rate of site fidelity
   allele_array.add(0,20/mutation_stdev); // Rate of laying pheremone
-  allele_array.add(0,20/mutation_stdev); // Rate of pheremone decay
+  allele_array.add(0,2/mutation_stdev); // Rate of pheremone decay
 
   
   // Create the template genome using the phenotype map we just made.
