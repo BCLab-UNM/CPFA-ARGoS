@@ -146,7 +146,7 @@ int main(int argc, char **argv)
   // scaling so that we can handle negative objective scores.
   GASimpleGA ga(genome);
   GALinearScaling scaling;
-  ga.maximize();		// Maxamize the objective
+  ga.maximize();		// Maximize the objective
   ga.populationSize(population_size);
   ga.nGenerations(n_generations);
   ga.pMutation(mutation_rate);
@@ -229,7 +229,7 @@ int main(int argc, char **argv)
 			      << ", " << ga.statistics().current(GAStatistics::Diversity);
 	
 	  for (int i = 0; i < GENOME_SIZE; i++)
-	    results_output_stream << ", " << dynamic_cast<const GARealGenome&>(ga.statistics().bestIndividual()).gene(i)*mutation_stdev;
+	    results_output_stream << ", " << dynamic_cast<const GARealGenome&>(ga.population().best()).gene(i)*mutation_stdev;
 	
 	results_output_stream << endl;
 	results_output_stream.close();
