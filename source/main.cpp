@@ -29,8 +29,9 @@
 #include <ctime> // For clock()
 #include <chrono> // For clock()
 
-// Shared variable between child and parent process
-static float *shared_fitness;
+// For shared variable between child and parent process
+#include  <sys/ipc.h>
+#include  <sys/shm.h>
 
 float objective(GAGenome &);
 float LaunchARGoS(GAGenome &);
@@ -45,8 +46,10 @@ int main(int argc, char **argv)
   std::chrono::time_point<std::chrono::system_clock> start, end;
   start = std::chrono::system_clock::now();
 
+  srand(time(NULL));
+
   double mutation_rate = 0.1;
-  double crossover_rate = 0.1;
+  double crossover_rate = 0.05;
   int population_size = 50;
   int n_generations = 100;
 
@@ -102,9 +105,6 @@ int main(int argc, char **argv)
 
   float max_float = std::numeric_limits<float>::max();
 
-  // Allocate the shared memory to use between us and the child argos process
-  shared_fitness = static_cast<float*>(mmap((caddr_t)NULL, sizeof (*shared_fitness), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0));
-
   // MPI init
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &mpi_tasks);
@@ -131,10 +131,10 @@ int main(int argc, char **argv)
   allele_array.add(0,1/mutation_stdev); // Probability of switching to search
   allele_array.add(0,1/mutation_stdev); // Probability of returning to nest
   allele_array.add(0,4*M_PI/mutation_stdev); // Uninformed search variation
-  allele_array.add(0,exp(5)/mutation_stdev); // Rate of informed search decay
+  allele_array.add(0,20/mutation_stdev); // Rate of informed search decay
   allele_array.add(0,20/mutation_stdev); // Rate of site fidelity
   allele_array.add(0,20/mutation_stdev); // Rate of laying pheremone
-  allele_array.add(0,exp(10)/mutation_stdev); // Rate of pheremone decay
+  allele_array.add(0,20/mutation_stdev); // Rate of pheremone decay
 
   
   // Create the template genome using the phenotype map we just made.
@@ -152,7 +152,7 @@ int main(int argc, char **argv)
   ga.pMutation(mutation_rate);
   ga.pCrossover(crossover_rate);
   ga.scaling(scaling);
-  ga.elitist(gaTrue);
+  ga.elitist(gaFalse);
   if(mpi_rank == 0)
     ga.scoreFilename("evolution.txt");
   else
@@ -275,7 +275,21 @@ float LaunchARGoS(GAGenome& c_genome)
 {
   float fitness = 0;
 
-  *shared_fitness = 0; // init the shared variable
+  int    ShmID;
+  float*   ShmPTR;
+  
+  // Allocate the shared memory to use between us and the child argos process
+  ShmID = shmget(IPC_PRIVATE, sizeof(float), IPC_CREAT | 0666);
+  if (ShmID < 0) {
+    printf("*** shmget error (server) ***\n");
+  }
+  
+  ShmPTR = (float*) shmat(ShmID, NULL, 0);
+  if ((float*) ShmPTR == (float*)-1) {
+    printf("*** shmat error (server) ***\n");
+  }
+
+  *ShmPTR = 0;
 
   pid_t pid = fork();
 
@@ -347,7 +361,8 @@ float LaunchARGoS(GAGenome& c_genome)
       cSimulator.Execute();
 
       /* Update performance */
-      *shared_fitness = cLoopFunctions.Score();
+     
+      *ShmPTR = cLoopFunctions.Score();;
   
 
       //cLoopFunctions.Destroy();
@@ -356,7 +371,7 @@ float LaunchARGoS(GAGenome& c_genome)
       end = std::chrono::system_clock::now();
                      
       std::chrono::duration<double> elapsed_seconds = end-start;
-      printf("%s: worker %d completed a genome evaluation in %f seconds. Fitness was %f\n", hostname, mpi_rank, elapsed_seconds.count(), *shared_fitness);                                          
+      printf("%s: worker %d completed a genome evaluation in %f seconds. Fitness was %f\n", hostname, mpi_rank, elapsed_seconds.count(), *ShmPTR);                                          
 
 	delete [] cpfa_genome;
 
@@ -365,9 +380,13 @@ float LaunchARGoS(GAGenome& c_genome)
   
   // In parent - wait for child to finish
   int status = wait(&status);
-  
-  /* Return the result of the evaluation */
-  fitness = *shared_fitness;
 
+  fitness = *ShmPTR;  
+
+  // Release shared memory
+  shmdt((void *) ShmPTR);
+  shmctl(ShmID, IPC_RMID, NULL);
+
+  /* Return the result of the evaluation */  
   return fitness;
 }
