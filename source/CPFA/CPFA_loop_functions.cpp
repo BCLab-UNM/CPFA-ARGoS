@@ -36,9 +36,7 @@ CPFA_loop_functions::CPFA_loop_functions() :
 {}
 
 void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
-
   
-
   argos::CDegrees USV_InDegrees;
 
   argos::TConfigurationNode CPFA_node = argos::GetNode(node, "CPFA");
@@ -51,6 +49,27 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
   argos::GetNodeAttribute(CPFA_node, "RateOfPheromoneDecay",              RateOfPheromoneDecay);
 
   UninformedSearchVariation = ToRadians(USV_InDegrees);
+
+  /****************************************************************************************************************************/
+  argos::TConfigurationNode settings_node = argos::GetNode(node, "settings");
+  argos::GetNodeAttribute(settings_node, "MaxSimTimeInSeconds", MaxSimTime);
+  MaxSimTime *= GetSimulator().GetPhysicsEngine("dyn2d").GetInverseSimulationClockTick();
+  argos::GetNodeAttribute(settings_node, "MaxSimCounter", MaxSimCounter);
+  argos::GetNodeAttribute(settings_node, "VariableFoodPlacement", VariableFoodPlacement);
+  argos::GetNodeAttribute(settings_node, "OutputData", OutputData);
+  argos::GetNodeAttribute(settings_node, "DrawIDs", DrawIDs);
+  argos::GetNodeAttribute(settings_node, "DrawTrails", DrawTrails);
+  argos::GetNodeAttribute(settings_node, "DrawTargetRays", DrawTargetRays);
+  argos::GetNodeAttribute(settings_node, "FoodDistribution", FoodDistribution);
+  argos::GetNodeAttribute(settings_node, "FoodItemCount", FoodItemCount);
+  argos::GetNodeAttribute(settings_node, "NumberOfClusters", NumberOfClusters);
+  argos::GetNodeAttribute(settings_node, "ClusterWidthX", ClusterWidthX);
+  argos::GetNodeAttribute(settings_node, "ClusterLengthY", ClusterLengthY);
+  argos::GetNodeAttribute(settings_node, "PowerRank", PowerRank);
+  argos::GetNodeAttribute(settings_node, "FoodRadius", FoodRadius);
+  argos::GetNodeAttribute(settings_node, "NestElevation", NestElevation);
+  
+  FoodRadiusSquared = FoodRadius*FoodRadius;
 
   // calculate the forage range and compensate for the robot's radius of 0.085m
   argos::CVector3 ArenaSize = GetSpace().GetArenaSize();

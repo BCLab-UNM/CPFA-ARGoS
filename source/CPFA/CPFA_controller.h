@@ -85,6 +85,7 @@ class CPFA_controller : public BaseController {
 
 	string results_path;
 	string results_full_path;
+	bool isUsingPheromone;
 
 	unsigned int survey_count;
 };

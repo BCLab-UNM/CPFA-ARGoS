@@ -10,9 +10,10 @@ CPFA_controller::CPFA_controller() :
     ResourceDensity(0),
     MaxTrailSize(50),
     SearchTime(0),
-    CPFA_state(DEPARTING),
+    CPFA_state(RETURNING),
     LoopFunctions(NULL),
-    survey_count(0)
+    survey_count(0),
+    isUsingPheromone(0)
 {}
 
 void CPFA_controller::Init(argos::TConfigurationNode &node) {
@@ -49,15 +50,17 @@ void CPFA_controller::ControlStep() {
   switch(CPFA_state) 
     {
     case DEPARTING:
-      log_output_stream << "DEPARTING" << endl;
+      if (isUsingSiteFidelity)
+	log_output_stream << "DEPARTING (Fidelity): " << GetTarget().GetX() << ", " << GetTarget().GetY() << endl;
+      else if (isInformed)
+	log_output_stream << "DEPARTING (Waypoint): " << GetTarget().GetX() << ", " << GetTarget().GetY() << endl;
+      else 
+	log_output_stream << "DEPARTING (Searching): " << GetTarget().GetX() << ", " << GetTarget().GetY() << endl;
       break;
       // after departing(), once conditions are met, begin searching()
     case SEARCHING:
       if (isInformed) 
-	if (!isUsingSiteFidelity)
-	  log_output_stream << "SEARCHING: Informed (P)" << endl;
-	else
-	  log_output_stream << "SEARCHING: Informed (F)" << endl;
+	  log_output_stream << "SEARCHING: Informed" << endl;      
       else
 	log_output_stream << "SEARCHING: UnInformed" << endl;
       break;
@@ -71,8 +74,8 @@ void CPFA_controller::ControlStep() {
     default:
       log_output_stream << "Unknown state" << endl;
     }
-  */
   
+  */
 
   // Add line so we can draw the trail
 
@@ -111,7 +114,7 @@ void CPFA_controller::CPFA() {
     break;
     // after departing(), once conditions are met, begin searching()
   case SEARCHING:
-    if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
+    //if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
       Searching();
     break;
     // return to nest after food pick up or giving up searching()
@@ -164,6 +167,7 @@ gethostname(hostname, 1023);
    
     if (GetId().compare("CPFA_0") == 0)
       {
+	/*
 
    ofstream results_output_stream;
    results_output_stream.open(results_full_path, ios::app);
@@ -198,6 +202,7 @@ gethostname(hostname, 1023);
 			 << endl;
      		
    results_output_stream.close();
+	*/
       }
 
 }
@@ -345,9 +350,7 @@ void CPFA_controller::Returning() {
 
   //SetHoldingFood();
     
-    argos::CVector2 distance = GetPosition() - GetTarget();
-
-    // Are we there yet? (To the nest, that is.)
+  // Are we there yet? (To the nest, that is.)
     if(IsInTheNest() == true) {
         // Based on a Poisson CDF, the robot may or may not create a pheromone
         // located at the last place it picked up food.
@@ -356,18 +359,15 @@ void CPFA_controller::Returning() {
         argos::Real r1 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
         argos::Real r2 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
-        if(poissonCDF_pLayRate > r1) {
-            if(isGivingUpSearch == false) {
-                TrailToShare.push_back(LoopFunctions->NestPosition);
+	if (isHoldingFood) 
+	  if(poissonCDF_pLayRate > r1) {
+	      TrailToShare.push_back(LoopFunctions->NestPosition); // For drawing the waypoints
                 argos::Real timeInSeconds = (argos::Real)(SimulationTick() / SimulationTicksPerSecond());
                 Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay);
                 LoopFunctions->PheromoneList.push_back(sharedPheromone);
                 TrailToShare.clear();
                 sharedPheromone.Deactivate(); // make sure this won't get re-added later...
-            } else {
-                isGivingUpSearch = false;
-            }
-        }
+	}
 
         // Determine probabilistically wether to use site fidelity, pheromone
         // trails, or random search.
@@ -392,27 +392,26 @@ void CPFA_controller::Returning() {
 	// Record that a target has been retrieved
 	if (isHoldingFood)
 	  {
-	    ofstream results_output_stream;
-	    results_output_stream.open(results_full_path, ios::app);
-	    results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << ++num_targets_collected << endl;	    
-	    results_output_stream.close();
+	    num_targets_collected++;
+	    //ofstream results_output_stream;
+	    //results_output_stream.open(results_full_path, ios::app);
+	    //results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << num_targets_collected << endl;	    
+	    //results_output_stream.close();
 
 	    LoopFunctions->setScore(num_targets_collected);
-
-	    isHoldingFood = false;
-	    CPFA_state = DEPARTING;
 	    
 	     // We dropped off food. Clear the built-up pheromone trail.
 	    TrailToShare.clear();
 	  }
-    }
 
-    //if(distance.SquareLength() < TargetDistanceTolerance) {
-    //
-    //   argos::CVector2 step(SearchStepSize, GetHeading().UnsignedNormalize());
-    //
-    //    SetTarget(GetPosition() + step);
-    //}
+	isGivingUpSearch = false;
+	CPFA_state = DEPARTING;   
+	isHoldingFood = false;
+    }
+    //else // Take a small step towards the nest so we don't overshoot by too much is we miss it
+      {
+	SetTarget(LoopFunctions->NestPosition);
+      }
 
 }
 

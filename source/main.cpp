@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <cstdlib>
-#include <unistd.h> // For usleep
+#include <unistd.h> // For usleep and optargs
 
 // For shared memory management
 #include <sys/mman.h>
@@ -38,25 +38,37 @@ float LaunchARGoS(GAGenome &);
 
 int mpi_tasks, mpi_rank;
 
-int n_trials = 10; // used by the objective function
-double mutation_stdev = 0.1; // Used by LaunchArgos function.
+int n_trials = 20; // used by the objective function
+double mutation_stdev = 1.00; // Gaussian mutation stdev - will be scaled by possible range
+
+int GARealGaussianMutatorStdev(GAGenome &, float);
 
 int main(int argc, char **argv)
 {
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  start = std::chrono::system_clock::now();
+  std::chrono::time_point<std::chrono::system_clock> program_start, program_end;
+  program_start = std::chrono::system_clock::now();
+
+  // MPI init - this has to happen before getopt() so the argv can be properly trimmed
+  MPI_Init(&argc, &argv);
+  MPI_Comm_size(MPI_COMM_WORLD, &mpi_tasks);
+  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+                         
+  char hostname[1024];                                                                                                       
+  hostname[1023] = '\0';                                          
+  gethostname(hostname, 1023);
 
   srand(time(NULL));
 
   double mutation_rate = 0.1;
   double crossover_rate = 0.05;
-  int population_size = 50;
+  int population_size = 28;
   int n_generations = 100;
 
+  string ga_description = "GASimple, no elitism, linear fitness function scaling.";
   
   char c='h';
   // Handle command line arguments
-  while ((c = getopt (argc, argv, "tgp:")) != -1)
+  while ((c = getopt (argc, argv, "t:g:p:c:m:s:h:")) != -1)
     switch (c)
       {
       case 't':
@@ -71,8 +83,8 @@ int main(int argc, char **argv)
       case 'c':
 	crossover_rate = strtod(optarg, NULL);
 	break;
-      case 'm':
-        mutation_rate = strtod(optarg, NULL);
+      case 's':
+        mutation_stdev = strtod(optarg, NULL);
 	break;
       case 'h':
 	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
@@ -101,19 +113,10 @@ int main(int argc, char **argv)
 	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
         abort ();
       }
-  
 
   float max_float = std::numeric_limits<float>::max();
 
-  // MPI init
-  MPI_Init(&argc, &argv);
-  MPI_Comm_size(MPI_COMM_WORLD, &mpi_tasks);
-  MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
-                         
-  char hostname[1024];                                                                                                       
-  hostname[1023] = '\0';                                          
-  gethostname(hostname, 1023);                        
-  printf("%s:\tworker %d ready.\n", hostname, mpi_rank);                                          
+  //printf("%s:\tworker %d ready.\n", hostname, mpi_rank);                                          
 
   // See if we've been given a seed to use (for testing purposes).  When you
   // specify a random seed, the evolution will be exactly the same each time
@@ -126,24 +129,28 @@ int main(int argc, char **argv)
   // popsize / mpi_tasks must be an integer
   population_size = mpi_tasks * int((double)population_size/(double)mpi_tasks+0.999);
   
+  if (mpi_rank==0)
+    {
+      printf("Population size: %d\nNumer of trials: %d\nNumber of generations: %d\nCrossover rate: %f\nMutation rate: %f\nMutation stdev: %f\nGenetic algorithm description: %s\nAllocated MPI workers: %d\n", population_size, n_trials, n_generations, crossover_rate, mutation_rate, mutation_stdev, ga_description.c_str(), mpi_tasks);
+    }
+
   // Define the genome
   GARealAlleleSetArray allele_array;
-  allele_array.add(0,1/mutation_stdev); // Probability of switching to search
-  allele_array.add(0,1/mutation_stdev); // Probability of returning to nest
-  allele_array.add(0,4*M_PI/mutation_stdev); // Uninformed search variation
-  allele_array.add(0,20/mutation_stdev); // Rate of informed search decay
-  allele_array.add(0,20/mutation_stdev); // Rate of site fidelity
-  allele_array.add(0,20/mutation_stdev); // Rate of laying pheremone
-  allele_array.add(0,2/mutation_stdev); // Rate of pheremone decay
+  allele_array.add(0,1); // Probability of switching to search
+  allele_array.add(0,0.0001); // Probability of returning to nest
+  allele_array.add(0,4*M_PI); // Uninformed search variation
+  allele_array.add(0,20); // Rate of informed search decay
+  allele_array.add(0,20); // Rate of site fidelity
+  allele_array.add(0,20); // Rate of laying pheremone
+  allele_array.add(0,2); // Rate of pheremone decay
 
   
   // Create the template genome using the phenotype map we just made.
   GARealGenome genome(allele_array, objective);
   genome.crossover(GARealUniformCrossover);
-  genome.mutator(GARealGaussianMutator);
-
-  // Now create the GA using the genome and run it. We'll use sigma truncation
-  // scaling so that we can handle negative objective scores.
+  genome.mutator(GARealGaussianMutatorStdev); // Specify our version of the Gaussuan mutator
+ 
+  // Now create the GA using the genome and run it.
   GASimpleGA ga(genome);
   GALinearScaling scaling;
   ga.maximize();		// Maximize the objective
@@ -162,7 +169,6 @@ int main(int argc, char **argv)
   ga.flushFrequency(1);
   ga.selectScores(GAStatistics::AllScores);
   
-
   // Pass MPI data to the GA class
   ga.mpi_rank(mpi_rank);
   ga.mpi_tasks(mpi_tasks);
@@ -190,7 +196,9 @@ int main(int argc, char **argv)
     // Write output file header
     ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
+	results_output_stream << "Population size: " << population_size << "\nNumer of trials: " << n_trials << "\nNumber of generations: "<< n_generations<<"\nCrossover rate: "<< crossover_rate<<"\nMutation rate: " << mutation_rate << "\nMutation stdev: "<< mutation_stdev << "\nGenetic algorithm: " << ga_description << "Algorithm: CPFA\n" << "Number of searchers: 6\n" << "Number of targets: 256\n" << "Target distribution: power law" << endl;
 	results_output_stream << "Generation" 
+			      << ", " << "Compute Time (s)"
 			      << ", " << "Convergence"
 			      << ", " << "Mean"
 			      << ", " << "Maximum"
@@ -213,23 +221,32 @@ int main(int argc, char **argv)
 	ga.initialize();
 
     while(!ga.done()){
-    ga.step();
+
+      std::chrono::time_point<std::chrono::system_clock>generation_start, generation_end;
+      if (mpi_rank == 0)
+	{
+	 generation_start = std::chrono::system_clock::now();
+	}
+      
+      // Calculate the generation
+      ga.step();
 
     if(mpi_rank == 0)
       {
-	printf("Generation %d.\n", ga.generation());
+	std::chrono::duration<double> generation_elapsed_seconds = generation_end-generation_start;
 	ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
        results_output_stream << ga.statistics().generation() 
-			      << ", " << ga.statistics().convergence()
-			      << ", " << ga.statistics().current(GAStatistics::Mean)
-			      << ", " << ga.statistics().current(GAStatistics::Maximum)
-			      << ", " << ga.statistics().current(GAStatistics::Minimum)
-			      << ", " << ga.statistics().current(GAStatistics::Deviation)
-			      << ", " << ga.statistics().current(GAStatistics::Diversity);
-	
+			     << ", " << generation_elapsed_seconds.count()
+			     << ", " << ga.statistics().convergence()
+			     << ", " << ga.statistics().current(GAStatistics::Mean)
+			     << ", " << ga.statistics().current(GAStatistics::Maximum)
+			     << ", " << ga.statistics().current(GAStatistics::Minimum)
+			     << ", " << ga.statistics().current(GAStatistics::Deviation)
+			     << ", " << ga.statistics().current(GAStatistics::Diversity);
+       
 	  for (int i = 0; i < GENOME_SIZE; i++)
-	    results_output_stream << ", " << dynamic_cast<const GARealGenome&>(ga.population().best()).gene(i)*mutation_stdev;
+	    results_output_stream << ", " << dynamic_cast<const GARealGenome&>(ga.population().best()).gene(i);
 	
 	results_output_stream << endl;
 	results_output_stream.close();
@@ -244,16 +261,64 @@ int main(int argc, char **argv)
 
   MPI_Finalize();
 
-  end = std::chrono::system_clock::now();
+  program_end = std::chrono::system_clock::now();
  
-  std::chrono::duration<double> elapsed_seconds = end-start;
+  std::chrono::duration<double> program_elapsed_seconds = program_end-program_start;
 
   if(mpi_rank == 0)
-    printf("Run time was %f seconds\n", elapsed_seconds.count());
+    printf("Run time was %f seconds\n", program_elapsed_seconds.count());
 
   return 0;
   }
  
+// The mutation operator based on the original from GALib but adds stdev
+// The Gaussian mutator picks a new value based on a Gaussian distribution
+// around the current value.  We respect the bounds (if any).
+int GARealGaussianMutatorStdev(GAGenome& g, float pmut)
+{
+  GA1DArrayAlleleGenome<float> &child=
+    DYN_CAST(GA1DArrayAlleleGenome<float> &, g);
+  register int n, i;
+  if(pmut <= 0.0) return(0);
+
+  float nMut = pmut * (float)(child.length());
+  int length = child.length()-1;
+  if(nMut < 1.0){// we have to do a flip test on each element
+    nMut = 0;
+    for(i=length; i>=0; i--){
+      float value = child.gene(i);
+      if(GAFlipCoin(pmut)){
+	if(child.alleleset(i).type() == GAAllele::ENUMERATED ||
+	   child.alleleset(i).type() == GAAllele::DISCRETIZED)
+	  value = child.alleleset(i).allele();
+	else if(child.alleleset(i).type() == GAAllele::BOUNDED){
+	  value += GAUnitGaussian()*mutation_stdev*(child.alleleset(i).upper()-child.alleleset(i).lower()); // since the standard deviation varies proportionally to a constant multiplier 
+	  value = GAMax(child.alleleset(i).lower(), value);
+	  value = GAMin(child.alleleset(i).upper(), value);
+	}
+	child.gene(i, value);
+	nMut++;
+      }
+    }
+  }
+  else{// only mutate the ones we need to
+    for(n=0; n<nMut; n++){
+      int idx = GARandomInt(0,length);
+      float value = child.gene(idx);
+      if(child.alleleset(idx).type() == GAAllele::ENUMERATED ||
+	 child.alleleset(idx).type() == GAAllele::DISCRETIZED)
+	value = child.alleleset(idx).allele();
+      else if(child.alleleset(idx).type() == GAAllele::BOUNDED){
+	value += GAUnitGaussian()*mutation_stdev*(child.alleleset(i).upper()-child.alleleset(i).lower()); // since the standard deviation varies proportionally to a constant multiplier 
+	value = GAMax(child.alleleset(idx).lower(), value);
+	value = GAMin(child.alleleset(idx).upper(), value);
+      }
+      child.gene(idx, value);
+    }
+  }
+  return((int)nMut);
+}
+
 // The objective function used by GAlib
 
 float objective(GAGenome &c)
@@ -280,7 +345,7 @@ float objective(GAGenome &c)
        
       printf("Worker %d on %s evaluated genome [", mpi_rank, hostname);
       for (int i = 0; i < GENOME_SIZE; i++)
-	printf("%f ",dynamic_cast<const GARealGenome&>(c).gene(i)*mutation_stdev);
+	printf("%f ",dynamic_cast<const GARealGenome&>(c).gene(i));
       printf("] in %f seconds. ", elapsed_seconds.count());
       printf("Fitness: %f.\n", avg );
       return avg;
@@ -321,7 +386,7 @@ float LaunchARGoS(GAGenome& c_genome)
       Real* cpfa_genome = new Real[GENOME_SIZE];
 
       for (int i = 0; i < GENOME_SIZE; i++)
-	cpfa_genome[i] = cRealGenome.gene(i)*mutation_stdev; // Convert back from genes transormed to simulate mutation stdev
+	cpfa_genome[i] = cRealGenome.gene(i);
        
             
       /*
