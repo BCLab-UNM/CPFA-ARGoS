@@ -80,6 +80,9 @@ int main(int argc, char **argv)
       case 'p':
         population_size = atoi(optarg);
         break;
+      case 'm':
+        mutation_rate = strtod(optarg, NULL);
+	break;
       case 'c':
 	crossover_rate = strtod(optarg, NULL);
 	break;
@@ -136,13 +139,13 @@ int main(int argc, char **argv)
 
   // Define the genome
   GARealAlleleSetArray allele_array;
-  allele_array.add(0,1); // Probability of switching to search
-  allele_array.add(0,0.0001); // Probability of returning to nest
-  allele_array.add(0,4*M_PI); // Uninformed search variation
-  allele_array.add(0,20); // Rate of informed search decay
-  allele_array.add(0,20); // Rate of site fidelity
-  allele_array.add(0,20); // Rate of laying pheremone
-  allele_array.add(0,2); // Rate of pheremone decay
+  allele_array.add(0, 1.0);//(0,1); // Probability of switching to search
+  allele_array.add(0, 1.0);//(0,1); // Probability of returning to nest
+  allele_array.add(0, 20);//(0,4*M_PI); // Uninformed search variation
+  allele_array.add(0,.20);//(0,20); // Rate of informed search decay
+  allele_array.add(0, 20);//(0,20); // Rate of site fidelity
+  allele_array.add(0, 20);//(0,20); // Rate of laying pheremone
+  allele_array.add(0, 1.0);//(0,2); // Rate of pheremone decay
 
   
   // Create the template genome using the phenotype map we just made.
@@ -220,14 +223,15 @@ int main(int argc, char **argv)
 	// initialize the ga since we are not using the evolve function
 	ga.initialize();
 
-    while(!ga.done()){
+	while(!ga.done())
+	  {
 
-      std::chrono::time_point<std::chrono::system_clock>generation_start, generation_end;
-      if (mpi_rank == 0)
-	{
-	 generation_start = std::chrono::system_clock::now();
-	}
-      
+	    std::chrono::time_point<std::chrono::system_clock>generation_start, generation_end;
+	    if (mpi_rank == 0)
+	      {
+		generation_start = std::chrono::system_clock::now();
+	      }
+	    
       // Calculate the generation
       ga.step();
 
@@ -251,14 +255,14 @@ int main(int argc, char **argv)
 	results_output_stream << endl;
 	results_output_stream.close();
       }
-  }
+	  }
 
-  // Display the GA's progress
-  if(mpi_rank == 0)
-    {
-      cout << ga.statistics() << " " << ga.parameters() << endl;
-    }
-
+	// Display the GA's progress
+	if(mpi_rank == 0)
+	  {
+	    cout << ga.statistics() << " " << ga.parameters() << endl;
+	  }
+	
   MPI_Finalize();
 
   program_end = std::chrono::system_clock::now();
@@ -332,6 +336,8 @@ float objective(GAGenome &c)
   for (int i = 0; i < n_trials; i++) avg += LaunchARGoS(c);
   
   avg /= n_trials;
+
+  
   end = std::chrono::system_clock::now();
   
   std::chrono::duration<double> elapsed_seconds = end-start;
@@ -342,12 +348,13 @@ float objective(GAGenome &c)
       hostname[1023] = '\0';                                          
       gethostname(hostname, 1023);     
  
-       
       printf("Worker %d on %s evaluated genome [", mpi_rank, hostname);
       for (int i = 0; i < GENOME_SIZE; i++)
 	printf("%f ",dynamic_cast<const GARealGenome&>(c).gene(i));
       printf("] in %f seconds. ", elapsed_seconds.count());
       printf("Fitness: %f.\n", avg );
+      
+
       return avg;
 }
 
@@ -389,7 +396,7 @@ float LaunchARGoS(GAGenome& c_genome)
 	cpfa_genome[i] = cRealGenome.gene(i);
        
             
-      /*
+      /*      
       printf("%s: worker %d started a genome evaluation. (%f, %f, %f, %f, %f, %f, %f)\n", hostname, mpi_rank, 
 	     cpfa_genome[0],
 	     cpfa_genome[1],
@@ -420,8 +427,8 @@ float LaunchARGoS(GAGenome& c_genome)
        * This is a relative path which assumed that you launch the executable
        * from argos3-examples (as said also in the README) */
       cSimulator.SetExperimentFileName("experiments/CPFA.xml");
+      
       /* Load it to configure ARGoS */
- 
       cSimulator.LoadExperiment();
 
       /* Get a reference to the loop functions */

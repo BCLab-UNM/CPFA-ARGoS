@@ -32,7 +32,8 @@ CPFA_loop_functions::CPFA_loop_functions() :
   NestRadiusSquared(0.0625),
   NestElevation(0.01),
   SearchRadiusSquared((4.0 * FoodRadius) * (4.0 * FoodRadius)),
-  score(0)
+  score(0),
+  PrintFinalScore(0)
 {}
 
 void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
@@ -47,6 +48,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
   argos::GetNodeAttribute(CPFA_node, "RateOfSiteFidelity",                RateOfSiteFidelity);
   argos::GetNodeAttribute(CPFA_node, "RateOfLayingPheromone",             RateOfLayingPheromone);
   argos::GetNodeAttribute(CPFA_node, "RateOfPheromoneDecay",              RateOfPheromoneDecay);
+  argos::GetNodeAttribute(CPFA_node, "PrintFinalScore",                   PrintFinalScore);
 
   UninformedSearchVariation = ToRadians(USV_InDegrees);
 
@@ -165,7 +167,10 @@ bool CPFA_loop_functions::IsExperimentFinished() {
   return isFinished;
 }
 
-void CPFA_loop_functions::PostExperiment() {}
+void CPFA_loop_functions::PostExperiment() 
+{
+  if (PrintFinalScore == 1) printf("Targets collected: %f\n", score);
+}
 
 argos::CColor CPFA_loop_functions::GetFloorColor(const argos::CVector2 &c_pos_on_floor) {
   return argos::CColor::WHITE;

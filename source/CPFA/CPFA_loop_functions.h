@@ -128,6 +128,7 @@ public:
         bool IsCollidingWithNest(argos::CVector2 p);
         bool IsCollidingWithFood(argos::CVector2 p);
 	double score;
+	int PrintFinalScore;
 };
 
 #endif /* CPFA_LOOP_FUNCTIONS_H */

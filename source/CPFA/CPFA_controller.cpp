@@ -114,7 +114,7 @@ void CPFA_controller::CPFA() {
     break;
     // after departing(), once conditions are met, begin searching()
   case SEARCHING:
-    //if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
+    if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
       Searching();
     break;
     // return to nest after food pick up or giving up searching()
@@ -167,8 +167,8 @@ gethostname(hostname, 1023);
    
     if (GetId().compare("CPFA_0") == 0)
       {
+	
 	/*
-
    ofstream results_output_stream;
    results_output_stream.open(results_full_path, ios::app);
    results_output_stream << "NumberOfRobots, "
@@ -393,10 +393,13 @@ void CPFA_controller::Returning() {
 	if (isHoldingFood)
 	  {
 	    num_targets_collected++;
-	    //ofstream results_output_stream;
-	    //results_output_stream.open(results_full_path, ios::app);
-	    //results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << num_targets_collected << endl;	    
-	    //results_output_stream.close();
+
+	    /*
+	    ofstream results_output_stream;
+	    results_output_stream.open(results_full_path, ios::app);
+	    results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << num_targets_collected << endl;	    
+	    results_output_stream.close();
+	    */
 
 	    LoopFunctions->setScore(num_targets_collected);
 	    

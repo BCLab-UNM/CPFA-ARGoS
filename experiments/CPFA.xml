@@ -7,7 +7,7 @@
   <framework>
     <system threads="0" />
     <experiment length="3600"
-                ticks_per_second="60"
+                ticks_per_second="16"
 		random_seed="0"/>
   </framework>
 
@@ -50,10 +50,13 @@
         <CPFA       ProbabilityOfSwitchingToSearching = "0.687"
                     ProbabilityOfReturningToNest      = "0.0001"
                     UninformedSearchVariation         = "13.64"
-                    RateOfInformedSearchDecay         = "0"
+                    RateOfInformedSearchDecay         = "0.28"
                     RateOfSiteFidelity                = "17.4772"
                     RateOfLayingPheromone             = "8.14845"
-                    RateOfPheromoneDecay              = "0"/>
+                    RateOfPheromoneDecay              = "0.03"
+
+		    PrintFinalScore = "0"
+		    />
 
          <settings
 	     MaxSimTimeInSeconds = "3600"

@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.12)
 project(CPFA-ARGoS)
 
+#CMAKE_BUILD_TYPE(Release)
+#ARGOS_BUILD_NATTIVE(ON)
+
 ##
 ## Get the Git hash for this code
 ##
