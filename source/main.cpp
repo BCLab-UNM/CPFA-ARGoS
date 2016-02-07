@@ -142,7 +142,7 @@ int main(int argc, char **argv)
   allele_array.add(0, 1.0);//(0,1); // Probability of switching to search
   allele_array.add(0, 1.0);//(0,1); // Probability of returning to nest
   allele_array.add(0, 20);//(0,4*M_PI); // Uninformed search variation
-  allele_array.add(0,.20);//(0,20); // Rate of informed search decay
+  allele_array.add(0, 20);//(0,20); // Rate of informed search decay
   allele_array.add(0, 20);//(0,20); // Rate of site fidelity
   allele_array.add(0, 20);//(0,20); // Rate of laying pheremone
   allele_array.add(0, 1.0);//(0,2); // Rate of pheremone decay
