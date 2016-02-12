@@ -41,6 +41,7 @@ int mpi_tasks, mpi_rank;
 int n_trials = 20; // used by the objective function
 double mutation_stdev = 1.00; // Gaussian mutation stdev - will be scaled by possible range
 
+//void CPFAUniformInitializer(GAGenome & c);
 int GARealGaussianMutatorStdev(GAGenome &, float);
 
 int main(int argc, char **argv)
@@ -139,6 +140,7 @@ int main(int argc, char **argv)
 
   // Define the genome
   GARealAlleleSetArray allele_array;
+  /*
   allele_array.add(0, 1.0);//(0,1); // Probability of switching to search
   allele_array.add(0, 1.0);//(0,1); // Probability of returning to nest
   allele_array.add(0, 20);//(0,4*M_PI); // Uninformed search variation
@@ -146,17 +148,28 @@ int main(int argc, char **argv)
   allele_array.add(0, 20);//(0,20); // Rate of site fidelity
   allele_array.add(0, 20);//(0,20); // Rate of laying pheremone
   allele_array.add(0, 1.0);//(0,2); // Rate of pheremone decay
-
+  */
+  
+  allele_array.add(-10, 10);
+  allele_array.add(-10, 10);
+  allele_array.add(-10, 10);
+  allele_array.add(-10, 10);
+  allele_array.add(-10, 10);
+  allele_array.add(-10, 10);
+  allele_array.add(-10, 10);
   
   // Create the template genome using the phenotype map we just made.
   GARealGenome genome(allele_array, objective);
   genome.crossover(GARealUniformCrossover);
   genome.mutator(GARealGaussianMutatorStdev); // Specify our version of the Gaussuan mutator
+  //genome.initializer(CPFAUniformInitializer);
  
   // Now create the GA using the genome and run it.
   GASimpleGA ga(genome);
   GALinearScaling scaling;
-  ga.maximize();		// Maximize the objective
+  //ga.maximize();		// Maximize the objective
+  ga.minimize();		// For Ackley function test
+
   ga.populationSize(population_size);
   ga.nGenerations(n_generations);
   ga.pMutation(mutation_rate);
@@ -237,6 +250,7 @@ int main(int argc, char **argv)
 
     if(mpi_rank == 0)
       {
+	generation_start = std::chrono::system_clock::now();
 	std::chrono::duration<double> generation_elapsed_seconds = generation_end-generation_start;
 	ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
@@ -274,7 +288,18 @@ int main(int argc, char **argv)
 
   return 0;
   }
- 
+
+/* 
+void CPFAUniformInitializer(GAGenome & c)
+{
+  GA1DArrayAlleleGenome<ARRAY_TYPE> &child=
+    DYN_CAST(GA1DArrayAlleleGenome<ARRAY_TYPE> &, c);
+  child.resize(GAGenome::ANY_SIZE); // let chrom resize if it can
+  for(int i=child.length()-1; i>=0; i--)
+    child.gene(i, child.alleleset(i).allele());
+}
+*/
+
 // The mutation operator based on the original from GALib but adds stdev
 // The Gaussian mutator picks a new value based on a Gaussian distribution
 // around the current value.  We respect the bounds (if any).
@@ -421,36 +446,47 @@ float LaunchARGoS(GAGenome& c_genome)
        */
       /* The CSimulator class of ARGoS is a singleton. Therefore, to
        * manipulate an ARGoS experiment, it is enough to get its instance */
-      argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
+      //++++      argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
       /* Set the .argos configuration file
        * This is a relative path which assumed that you launch the executable
        * from argos3-examples (as said also in the README) */
-      cSimulator.SetExperimentFileName("experiments/CPFA.xml");
+      //+++++ cSimulator.SetExperimentFileName("experiments/CPFA.xml");
       
       /* Load it to configure ARGoS */
-      cSimulator.LoadExperiment();
+      //++++++ cSimulator.LoadExperiment();
 
       /* Get a reference to the loop functions */
-      CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
+      //++++ CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
 
 
       /* This internally calls also CEvolutionLoopFunctions::Reset(). */
       // cSimulator.Reset();
 
       /* Configure the controller with the genome */
-      cLoopFunctions.ConfigureFromGenome(cpfa_genome);
+      //++++ cLoopFunctions.ConfigureFromGenome(cpfa_genome);
 
       /* Run the experiment */
-      cSimulator.Execute();
+      //+++++ cSimulator.Execute();
 
       /* Update performance */
-     
-      *ShmPTR = cLoopFunctions.Score();;
+      
+      float a = 20, b = 0.2, c = 2*M_PI;
+      float s1 = 0, s2 = 0;
+      int n = GENOME_SIZE;
+      for (int i=0; i < n; i++)
+	{
+	  s1 = s1+pow(cpfa_genome[i],2);
+	  s2 = s2+cos(c*cpfa_genome[i]);
+	}
+      
+      *ShmPTR = -a*exp(-b*sqrt(1/n*s1))-exp(1/n*s2)+a+exp(1);
+      
+	     //++*ShmPTR = cLoopFunctions.Score();;
   
 
       //cLoopFunctions.Destroy();
-      cSimulator.Destroy();
+      //+++ cSimulator.Destroy();
 
       
 	delete [] cpfa_genome;
