@@ -3,6 +3,9 @@
 #include <cstdlib>
 #include <unistd.h> // For usleep and optargs
 
+// For random numbers in genome initialization
+#include <random>
+
 // For shared memory management
 #include <sys/mman.h>
 
@@ -38,10 +41,11 @@ float LaunchARGoS(GAGenome &);
 
 int mpi_tasks, mpi_rank;
 
+int elitism = 0;
 int n_trials = 20; // used by the objective function
 double mutation_stdev = 1.00; // Gaussian mutation stdev - will be scaled by possible range
 
-//void CPFAUniformInitializer(GAGenome & c);
+void CPFAInitializer(GAGenome & c);
 int GARealGaussianMutatorStdev(GAGenome &, float);
 
 int main(int argc, char **argv)
@@ -60,16 +64,14 @@ int main(int argc, char **argv)
 
   srand(time(NULL));
 
-  double mutation_rate = 0.1;
-  double crossover_rate = 0.05;
-  int population_size = 28;
-  int n_generations = 100;
+  double mutation_rate = 0.01;
+  double crossover_rate = 0.01;
+  int population_size = 10;
+  int n_generations = 10;
 
-  string ga_description = "GASimple, no elitism, linear fitness function scaling.";
-  
-  char c='h';
+    char c='h';
   // Handle command line arguments
-  while ((c = getopt (argc, argv, "t:g:p:c:m:s:h:")) != -1)
+  while ((c = getopt (argc, argv, "t:g:p:c:m:s:h:e:")) != -1)
     switch (c)
       {
       case 't':
@@ -90,8 +92,11 @@ int main(int argc, char **argv)
       case 's':
         mutation_stdev = strtod(optarg, NULL);
 	break;
+      case 'e':
+        elitism = atoi(optarg);
+	break;
       case 'h':
-	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
+	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation} -e {elitism 0 or 1}", argv[0]);
 	break;
       case '?':
         if (optopt == 'p')
@@ -120,7 +125,7 @@ int main(int argc, char **argv)
 
   float max_float = std::numeric_limits<float>::max();
 
-  //printf("%s:\tworker %d ready.\n", hostname, mpi_rank);                                          
+    //printf("%s:\tworker %d ready.\n", hostname, mpi_rank);                                          
 
   // See if we've been given a seed to use (for testing purposes).  When you
   // specify a random seed, the evolution will be exactly the same each time
@@ -135,47 +140,42 @@ int main(int argc, char **argv)
   
   if (mpi_rank==0)
     {
-      printf("Population size: %d\nNumer of trials: %d\nNumber of generations: %d\nCrossover rate: %f\nMutation rate: %f\nMutation stdev: %f\nGenetic algorithm description: %s\nAllocated MPI workers: %d\n", population_size, n_trials, n_generations, crossover_rate, mutation_rate, mutation_stdev, ga_description.c_str(), mpi_tasks);
+      printf("Population size: %d\nNumer of trials: %d\nNumber of generations: %d\nCrossover rate: %f\nMutation rate: %f\nMutation stdev: %f\nAllocated MPI workers: %d\n", population_size, n_trials, n_generations, crossover_rate, mutation_rate, mutation_stdev, mpi_tasks);
+      	printf("elitism: %d\n", elitism);
     }
 
   // Define the genome
   GARealAlleleSetArray allele_array;
-  /*
-  allele_array.add(0, 1.0);//(0,1); // Probability of switching to search
-  allele_array.add(0, 1.0);//(0,1); // Probability of returning to nest
-  allele_array.add(0, 20);//(0,4*M_PI); // Uninformed search variation
-  allele_array.add(0, 20);//(0,20); // Rate of informed search decay
-  allele_array.add(0, 20);//(0,20); // Rate of site fidelity
-  allele_array.add(0, 20);//(0,20); // Rate of laying pheremone
-  allele_array.add(0, 1.0);//(0,2); // Rate of pheremone decay
-  */
   
-  allele_array.add(-10, 10);
-  allele_array.add(-10, 10);
-  allele_array.add(-10, 10);
-  allele_array.add(-10, 10);
-  allele_array.add(-10, 10);
-  allele_array.add(-10, 10);
-  allele_array.add(-10, 10);
+  allele_array.add(0, 1.0); // Probability of switching to search
+  allele_array.add(0, 1.0); // Probability of returning to nest
+  allele_array.add(0, 4*M_PI); // Uninformed search variation
+  allele_array.add(0, 20); // Rate of informed search decay
+  allele_array.add(0, 20); // Rate of site fidelity
+  allele_array.add(0, 20); // Rate of laying pheremone
+  allele_array.add(0, 20); // Rate of pheremone decay
   
+    
   // Create the template genome using the phenotype map we just made.
   GARealGenome genome(allele_array, objective);
   genome.crossover(GARealUniformCrossover);
   genome.mutator(GARealGaussianMutatorStdev); // Specify our version of the Gaussuan mutator
-  //genome.initializer(CPFAUniformInitializer);
+  genome.initializer(CPFAInitializer);
  
   // Now create the GA using the genome and run it.
   GASimpleGA ga(genome);
   GALinearScaling scaling;
-  //ga.maximize();		// Maximize the objective
-  ga.minimize();		// For Ackley function test
-
+  ga.maximize();		// Maximize the objective
+ 
   ga.populationSize(population_size);
   ga.nGenerations(n_generations);
   ga.pMutation(mutation_rate);
   ga.pCrossover(crossover_rate);
   ga.scaling(scaling);
-  ga.elitist(gaFalse);
+  if (elitism == 1)
+    ga.elitist(gaTrue);
+  else
+    ga.elitist(gaFalse);
   if(mpi_rank == 0)
     ga.scoreFilename("evolution.txt");
   else
@@ -188,7 +188,10 @@ int main(int argc, char **argv)
   // Pass MPI data to the GA class
   ga.mpi_rank(mpi_rank);
   ga.mpi_tasks(mpi_tasks);
-  //ga.evolve(seed);
+  //ga.evolve(seed); // Manual generations
+
+// initialize the ga since we are not using the evolve function
+  ga.initialize();
 
     // Name the results file with the current time and date
  time_t t = time(0);   // get time now
@@ -212,7 +215,7 @@ int main(int argc, char **argv)
     // Write output file header
     ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
-	results_output_stream << "Population size: " << population_size << "\nNumer of trials: " << n_trials << "\nNumber of generations: "<< n_generations<<"\nCrossover rate: "<< crossover_rate<<"\nMutation rate: " << mutation_rate << "\nMutation stdev: "<< mutation_stdev << "\nGenetic algorithm: " << ga_description << "Algorithm: CPFA\n" << "Number of searchers: 6\n" << "Number of targets: 256\n" << "Target distribution: power law" << endl;
+	results_output_stream << "Population size: " << population_size << "\nNumer of trials: " << n_trials << "\nNumber of generations: "<< n_generations<<"\nCrossover rate: "<< crossover_rate<<"\nMutation rate: " << mutation_rate << "\nMutation stdev: "<< mutation_stdev << "Algorithm: CPFA\n" << "Number of searchers: 6\n" << "Number of targets: 256\n" << "Target distribution: power law" << endl;
 	results_output_stream << "Generation" 
 			      << ", " << "Compute Time (s)"
 			      << ", " << "Convergence"
@@ -233,9 +236,6 @@ int main(int argc, char **argv)
 	results_output_stream.close();
       }
 
-	// initialize the ga since we are not using the evolve function
-	ga.initialize();
-
 	while(!ga.done())
 	  {
 
@@ -250,7 +250,7 @@ int main(int argc, char **argv)
 
     if(mpi_rank == 0)
       {
-	generation_start = std::chrono::system_clock::now();
+	generation_end = std::chrono::system_clock::now();
 	std::chrono::duration<double> generation_elapsed_seconds = generation_end-generation_start;
 	ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
@@ -270,7 +270,7 @@ int main(int argc, char **argv)
 	results_output_stream.close();
       }
 	  }
-
+  
 	// Display the GA's progress
 	if(mpi_rank == 0)
 	  {
@@ -289,16 +289,28 @@ int main(int argc, char **argv)
   return 0;
   }
 
-/* 
-void CPFAUniformInitializer(GAGenome & c)
+// Initializes the genome according to the Beyond Pheromones paper 
+void CPFAInitializer(GAGenome & c)
 {
-  GA1DArrayAlleleGenome<ARRAY_TYPE> &child=
-    DYN_CAST(GA1DArrayAlleleGenome<ARRAY_TYPE> &, c);
+  // For the exponential PDF needed to initialize some of the genes
+  std::default_random_engine generator;
+  std::exponential_distribution<double> exponential_distribution_20(10.0);
+  std::exponential_distribution<double> exponential_distribution_5(5.0);
+  std::uniform_real_distribution<double> uniform_distribution_0_1(0.0, 1.0);
+  std::uniform_real_distribution<double> uniform_distribution_0_4PI(0.0, 4.0*M_PI);
+  std::uniform_real_distribution<double> uniform_distribution_0_20(0.0, 20.0);
+
+  GA1DArrayAlleleGenome<float> &child= DYN_CAST(GA1DArrayAlleleGenome<float> &, c);
   child.resize(GAGenome::ANY_SIZE); // let chrom resize if it can
-  for(int i=child.length()-1; i>=0; i--)
-    child.gene(i, child.alleleset(i).allele());
+  
+  child.gene(0, uniform_distribution_0_1(generator)); // Probability of switching to search
+  child.gene(1, uniform_distribution_0_1(generator)); // Probability of returning to nest
+  child.gene(2, uniform_distribution_0_4PI(generator)); // Uninformed search variation
+  child.gene(3, exponential_distribution_5(generator)); // Rate of informed search decay
+  child.gene(4, uniform_distribution_0_20(generator)); // Rate of site fidelity
+  child.gene(5, uniform_distribution_0_20(generator)); // Rate of laying pheremone
+  child.gene(6, exponential_distribution_20(generator)); // Rate of pheremone decay
 }
-*/
 
 // The mutation operator based on the original from GALib but adds stdev
 // The Gaussian mutator picks a new value based on a Gaussian distribution
@@ -348,7 +360,6 @@ int GARealGaussianMutatorStdev(GAGenome& g, float pmut)
   return((int)nMut);
 }
 
-// The objective function used by GAlib
 
 float objective(GAGenome &c)
 {
@@ -373,12 +384,13 @@ float objective(GAGenome &c)
       hostname[1023] = '\0';                                          
       gethostname(hostname, 1023);     
  
+      /*
       printf("Worker %d on %s evaluated genome [", mpi_rank, hostname);
       for (int i = 0; i < GENOME_SIZE; i++)
 	printf("%f ",dynamic_cast<const GARealGenome&>(c).gene(i));
       printf("] in %f seconds. ", elapsed_seconds.count());
       printf("Fitness: %f.\n", avg );
-      
+      */
 
       return avg;
 }
@@ -388,25 +400,29 @@ float objective(GAGenome &c)
  */
 float LaunchARGoS(GAGenome& c_genome) 
 {
+  // Declate the fitness value and the shared memory segment id and address
   float fitness = 0;
-
   int    ShmID;
   float*   ShmPTR;
   
-  // Allocate the shared memory to use between us and the child argos process
+  // Allocate the shared memory to use between this process and the child argos process
   ShmID = shmget(IPC_PRIVATE, sizeof(float), IPC_CREAT | 0666);
   if (ShmID < 0) {
-    printf("*** shmget error (server) ***\n");
+    printf("ERROR: Allocating shared memory segment in main.cpp:LaunchARGoS() failed.\n");
+    exit(1);
   }
   
+  // Attach to the shared memory segment
   ShmPTR = (float*) shmat(ShmID, NULL, 0);
-  if ((float*) ShmPTR == (float*)-1) {
-    printf("*** shmat error (server) ***\n");
-  }
+  if ((float*) ShmPTR == (float*)-1) 
+    {
+      printf("ERROR: Attaching to shared memory segment in main.cpp:LaunchARGoS() failed.\n");
+      exit(1);
+    }
 
-  *ShmPTR = 0;
+  *ShmPTR = 0; // Initialise
 
-  pid_t pid = fork();
+  pid_t pid = fork(); // Create the new process with a copy of this memory space
 
   if (pid == 0)
     {
@@ -417,10 +433,10 @@ float LaunchARGoS(GAGenome& c_genome)
   
       Real* cpfa_genome = new Real[GENOME_SIZE];
 
+      // Convert to a convenient format for the argos controller
       for (int i = 0; i < GENOME_SIZE; i++)
 	cpfa_genome[i] = cRealGenome.gene(i);
        
-            
       /*      
       printf("%s: worker %d started a genome evaluation. (%f, %f, %f, %f, %f, %f, %f)\n", hostname, mpi_rank, 
 	     cpfa_genome[0],
@@ -433,7 +449,6 @@ float LaunchARGoS(GAGenome& c_genome)
       */
 
       /* Redirect LOG and LOGERR to dedicated files to prevent clutter on the screen */
-
       std::ofstream cLOGFile("argos_logs/ARGoS_LOG_" + ToString(::getpid()), std::ios::out);
       LOG.DisableColoredOutput();
       LOG.GetStream().rdbuf(cLOGFile.rdbuf());
@@ -446,57 +461,40 @@ float LaunchARGoS(GAGenome& c_genome)
        */
       /* The CSimulator class of ARGoS is a singleton. Therefore, to
        * manipulate an ARGoS experiment, it is enough to get its instance */
-      //++++      argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
+      argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
-      /* Set the .argos configuration file
-       * This is a relative path which assumed that you launch the executable
-       * from argos3-examples (as said also in the README) */
-      //+++++ cSimulator.SetExperimentFileName("experiments/CPFA.xml");
+      // Set the .argos configuration file
+      cSimulator.SetExperimentFileName("experiments/CPFAEvolver.xml");
       
-      /* Load it to configure ARGoS */
-      //++++++ cSimulator.LoadExperiment();
+      // Load it to configure ARGoS 
+      cSimulator.LoadExperiment();
 
-      /* Get a reference to the loop functions */
-      //++++ CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
+      // Get a reference to the loop functions
+      CPFA_loop_functions& cLoopFunctions = dynamic_cast<CPFA_loop_functions&>(cSimulator.GetLoopFunctions());
 
+      // Configure the controller with the genome
+      cLoopFunctions.ConfigureFromGenome(cpfa_genome);
 
-      /* This internally calls also CEvolutionLoopFunctions::Reset(). */
-      // cSimulator.Reset();
+      // Run the experiment
+      cSimulator.Execute();
 
-      /* Configure the controller with the genome */
-      //++++ cLoopFunctions.ConfigureFromGenome(cpfa_genome);
+      // Update performance and store in the shared memory segment
+      *ShmPTR = cLoopFunctions.Score();;
 
-      /* Run the experiment */
-      //+++++ cSimulator.Execute();
-
-      /* Update performance */
+      // Clean up the simulation
+      cSimulator.Destroy();
       
-      float a = 20, b = 0.2, c = 2*M_PI;
-      float s1 = 0, s2 = 0;
-      int n = GENOME_SIZE;
-      for (int i=0; i < n; i++)
-	{
-	  s1 = s1+pow(cpfa_genome[i],2);
-	  s2 = s2+cos(c*cpfa_genome[i]);
-	}
-      
-      *ShmPTR = -a*exp(-b*sqrt(1/n*s1))-exp(1/n*s2)+a+exp(1);
-      
-	     //++*ShmPTR = cLoopFunctions.Score();;
-  
-
-      //cLoopFunctions.Destroy();
-      //+++ cSimulator.Destroy();
-
-      
+      // Clean up the temp genome copy
 	delete [] cpfa_genome;
 
+	// Make this process exit
       _Exit(0); 
     }
   
   // In parent - wait for child to finish
   int status = wait(&status);
 
+  // Make a local copy of the shared fitness value
   fitness = *ShmPTR;  
 
   // Release shared memory

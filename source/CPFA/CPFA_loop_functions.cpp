@@ -169,7 +169,7 @@ bool CPFA_loop_functions::IsExperimentFinished() {
 
 void CPFA_loop_functions::PostExperiment() 
 {
-  if (PrintFinalScore == 1) printf("Targets collected: %f\n", score);
+  if (PrintFinalScore == 1) printf("%f\n", score);
 }
 
 argos::CColor CPFA_loop_functions::GetFloorColor(const argos::CVector2 &c_pos_on_floor) {
