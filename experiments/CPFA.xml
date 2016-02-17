@@ -50,10 +50,10 @@
     <!-- evolvable parameters -->
         <CPFA       ProbabilityOfSwitchingToSearching = "0.504"
                     ProbabilityOfReturningToNest      = "0.0001"
-                    UninformedSearchVariation         = "13.27"
+                    UninformedSearchVariation         = "13.0"
                     RateOfInformedSearchDecay         = "0.28"
-                    RateOfSiteFidelity                = "4.26"
-                    RateOfLayingPheromone             = "3.74"
+                    RateOfSiteFidelity                = "4.27"
+                    RateOfLayingPheromone             = "3.75"
                     RateOfPheromoneDecay              = "0.03"
 
 		    PrintFinalScore = "1"
