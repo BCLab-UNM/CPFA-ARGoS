@@ -56,7 +56,7 @@
                     RateOfLayingPheromone             = "3.74"
                     RateOfPheromoneDecay              = "0.03"
 
-		    PrintFinalScore = "1"
+		    PrintFinalScore = "0"
 		    />
 
          <settings
