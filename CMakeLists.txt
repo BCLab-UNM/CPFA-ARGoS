@@ -61,6 +61,11 @@ find_package(GSL REQUIRED)
 # Find the LUA package.
 find_package(Lua52 REQUIRED)
 
+find_package(GALIB)
+	if(GALIB_FOUND)
+	  include_directories(${GALIB_INCLUDE_DIRS})
+	endif(GALIB_FOUND)
+
 # Set ARGoS include directory.
 include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${LUA_INCLUDE_DIR} source)
 
@@ -74,8 +79,8 @@ add_executable(cpfa_evolver source/main.cpp)
 
 target_link_libraries(cpfa_evolver CPFA_controller
 				   CPFA_loop_functions
-				   ga-mpi	    
-				   #${GALIB_LIBRARIES}
+				   #ga-mpi	    
+				   ${GALIB_LIBRARIES}
 				   ${MPI_LIBRARIES}		   
 				   argos3core_simulator)
 

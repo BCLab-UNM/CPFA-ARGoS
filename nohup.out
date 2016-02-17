@@ -1,0 +1,12 @@
+--------------------------------------------------------------------------
+Open RTE detected a parse error in the hostfile:
+    /nfs/home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver
+It occured on line number 1 on token 1.
+--------------------------------------------------------------------------
+[electra:11630] [[24518,0],0] ORTE_ERROR_LOG: Error in file base/rmaps_base_support_fns.c at line 83
+[electra:11630] [[24518,0],0] ORTE_ERROR_LOG: Error in file rmaps_rr.c at line 82
+[electra:11630] [[24518,0],0] ORTE_ERROR_LOG: Error in file base/rmaps_base_map_job.c at line 88
+[electra:11630] [[24518,0],0] ORTE_ERROR_LOG: Error in file base/plm_base_launch_support.c at line 105
+[electra:11630] [[24518,0],0] ORTE_ERROR_LOG: Error in file plm_rsh_module.c at line 1173
+[electra:11630] 1 more process has sent help message help-hostfile.txt / parse_error
+[electra:11630] Set MCA parameter "orte_base_help_aggregate" to 0 to see all help / error messages
