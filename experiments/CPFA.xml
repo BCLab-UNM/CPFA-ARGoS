@@ -7,8 +7,8 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="3600"
-                ticks_per_second="16"
+    <experiment length="1800"
+                ticks_per_second="32"
 		random_seed="0"/>
   </framework>
 
@@ -25,7 +25,16 @@
 
       <sensors>
         <footbot_proximity    implementation = "default" show_rays = "false"/>
-        <positioning          implementation = "default"/>
+<!--
+	<positioning          implementation = "default"
+                                        pos_noise_range= "-0.001:0.001"
+                                        angle_noise_range= "-0.005:0.005"
+                                        axis_noise_range= "-0.0001:0.0001"
+					/>	
+-->
+
+	<positioning          implementation = "default"/>
+
         <footbot_motor_ground implementation = "rot_z_only"/>
       </sensors>
 
@@ -36,7 +45,7 @@
 		  TargetAngleTolerance               = "0.05"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                  RobotRotationSpeed                = "4.0"
+                  RobotRotationSpeed                = "8.0"
 		  ResultsDirectoryPath              = "results/"/>
       </params>
 
@@ -118,14 +127,14 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-
+<!--
 <qt-opengl>
       <camera>
         <placement idx="0" position="  0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
       </camera>
       <user_functions label="CPFA_qt_user_functions"/>
     </qt-opengl>
-
+-->
   </visualization>
 
 </argos-configuration>

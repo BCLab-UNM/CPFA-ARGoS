@@ -1,11 +1,11 @@
-#include "BaseController.h"
+#include "iAntBaseController.h"
 
 /**
- * Constructor for the BaseController. Several important variables are defined here.
+ * Constructor for the iAntBaseController. Several important variables are defined here.
  * <p>
  * TODO: update xml configuration file to allow these to be adjusted from configuration without recompiling.
  */
-BaseController::BaseController() :
+iAntBaseController::iAntBaseController() :
     LF(argos::CSimulator::GetInstance().GetLoopFunctions()),
     WaitTime(0),
     TargetDistanceTolerance(0.01),
@@ -25,7 +25,7 @@ BaseController::BaseController() :
     GoStraightAngleRangeInDegrees.Set(-37.5, 37.5);
 }
 
-argos::CRadians BaseController::GetHeading() {
+argos::CRadians iAntBaseController::GetHeading() {
     /* in ARGoS, the robot's orientation is represented by a quaternion */
     const argos::CCI_PositioningSensor::SReading& readings = compassSensor->GetReading();
     argos::CQuaternion orientation = readings.Orientation;
@@ -38,18 +38,18 @@ argos::CRadians BaseController::GetHeading() {
     return z_angle;
 }
 
-argos::CVector2 BaseController::GetPosition() {
+argos::CVector2 iAntBaseController::GetPosition() {
     /* the robot's compass sensor gives us a 3D position */
     argos::CVector3 position3D = compassSensor->GetReading().Position;
     /* return the 2D position components of the compass sensor reading */
     return argos::CVector2(position3D.GetX(), position3D.GetY());
 }
 
-argos::CVector2 BaseController::GetTarget() {
+argos::CVector2 iAntBaseController::GetTarget() {
     return TargetPosition;
 }
 
-void BaseController::SetTarget(argos::CVector2 t) {
+void iAntBaseController::SetTarget(argos::CVector2 t) {
 
     argos::Real x(t.GetX()), y(t.GetY());
 
@@ -63,19 +63,19 @@ void BaseController::SetTarget(argos::CVector2 t) {
 
 }
 
-void BaseController::SetStartPosition(argos::CVector3 sp) {
+void iAntBaseController::SetStartPosition(argos::CVector3 sp) {
     StartPosition = sp;
 }
 
-argos::CVector3 BaseController::GetStartPosition() {
+argos::CVector3 iAntBaseController::GetStartPosition() {
     return StartPosition;
 }
 
-size_t BaseController::GetMovementState() {
+size_t iAntBaseController::GetMovementState() {
     return CurrentMovementState;
 }
 
-void BaseController::SetNextMovement() {
+void iAntBaseController::SetNextMovement() {
 
 
     if(MovementStack.size() == 0 && CurrentMovementState == STOP) {
@@ -115,7 +115,7 @@ void BaseController::SetNextMovement() {
     }
 }
 
-void BaseController::SetTargetAngleDistance(argos::Real newAngleToTurnInDegrees) {
+void iAntBaseController::SetTargetAngleDistance(argos::Real newAngleToTurnInDegrees) {
     // s = arc_length = robot_radius * turning_angle
     // NOTE: the footbot robot has a radius of 0.085 m... or 8.5 cm...
     // adjusting with + 0.02 m, or + 2 cm, increases accuracy...
@@ -123,13 +123,13 @@ void BaseController::SetTargetAngleDistance(argos::Real newAngleToTurnInDegrees)
     TicksToWaitWhileMoving = std::ceil((SimulationTicksPerSecond() * s) / RobotRotationSpeed);
 }
 
-void BaseController::SetTargetTravelDistance(argos::Real newTargetDistance) {
+void iAntBaseController::SetTargetTravelDistance(argos::Real newTargetDistance) {
     // convert meters into cm
     argos::Real d = newTargetDistance * 100.0;
     TicksToWaitWhileMoving = std::ceil((SimulationTicksPerSecond() * d) / RobotForwardSpeed);
 }
 
-void BaseController::SetLeftTurn(argos::Real newAngleToTurnInDegrees) {
+void iAntBaseController::SetLeftTurn(argos::Real newAngleToTurnInDegrees) {
     if(newAngleToTurnInDegrees > 0.0) {
         SetTargetAngleDistance(newAngleToTurnInDegrees);
         CurrentMovementState = LEFT;
@@ -141,7 +141,7 @@ void BaseController::SetLeftTurn(argos::Real newAngleToTurnInDegrees) {
     }
 }
 
-void BaseController::SetRightTurn(argos::Real newAngleToTurnInDegrees) {
+void iAntBaseController::SetRightTurn(argos::Real newAngleToTurnInDegrees) {
     if(newAngleToTurnInDegrees > 0.0) {
         SetTargetAngleDistance(newAngleToTurnInDegrees);
         CurrentMovementState = RIGHT;
@@ -153,7 +153,7 @@ void BaseController::SetRightTurn(argos::Real newAngleToTurnInDegrees) {
     }
 }
 
-void BaseController::SetMoveForward(argos::Real newTargetDistance) {
+void iAntBaseController::SetMoveForward(argos::Real newTargetDistance) {
     if(newTargetDistance > 0.0) {
         SetTargetTravelDistance(newTargetDistance);
         CurrentMovementState = FORWARD;
@@ -165,7 +165,7 @@ void BaseController::SetMoveForward(argos::Real newTargetDistance) {
     }
 }
 
-void BaseController::SetMoveBack(argos::Real newTargetDistance) {
+void iAntBaseController::SetMoveBack(argos::Real newTargetDistance) {
     if(newTargetDistance > 0.0) {
         SetTargetTravelDistance(newTargetDistance);
         CurrentMovementState = BACK;
@@ -177,12 +177,12 @@ void BaseController::SetMoveBack(argos::Real newTargetDistance) {
     }
 }
 
-void BaseController::PushMovement(size_t moveType, argos::Real moveSize) {
+void iAntBaseController::PushMovement(size_t moveType, argos::Real moveSize) {
     Movement newMove = { moveType, moveSize };
     MovementStack.push(newMove);
 }
 
-void BaseController::PopMovement() {
+void iAntBaseController::PopMovement() {
     Movement nextMove = MovementStack.top();
     MovementStack.pop();
 
@@ -216,7 +216,7 @@ void BaseController::PopMovement() {
     }
 }
 
-bool BaseController::CollisionDetection() {
+bool iAntBaseController::CollisionDetection() {
 
     argos::CVector2 collisionVector = GetCollisionVector();
     argos::Real collisionAngle = ToDegrees(collisionVector.Angle()).GetValue();
@@ -229,7 +229,6 @@ bool BaseController::CollisionDetection() {
 
         Stop();
        isCollisionDetected = true;
-       collision_counter++;
         while(MovementStack.size() > 0) MovementStack.pop();
 
         PushMovement(FORWARD, SearchStepSize);
@@ -244,7 +243,7 @@ bool BaseController::CollisionDetection() {
     return isCollisionDetected;
 }
 
-argos::CVector2 BaseController::GetCollisionVector() {
+argos::CVector2 iAntBaseController::GetCollisionVector() {
     /* Get readings from proximity sensor */
     const argos::CCI_FootBotProximitySensor::TReadings& proximityReadings = proximitySensor->GetReadings();
 
@@ -260,14 +259,14 @@ argos::CVector2 BaseController::GetCollisionVector() {
     return collisionVector;
 }
 
-void BaseController::Stop() {
+void iAntBaseController::Stop() {
     SetTargetTravelDistance(0.0);
     SetTargetAngleDistance(0.0);
     TicksToWaitWhileMoving = 0.0;
     CurrentMovementState = STOP;
 }
 
-void BaseController::Move() {
+void iAntBaseController::Move() {
 
     if(Wait() == true) return;
 
@@ -325,7 +324,7 @@ void BaseController::Move() {
     }
 }
 
-bool BaseController::Wait() {
+bool iAntBaseController::Wait() {
 
     bool wait = false;
 
@@ -337,31 +336,31 @@ bool BaseController::Wait() {
     return wait;
 }
 
-void BaseController::Wait(size_t wait_time_in_seconds) {
+void iAntBaseController::Wait(size_t wait_time_in_seconds) {
 
     WaitTime += (wait_time_in_seconds * SimulationTicksPerSecond());
 
 }
 
-size_t BaseController::SimulationTick() {
+size_t iAntBaseController::SimulationTick() {
     return LF.GetSpace().GetSimulationClock();
 }
 
-size_t BaseController::SimulationTicksPerSecond() {
+size_t iAntBaseController::SimulationTicksPerSecond() {
     return LF.GetSimulator().GetPhysicsEngine("default").GetInverseSimulationClockTick();
 }
 
-argos::Real BaseController::SimulationSecondsPerTick() {
+argos::Real iAntBaseController::SimulationSecondsPerTick() {
     return LF.GetSimulator().GetPhysicsEngine("default").GetSimulationClockTick();
 }
 
-argos::Real BaseController::SimulationTimeInSeconds() {
+argos::Real iAntBaseController::SimulationTimeInSeconds() {
     return (argos::Real)(SimulationTick()) * SimulationSecondsPerTick();
 }
 
-bool BaseController::IsAtTarget() {
+bool iAntBaseController::IsAtTarget() {
     argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
     return (distanceToTarget < TargetDistanceTolerance) ? (true) : (false);
 }
 
-//REGISTER_CONTROLLER(BaseController, "BaseController")
+//REGISTER_CONTROLLER(iAntBaseController, "iAntBaseController")

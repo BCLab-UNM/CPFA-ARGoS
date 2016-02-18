@@ -1,5 +1,5 @@
-#ifndef BASECONTROLLER_H
-#define BASECONTROLLER_H
+#ifndef IANTBASECONTROLLER_H
+#define IANTBASECONTROLLER_H
 
 #include <argos3/core/utility/logging/argos_log.h>
 #include <argos3/core/control_interface/ci_controller.h>
@@ -11,16 +11,16 @@
 #include <stack>
 
 /**
- * BaseController
+ * iAntBaseController
  * @author Antonio Griego
  */
-class BaseController : public argos::CCI_Controller {
+class iAntBaseController : public argos::CCI_Controller {
 
     public:
 
-        BaseController();
+        iAntBaseController();
 
-        /*  navigation functions */
+        /* iAnt navigation functions */
         argos::CRadians GetHeading();
         argos::CVector2 GetPosition();
         argos::CVector2 GetTarget();
@@ -34,7 +34,7 @@ class BaseController : public argos::CCI_Controller {
         bool Wait();
         void Wait(size_t wait_time_in_seconds);
 
-        /*  time calculation functions */
+        /* iAnt time calculation functions */
         size_t SimulationTick();
         size_t SimulationTicksPerSecond();
         argos::Real SimulationSecondsPerTick();
@@ -43,8 +43,6 @@ class BaseController : public argos::CCI_Controller {
         bool IsAtTarget();
 
     protected:
-
-	unsigned int collision_counter;
 
         size_t WaitTime;
 
@@ -56,7 +54,7 @@ class BaseController : public argos::CCI_Controller {
         argos::CRange<argos::Real> ForageRangeY;
         argos::CRange<argos::Real> GoStraightAngleRangeInDegrees;
 
-    	//  base controller movement parameters
+    	// iAnt base controller movement parameters
     	argos::Real RobotForwardSpeed;
     	argos::Real RobotRotationSpeed;
     	argos::Real TicksToWaitWhileMoving;

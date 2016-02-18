@@ -8,13 +8,16 @@
 BaseController::BaseController() :
     LF(argos::CSimulator::GetInstance().GetLoopFunctions()),
     WaitTime(0),
+    NestDistanceTolerance(0.01),
+    NestAngleTolerance(0.05),
     TargetDistanceTolerance(0.01),
     TargetAngleTolerance(0.04),
     SearchStepSize(0.16),
     RobotForwardSpeed(16.0),
     RobotRotationSpeed(4.0),
     TicksToWaitWhileMoving(0.0),
-    CurrentMovementState(STOP)
+    CurrentMovementState(STOP),
+    heading_to_nest(true)
 {
     // calculate the forage range and compensate for the robot's radius of 0.085m
     argos::CVector3 ArenaSize = LF.GetSpace().GetArenaSize();
@@ -75,9 +78,31 @@ size_t BaseController::GetMovementState() {
     return CurrentMovementState;
 }
 
-void BaseController::SetNextMovement() {
 
+void BaseController::SetIsHeadingToNest(bool n)
+{
+  heading_to_nest = n;
+}
 
+void BaseController::SetNextMovement() 
+{
+
+  argos::CRadians AngleTol;
+  float DistTol;
+  
+  // Allow the searcher to treat movement to the nest
+  // differently than other movement
+  if (heading_to_nest)
+    {
+      DistTol = NestDistanceTolerance;
+      AngleTol = NestAngleTolerance;
+    }
+  else
+    {
+      DistTol = TargetDistanceTolerance;
+      AngleTol = TargetAngleTolerance;
+    }
+ 
     if(MovementStack.size() == 0 && CurrentMovementState == STOP) {
 
         argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
@@ -92,12 +117,12 @@ void BaseController::SetNextMovement() {
 
 
         if(!IsAtTarget()) {
-	  if(headingToTargetError > TargetAngleTolerance) 
+	  if(headingToTargetError > AngleTol) 
 	    {
 	      //cout << "Turn Left " << endl;
 	      PushMovement(LEFT, -ToDegrees(headingToTargetError).GetValue());
             } 
-	  else if(headingToTargetError < -TargetAngleTolerance) 
+	  else if(headingToTargetError < -AngleTol) 
 	    {
 	      //cout << "Turn Right " << endl;
 	      PushMovement(RIGHT, ToDegrees(headingToTargetError).GetValue());
@@ -184,6 +209,9 @@ void BaseController::PushMovement(size_t moveType, argos::Real moveSize) {
 
 void BaseController::PopMovement() {
     Movement nextMove = MovementStack.top();
+
+    previous_movement = nextMove;
+
     MovementStack.pop();
 
     switch(nextMove.type) {
@@ -214,6 +242,7 @@ void BaseController::PopMovement() {
         }
 
     }
+
 }
 
 bool BaseController::CollisionDetection() {
@@ -359,9 +388,26 @@ argos::Real BaseController::SimulationTimeInSeconds() {
     return (argos::Real)(SimulationTick()) * SimulationSecondsPerTick();
 }
 
-bool BaseController::IsAtTarget() {
+bool BaseController::IsAtTarget() 
+{
+  argos::CRadians AngleTol;
+  float DistTol;
+  
+  // Allow the searcher to treat movement to the nest
+  // differently than other movement
+  if (heading_to_nest)
+    {
+      DistTol = NestDistanceTolerance;
+      AngleTol = NestAngleTolerance;
+    }
+  else
+    {
+      DistTol = TargetDistanceTolerance;
+      AngleTol = TargetAngleTolerance;
+    }
+
     argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
-    return (distanceToTarget < TargetDistanceTolerance) ? (true) : (false);
+    return (distanceToTarget < DistTol) ? (true) : (false);
 }
 
 //REGISTER_CONTROLLER(BaseController, "BaseController")

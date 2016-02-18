@@ -40,15 +40,20 @@ class BaseController : public argos::CCI_Controller {
         argos::Real SimulationSecondsPerTick();
         argos::Real SimulationTimeInSeconds();
 
+	void SetIsHeadingToNest(bool n);
+
         bool IsAtTarget();
 
     protected:
 
 	unsigned int collision_counter;
+	
 
         size_t WaitTime;
 
 	argos::CRadians TargetAngleTolerance;
+	argos::Real NestDistanceTolerance;
+	argos::CRadians NestAngleTolerance;
         argos::Real TargetDistanceTolerance;
         argos::Real SearchStepSize;
 
@@ -75,6 +80,17 @@ class BaseController : public argos::CCI_Controller {
             BACK    = 4
         } CurrentMovementState;
 
+	/* movement definition variables */
+        struct Movement {
+            size_t type;
+            argos::Real magnitude;
+        };
+
+	Movement previous_movement;
+	argos::CVector2 previous_pattern_position;
+	
+	std::stack<Movement> MovementStack;
+
     private:
 
         argos::CLoopFunctions& LF;
@@ -82,20 +98,14 @@ class BaseController : public argos::CCI_Controller {
         argos::CVector3 StartPosition;
         argos::CVector2 TargetPosition;
 
-        /* movement definition variables */
-        struct Movement {
-            size_t type;
-            argos::Real magnitude;
-        };
-
-        //MovementState CurrentMovementState;
-        std::stack<Movement> MovementStack;
+                //MovementState CurrentMovementState;
+        
 
         /* private navigation helper functions */
         void SetNextMovement();
         void SetTargetAngleDistance(argos::Real newAngleToTurnInDegrees);
         void SetTargetTravelDistance(argos::Real newTargetDistance);
-	void SetLeftTurn(argos::Real newTargetAngle);
+        void SetLeftTurn(argos::Real newTargetAngle);
         void SetRightTurn(argos::Real newTargetAngle);
         void SetMoveForward(argos::Real newTargetDistance);
         void SetMoveBack(argos::Real newTargetDistance);
@@ -105,6 +115,8 @@ class BaseController : public argos::CCI_Controller {
         /* collision detection functions */
         bool CollisionDetection();
         argos::CVector2 GetCollisionVector();
+
+	bool heading_to_nest;
 
 };
 

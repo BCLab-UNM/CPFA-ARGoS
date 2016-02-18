@@ -10,7 +10,7 @@ CPFA_controller::CPFA_controller() :
     ResourceDensity(0),
     MaxTrailSize(50),
     SearchTime(0),
-    CPFA_state(RETURNING),
+    CPFA_state(DEPARTING),
     LoopFunctions(NULL),
     survey_count(0),
     isUsingPheromone(0)
@@ -35,6 +35,7 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
 
     FoodDistanceTolerance *= FoodDistanceTolerance;
 
+    SetTarget(argos::CVector2(0,0));
 }
 
 void CPFA_controller::ControlStep() {
@@ -138,6 +139,9 @@ void CPFA_controller::SetLoopFunctions(CPFA_loop_functions* lf) {
     LoopFunctions = lf;
 
 
+    // Initialize the SiteFidelityPosition
+    SiteFidelityPosition = LoopFunctions->NestPosition;
+
     // Create the output file here because it needs LoopFunctions
     
     // Name the results file with the current time and date
@@ -212,13 +216,13 @@ void CPFA_controller::Departing()
     argos::Real distanceToTarget = (GetPosition() - GetTarget()).Length();
     argos::Real randomNumber = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
-    
-    //ofstream log_output_stream;
-    //log_output_stream.open("cpfa_log.txt", ios::app);
-    //log_output_stream << "Distance to waypoint: " << distanceToTarget << endl;
-    //log_output_stream << GetTarget() << endl;
-    //log_output_stream.close();
-    
+    /*
+    ofstream log_output_stream;
+    log_output_stream.open("cpfa_log.txt", ios::app);
+    log_output_stream << "Distance to target: " << distanceToTarget << endl;
+    log_output_stream << "Current Position: " << GetPosition() << ", Target: " << GetTarget() << endl;
+    log_output_stream.close();
+    */
 
     /* When not informed, continue to travel until randomly switching to the searching state. */
     if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
@@ -369,7 +373,9 @@ void CPFA_controller::Surveying()
 void CPFA_controller::Returning() {
 
   //SetHoldingFood();
-    
+   
+  //SetTarget(LoopFunctions->NestPosition);
+
   // Are we there yet? (To the nest, that is.)
     if(IsInTheNest() == true) {
         // Based on a Poisson CDF, the robot may or may not create a pheromone
@@ -389,7 +395,7 @@ void CPFA_controller::Returning() {
                 sharedPheromone.Deactivate(); // make sure this won't get re-added later...
 	}
 
-        // Determine probabilistically wether to use site fidelity, pheromone
+        // Determine probabilistically whether to use site fidelity, pheromone
         // trails, or random search.
 	//ofstream log_output_stream;
 	//log_output_stream.open("cpfa_log.txt", ios::app);
@@ -444,7 +450,7 @@ void CPFA_controller::Returning() {
     }
     else // Take a small step towards the nest so we don't overshoot by too much is we miss it
       {
-	SetTarget(LoopFunctions->NestPosition);
+    	SetTarget(LoopFunctions->NestPosition);
       }
       
       
