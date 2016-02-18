@@ -79,8 +79,8 @@ add_executable(cpfa_evolver source/main.cpp)
 
 target_link_libraries(cpfa_evolver CPFA_controller
 				   CPFA_loop_functions
-				   #ga-mpi	    
-				   ${GALIB_LIBRARIES}
+				   ga-mpi	    
+				   #${GALIB_LIBRARIES}
 				   ${MPI_LIBRARIES}		   
 				   argos3core_simulator)
 

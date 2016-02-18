@@ -1,55 +1,347 @@
-Population size: 30
+[clotho:10655] *** Process received signal ***
+[Philautia:11990] *** Process received signal ***
+[Ludus:16827] *** Process received signal ***
+[Eros:29302] *** Process received signal ***
+[Pragma:22471] *** Process received signal ***
+[Agape:07847] *** Process received signal ***
+[Agape:07847] Signal: Segmentation fault (11)
+[Agape:07847] Signal code: Address not mapped (1)
+[Agape:07847] Failing at address: 0xa00000008
+[Eros:29302] Signal: Segmentation fault (11)
+[Eros:29302] Signal code: Address not mapped (1)
+[Eros:29302] Failing at address: 0xa00000008
+[Pragma:22471] Signal: Segmentation fault (11)
+[Pragma:22471] Signal code: Address not mapped (1)
+[Pragma:22471] Failing at address: 0xa00000008
+[Agape:07847] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fb3520d5d40]
+[Eros:29302] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fd2b582ad40]
+[Pragma:22471] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f36db57ed40]
+[Agape:07847] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fb3534d3612]
+[Eros:29302] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fd2b6c28612]
+[Pragma:22471] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f36dc97c612]
+[Agape:07847] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Eros:29302] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Pragma:22471] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Agape:07847] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Eros:29302] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Pragma:22471] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Agape:07847] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Eros:29302] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Pragma:22471] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Agape:07847] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fb3520c0ec5]
+[Eros:29302] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fd2b5815ec5]
+[Pragma:22471] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f36db569ec5]
+[Agape:07847] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Eros:29302] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Pragma:22471] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Agape:07847] *** End of error message ***
+[Eros:29302] *** End of error message ***
+[Pragma:22471] *** End of error message ***
+[clotho:10653] *** Process received signal ***
+[clotho:10653] Signal: Segmentation fault (11)
+[clotho:10653] Signal code: Address not mapped (1)
+[clotho:10653] Failing at address: 0xa00000008
+[clotho:10653] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f9e4b42ed40]
+[clotho:10653] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f9e4c82c612]
+[clotho:10653] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[clotho:10653] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[clotho:10653] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[clotho:10653] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f9e4b419ec5]
+[clotho:10653] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[clotho:10653] *** End of error message ***
+[Philia:11158] *** Process received signal ***
+[Pragma:22470] *** Process received signal ***
+[clotho:10655] Signal: Segmentation fault (11)
+[clotho:10655] Signal code: Address not mapped (1)
+[clotho:10655] Failing at address: 0xa00000008
+[Philia:11157] *** Process received signal ***
+[clotho:10655] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f731f948d40]
+[clotho:10655] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f7320d46612]
+[Philautia:11990] Signal: Segmentation fault (11)
+[Philautia:11990] Signal code: Address not mapped (1)
+[Philautia:11990] Failing at address: 0xa00000008
+[Pragma:22470] Signal: Segmentation fault (11)
+[Pragma:22470] Signal code: Address not mapped (1)
+[Pragma:22470] Failing at address: 0xa00000008
+[Agape:07849] *** Process received signal ***
+[Pragma:22470] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fe6d6b3ad40]
+[Pragma:22470] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fe6d7f38612]
+[Pragma:22470] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[clotho:10655] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[clotho:10655] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[clotho:10655] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[clotho:10655] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f731f933ec5]
+[clotho:10655] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[clotho:10655] *** End of error message ***
+[Philautia:11990] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fd410830d40]
+[Ludus:16828] *** Process received signal ***
+[Eros:29300] *** Process received signal ***
+[Pragma:22470] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Agape:07849] Signal: Segmentation fault (11)
+[Agape:07849] Signal code: Address not mapped (1)
+[Agape:07849] Failing at address: 0xa00000008
+[Philia:11157] Signal: Segmentation fault (11)
+[Philia:11157] Signal code: Address not mapped (1)
+[Philia:11157] Failing at address: 0xa00000008
+[Philautia:11990] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fd411c2e612]
+[Ludus:16825] *** Process received signal ***
+[Eros:29300] Signal: Segmentation fault (11)
+[Eros:29300] Signal code: Address not mapped (1)
+[Eros:29300] Failing at address: 0xa00000008
+[Eros:29300] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f18eb74bd40]
+[Eros:29300] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f18ecb49612]
+[Eros:29300] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Eros:29300] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Eros:29300] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Eros:29300] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f18eb736ec5]
+[Eros:29300] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Eros:29300] *** End of error message ***
+[Pragma:22470] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Agape:07849] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f674a424d40]
+[Philia:11157] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f2abae95d40]
+[Philautia:11990] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Ludus:16828] Signal: Segmentation fault (11)
+[Ludus:16828] Signal code: Address not mapped (1)
+[Ludus:16828] Failing at address: 0xa00000008
+[Eros:29301] *** Process received signal ***
+[Pragma:22470] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fe6d6b25ec5]
+[Agape:07849] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f674b822612]
+[Philia:11157] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f2abc293612]
+[Philautia:11990] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Ludus:16828] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f7ef111ed40]
+[Eros:29301] Signal: Segmentation fault (11)
+[Eros:29301] Signal code: Address not mapped (1)
+[Eros:29301] Failing at address: 0xa00000008
+[Pragma:22470] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Agape:07849] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Philia:11157] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Eros:29301] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f3a061edd40]
+[Pragma:22470] *** End of error message ***
+[Agape:07849] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philia:11157] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philautia:11990] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Ludus:16825] Signal: Segmentation fault (11)
+[Ludus:16825] Signal code: Address not mapped (1)
+[Ludus:16825] Failing at address: 0xa00000008
+[Pragma:22469] *** Process received signal ***
+[Agape:07849] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philia:11157] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philautia:11990] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fd41081bec5]
+[Ludus:16825] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fbe96829d40]
+[Eros:29301] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f3a075eb612]
+[Philautia:11990] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Ludus:16827] Signal: Segmentation fault (11)
+[Ludus:16827] Signal code: Address not mapped (1)
+[Ludus:16827] Failing at address: 0xa00000008
+[Eros:29301] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Pragma:22469] Signal: Segmentation fault (11)
+[Pragma:22469] Signal code: Address not mapped (1)
+[Pragma:22469] Failing at address: 0xa00000008
+[Agape:07849] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f674a40fec5]
+[Philia:11157] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f2abae80ec5]
+[Philia:11157] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philautia:11990] *** End of error message ***
+[Ludus:16827] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f7e3cf31d40]
+[Eros:29301] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Pragma:22469] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f8a28f33d40]
+[Agape:07849] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philautia:11989] *** Process received signal ***
+[Ludus:16828] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f7ef251c612]
+[Eros:29301] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Pragma:22469] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f8a2a331612]
+[Agape:07849] *** End of error message ***
+[Philia:11157] *** End of error message ***
+[Ludus:16828] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Eros:29301] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f3a061d8ec5]
+[Pragma:22469] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Agape:07848] *** Process received signal ***
+[Philia:11158] Signal: Segmentation fault (11)
+[Philia:11158] Signal code: Address not mapped (1)
+[Philia:11158] Failing at address: 0xa00000008
+[Philautia:11988] *** Process received signal ***
+[Philautia:11988] Signal: Segmentation fault (11)
+[Philautia:11988] Signal code: Address not mapped (1)
+[Philautia:11988] Failing at address: 0xa00000008
+[Ludus:16828] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Eros:29301] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Pragma:22469] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Agape:07848] Signal: Segmentation fault (11)
+[Agape:07848] Signal code: Address not mapped (1)
+[Agape:07848] Failing at address: 0xa00000008
+[Philia:11158] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f5130234d40]
+[Philautia:11988] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f121bce1d40]
+[Ludus:16828] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Eros:29301] *** End of error message ***
+[Pragma:22469] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Agape:07848] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f187bc26d40]
+[Philia:11158] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f5131632612]
+[Pragma:22469] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f8a28f1eec5]
+[Agape:07848] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f187d024612]
+[Philia:11158] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Philautia:11988] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f121d0df612]
+[Ludus:16828] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f7ef1109ec5]
+[Eros:29299] *** Process received signal ***
+[Philia:11158] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philautia:11988] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Ludus:16828] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Eros:29299] Signal: Segmentation fault (11)
+[Eros:29299] Signal code: Address not mapped (1)
+[Eros:29299] Failing at address: 0xa00000008
+[Pragma:22469] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Agape:07848] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Philautia:11988] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Ludus:16828] *** End of error message ***
+[Eros:29299] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fb0bd6e4d40]
+[Pragma:22469] *** End of error message ***
+[Agape:07848] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philia:11158] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philautia:11988] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Ludus:16825] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fbe97c27612]
+[Eros:29299] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fb0beae2612]
+[Agape:07848] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philia:11158] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f513021fec5]
+[Philautia:11988] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f121bcccec5]
+[Ludus:16825] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Eros:29299] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Agape:07848] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f187bc11ec5]
+[Philia:11158] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philautia:11988] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Ludus:16825] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Eros:29299] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Agape:07848] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philia:11158] *** End of error message ***
+[Philautia:11988] *** End of error message ***
+[Ludus:16825] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Eros:29299] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Agape:07848] *** End of error message ***
+[Philia:11159] *** Process received signal ***
+[Philautia:11989] Signal: Segmentation fault (11)
+[Philautia:11989] Signal code: Address not mapped (1)
+[Philautia:11989] Failing at address: 0xa00000008
+[Ludus:16825] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fbe96814ec5]
+[Eros:29299] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fb0bd6cfec5]
+[Philia:11159] Signal: Segmentation fault (11)
+[Philia:11159] Signal code: Address not mapped (1)
+[Philia:11159] Failing at address: 0xa00000008
+[Philautia:11989] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f1980b83d40]
+[Ludus:16825] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Eros:29299] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philia:11159] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f7664d77d40]
+[Philautia:11989] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f1981f81612]
+[Ludus:16825] *** End of error message ***
+[Eros:29299] *** End of error message ***
+[Philia:11159] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f7666175612]
+[Philautia:11989] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Ludus:16827] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f7e3e32f612]
+[Philia:11159] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Philautia:11989] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Ludus:16827] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Philia:11159] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philautia:11989] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Ludus:16827] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philia:11159] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philautia:11989] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f1980b6eec5]
+[Ludus:16827] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philia:11159] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f7664d62ec5]
+[Philautia:11989] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Ludus:16827] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f7e3cf1cec5]
+[Philia:11159] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philautia:11989] *** End of error message ***
+[Ludus:16827] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philia:11159] *** End of error message ***
+[Ludus:16827] *** End of error message ***
+[clotho:10654] *** Process received signal ***
+[clotho:10654] Signal: Segmentation fault (11)
+[clotho:10654] Signal code: Address not mapped (1)
+[clotho:10654] Failing at address: 0xa00000008
+[clotho:10654] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fc692b21d40]
+[clotho:10654] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fc693f1f612]
+[clotho:10654] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[clotho:10654] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[clotho:10654] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[clotho:10654] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fc692b0cec5]
+[clotho:10654] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[clotho:10654] *** End of error message ***
+[Philautia:11987] *** Process received signal ***
+[Philautia:11987] Signal: Segmentation fault (11)
+[Philautia:11987] Signal code: Address not mapped (1)
+[Philautia:11987] Failing at address: 0xa00000008
+[Philautia:11987] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f03760d1d40]
+[Philautia:11987] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f03774cf612]
+[Philautia:11987] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Philautia:11987] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philautia:11987] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philautia:11987] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f03760bcec5]
+[Philautia:11987] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philautia:11987] *** End of error message ***
+[Ludus:16826] *** Process received signal ***
+[Ludus:16826] Signal: Segmentation fault (11)
+[Ludus:16826] Signal code: Address not mapped (1)
+[Ludus:16826] Failing at address: 0xa00000008
+[Ludus:16826] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7ff1ce385d40]
+[Ludus:16826] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7ff1cf783612]
+[Ludus:16826] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Ludus:16826] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Ludus:16826] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Ludus:16826] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7ff1ce370ec5]
+[Ludus:16826] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Ludus:16826] *** End of error message ***
+Population size: 56
 Numer of trials: 10
-Number of generations: 30
+Number of generations: 100
 Crossover rate: 0.100000
 Mutation rate: 0.100000
-Mutation stdev: 0.500000
+Mutation stdev: 1.000000
+Allocated MPI workers: 28
 elitism: 1
-30	# current generation
-0.940239	# current convergence
-900	# number of selections since initialization
-106	# number of crossovers since initialization
-588	# number of mutations since initialization
-900	# number of replacements since initialization
-525	# number of genome evaluations since initialization
-16	# number of population evaluations since initialization
-75.3	# maximum score since initialization
-0	# minimum score since initialization
-13.0682	# average of all scores ('on-line' performance)
-64.0167	# average of maximum scores ('off-line' performance)
-0.0566667	# average of minimum scores ('off-line' performance)
-
-1.97667	# mean score in initial population
-3.2	# maximum score in initial population
-1	# minimum score in initial population
-0.573365	# standard deviation of initial population
-0	# diversity of initial population (0=identical,-1=unset)
-
-31.2133	# mean score in current population
-75.3	# maximum score in current population
-0.8	# minimum score in current population
-30.2889	# standard deviation of current population
-0.808539	# diversity of current population (0=identical,-1=unset)
-
-20	# how far back to look for convergence
-1	# how often to record scores
-1	# how often to write scores to file
-/dev/null	# name of file to which scores are written
- seed	0
-minimaxi	1
-number_of_generations	30
-generations_to_convergence	20
-convergence_percentage	0.99
-crossover_probability	0.1
-mutation_probability	0.1
-population_size	30
-score_frequency	1
-flush_frequency	1
-record_diversity	1
-score_filename	/dev/null
-select_scores	255
-number_of_best	1
-elitism	1
-
-Run time was 42032.307350 seconds
-[0m[0m
+[clotho:10652] *** Process received signal ***
+[clotho:10652] Signal: Segmentation fault (11)
+[clotho:10652] Signal code: Address not mapped (1)
+[clotho:10652] Failing at address: 0xa00000008
+[clotho:10652] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7fceddf98d40]
+[clotho:10652] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7fcedf396612]
+[clotho:10652] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[clotho:10652] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[clotho:10652] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[clotho:10652] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7fceddf83ec5]
+[clotho:10652] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[clotho:10652] *** End of error message ***
+[Pragma:22468] *** Process received signal ***
+[Pragma:22468] Signal: Segmentation fault (11)
+[Pragma:22468] Signal code: Address not mapped (1)
+[Pragma:22468] Failing at address: 0xa00000008
+[Pragma:22468] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f0d65b75d40]
+[Pragma:22468] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f0d66f73612]
+[Pragma:22468] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Pragma:22468] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Pragma:22468] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Pragma:22468] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f0d65b60ec5]
+[Pragma:22468] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Pragma:22468] *** End of error message ***
+[Philia:11156] *** Process received signal ***
+[Philia:11156] Signal: Segmentation fault (11)
+[Philia:11156] Signal code: Address not mapped (1)
+[Philia:11156] Failing at address: 0xa00000008
+[Philia:11156] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f8a44e02d40]
+[Philia:11156] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f8a46200612]
+[Philia:11156] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Agape:07846] *** Process received signal ***
+[Philia:11156] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Philia:11156] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Philia:11156] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f8a44dedec5]
+[Philia:11156] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Philia:11156] *** End of error message ***
+[Agape:07846] Signal: Segmentation fault (11)
+[Agape:07846] Signal code: Address not mapped (1)
+[Agape:07846] Failing at address: 0xa00000008
+[Agape:07846] [ 0] /lib/x86_64-linux-gnu/libc.so.6(+0x36d40) [0x7f434d1e6d40]
+[Agape:07846] [ 1] /usr/lib/libga.so.2(_ZN15GAParameterList3setEPKcPKv+0x32) [0x7f434e5e4612]
+[Agape:07846] [ 2] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN15GAParameterList3setEPKcj+0x2a) [0x41996a]
+[Agape:07846] [ 3] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(_ZN18GAGeneticAlgorithm12nGenerationsEj+0x2c) [0x41a06e]
+[Agape:07846] [ 4] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver(main+0x80f) [0x413cdd]
+[Agape:07846] [ 5] /lib/x86_64-linux-gnu/libc.so.6(__libc_start_main+0xf5) [0x7f434d1d1ec5]
+[Agape:07846] [ 6] /home/matthew/GitHub/CPFA-ARGoS/build/cpfa_evolver() [0x411a99]
+[Agape:07846] *** End of error message ***
+--------------------------------------------------------------------------
+mpirun noticed that process rank 18 with PID 11989 on node philautia exited on signal 11 (Segmentation fault).
+--------------------------------------------------------------------------

@@ -130,7 +130,7 @@ int main(int argc, char **argv)
   // See if we've been given a seed to use (for testing purposes).  When you
   // specify a random seed, the evolution will be exactly the same each time
   // you use that seed number
-  unsigned int seed = 0;
+  unsigned int seed = 12345;
   for(int i=1 ; i<argc ; i++)
     if(strcmp(argv[i++],"seed") == 0)
       seed = atoi(argv[i]);
@@ -191,7 +191,7 @@ int main(int argc, char **argv)
   //ga.evolve(seed); // Manual generations
 
 // initialize the ga since we are not using the evolve function
-  ga.initialize();
+  ga.initialize(seed); // This is essential for the mpi workers to be sychronized
 
     // Name the results file with the current time and date
  time_t t = time(0);   // get time now
@@ -215,7 +215,7 @@ int main(int argc, char **argv)
     // Write output file header
     ofstream results_output_stream;
 	results_output_stream.open(results_file_name, ios::app);
-	results_output_stream << "Population size: " << population_size << "\nNumer of trials: " << n_trials << "\nNumber of generations: "<< n_generations<<"\nCrossover rate: "<< crossover_rate<<"\nMutation rate: " << mutation_rate << "\nMutation stdev: "<< mutation_stdev << "Algorithm: CPFA\n" << "Number of searchers: 6\n" << "Number of targets: 256\n" << "Target distribution: power law" << endl;
+	results_output_stream << "Population size: " << population_size << "\nNumber of trials: " << n_trials << "\nNumber of generations: "<< n_generations<<"\nCrossover rate: "<< crossover_rate<<"\nMutation rate: " << mutation_rate << "\nMutation stdev: "<< mutation_stdev << "Algorithm: CPFA\n" << "Number of searchers: 6\n" << "Number of targets: 256\n" << "Target distribution: power law" << endl;
 	results_output_stream << "Generation" 
 			      << ", " << "Compute Time (s)"
 			      << ", " << "Convergence"
@@ -484,14 +484,15 @@ float LaunchARGoS(GAGenome& c_genome)
       cLoopFunctions.ConfigureFromGenome(cpfa_genome);
 
       // Run the experiment
-      // cSimulator.Execute();
+      cSimulator.Execute();
 
       // Update performance and store in the shared memory segment
-      //*ShmPTR = cLoopFunctions.Score();;
+      *ShmPTR = cLoopFunctions.Score();;
 
-      float score = 0;
-      for (int i = 0; i < GENOME_SIZE; i++) score += cpfa_genome[i];
-      *ShmPTR = score;
+      // For testing
+      //float score = 0;
+      //for (int i = 0; i < GENOME_SIZE; i++) score += cpfa_genome[i];
+      //*ShmPTR = score;
 
       // Clean up the simulation
       cSimulator.Destroy();
