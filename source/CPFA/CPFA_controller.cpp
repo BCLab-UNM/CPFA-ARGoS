@@ -213,11 +213,11 @@ void CPFA_controller::Departing()
     argos::Real randomNumber = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
     
-    ofstream log_output_stream;
-    log_output_stream.open("cpfa_log.txt", ios::app);
-    log_output_stream << "Distance to waypoint: " << distanceToTarget << endl;
-    log_output_stream << GetTarget() << endl;
-    log_output_stream.close();
+    //ofstream log_output_stream;
+    //log_output_stream.open("cpfa_log.txt", ios::app);
+    //log_output_stream << "Distance to waypoint: " << distanceToTarget << endl;
+    //log_output_stream << GetTarget() << endl;
+    //log_output_stream.close();
     
 
     /* When not informed, continue to travel until randomly switching to the searching state. */
@@ -243,9 +243,9 @@ void CPFA_controller::Departing()
     if(isInformed && distanceToTarget < TargetDistanceTolerance) 
       {
 	
-	ofstream log_output_stream;
-	log_output_stream.open("cpfa_log.txt", ios::app);
-	log_output_stream << "Reached waypoint: " << SiteFidelityPosition << endl;
+	//ofstream log_output_stream;
+	//log_output_stream.open("cpfa_log.txt", ios::app);
+	//log_output_stream << "Reached waypoint: " << SiteFidelityPosition << endl;
 
         SearchTime = 0;
         CPFA_state = SEARCHING;
@@ -253,11 +253,11 @@ void CPFA_controller::Departing()
         if(isUsingSiteFidelity == true) {
             isUsingSiteFidelity = false;
             SetFidelityList();
-	    log_output_stream << "After SetFidelityList: " << SiteFidelityPosition << endl;
+	    //log_output_stream << "After SetFidelityList: " << SiteFidelityPosition << endl;
         }
 	
 	
-	log_output_stream.close();
+	//log_output_stream.close();
 	
     }
 
@@ -391,28 +391,28 @@ void CPFA_controller::Returning() {
 
         // Determine probabilistically wether to use site fidelity, pheromone
         // trails, or random search.
-	ofstream log_output_stream;
-	log_output_stream.open("cpfa_log.txt", ios::app);
+	//ofstream log_output_stream;
+	//log_output_stream.open("cpfa_log.txt", ios::app);
 	
-	log_output_stream << "At the nest." << endl;	    
+	//log_output_stream << "At the nest." << endl;	    
 	   
         // use site fidelity
         if((isUsingSiteFidelity == true) && (poissonCDF_sFollowRate > r2)) 
 	  {
-	    log_output_stream << "Using site fidelity" << endl;	    
+	    //log_output_stream << "Using site fidelity" << endl;	    
             SetTarget(SiteFidelityPosition);
             isInformed = true;
         }
         // use pheromone waypoints
         else if(SetTargetPheromone() == true) 
 	  {
-	    log_output_stream << "Using site pheremone" << endl;	    
+	    //log_output_stream << "Using site pheremone" << endl;	    
             isInformed = true;
             isUsingSiteFidelity = false;
         }
         // use random search
         else {
-	  log_output_stream << "Using random search" << endl;	    
+	  //log_output_stream << "Using random search" << endl;	    
             SetRandomSearchLocation();
             isInformed = false;
             isUsingSiteFidelity = false;
@@ -440,7 +440,7 @@ void CPFA_controller::Returning() {
 	CPFA_state = DEPARTING;   
 	isHoldingFood = false;
 
-	log_output_stream.close();
+	//log_output_stream.close();
     }
     else // Take a small step towards the nest so we don't overshoot by too much is we miss it
       {
@@ -578,11 +578,11 @@ void CPFA_controller::SetLocalResourceDensity()
     /* Delay for 4 seconds (simulate iAnts scannning rotation). */
     //  Wait(4); // This function is broken. It causes the rover to move in the wrong direction after finishing its local resource density test 
 
-ofstream log_output_stream;
-  log_output_stream.open("cpfa_log.txt", ios::app);
-  log_output_stream << "(Survey): " << ResourceDensity << endl;
-  log_output_stream << "SiteFidelityPosition: " << SiteFidelityPosition << endl;
-  log_output_stream.close();
+    //ofstream log_output_stream;
+    //log_output_stream.open("cpfa_log.txt", ios::app);
+    //log_output_stream << "(Survey): " << ResourceDensity << endl;
+    //log_output_stream << "SiteFidelityPosition: " << SiteFidelityPosition << endl;
+    //log_output_stream.close();
 }
 
 /*****
@@ -665,11 +665,11 @@ bool CPFA_controller::SetTargetPheromone() {
         randomWeight -= LoopFunctions->PheromoneList[i].GetWeight();
     }
 
-    ofstream log_output_stream;
-    log_output_stream.open("cpfa_log.txt", ios::app);
-    log_output_stream << "Found: " << LoopFunctions->PheromoneList.size()  << " waypoints." << endl;
-    log_output_stream << "Follow waypoint?: " << isPheromoneSet << endl;
-    log_output_stream.close();
+    //ofstream log_output_stream;
+    //log_output_stream.open("cpfa_log.txt", ios::app);
+    //log_output_stream << "Found: " << LoopFunctions->PheromoneList.size()  << " waypoints." << endl;
+    //log_output_stream << "Follow waypoint?: " << isPheromoneSet << endl;
+    //log_output_stream.close();
 
     return isPheromoneSet;
 }
