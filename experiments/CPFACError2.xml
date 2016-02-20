@@ -28,7 +28,7 @@
 
 	<positioning          implementation = "default"
                                         pos_noise_range= "-0.001:0.001"
-                                        angle_noise_range= "-0.005:0.005"
+                                        angle_noise_range= "-0.2:0.2"
                                         axis_noise_range= "-0.0001:0.0001"
 					/>	
 
@@ -40,8 +40,8 @@
 
       <params>
 
-        <settings TargetDistanceTolerance           = "0.01"
-		  TargetAngleTolerance               = "0.05"
+        <settings TargetDistanceTolerance           = "0.2"
+		  TargetAngleTolerance               = "0.2"
 		  FoodDistanceTolerance              = "0.13"
                   NestDistanceTolerance = "0.01"  
                   NestAngleTolerance = "0.05"
@@ -79,7 +79,7 @@
 	     DrawIDs = "1"
 	     DrawTrails = "1"
 	     DrawTargetRays = "1"
-	     FoodDistribution = "2"
+	     FoodDistribution = "1"
 	     FoodItemCount = "256"
 	     NumberOfClusters = "4"
 	     ClusterWidthX = "8"
@@ -129,14 +129,14 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization><!--
-
+<!--
 <qt-opengl>
       <camera>
         <placement idx="0" position="  0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
       </camera>
       <user_functions label="CPFA_qt_user_functions"/>
     </qt-opengl>
-
+-->
   --></visualization>
 
 </argos-configuration>

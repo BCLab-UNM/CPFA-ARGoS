@@ -24,6 +24,8 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
     argos::TConfigurationNode settings = argos::GetNode(node, "settings");
     argos::GetNodeAttribute(settings, "FoodDistanceTolerance",   FoodDistanceTolerance);
     argos::GetNodeAttribute(settings, "TargetDistanceTolerance", TargetDistanceTolerance);
+    argos::GetNodeAttribute(settings, "NestDistanceTolerance", NestDistanceTolerance);
+    argos::GetNodeAttribute(settings, "NestAngleTolerance",    NestAngleTolerance);
     argos::GetNodeAttribute(settings, "TargetAngleTolerance",    TargetAngleTolerance);
     argos::GetNodeAttribute(settings, "SearchStepSize",          SearchStepSize);
     argos::GetNodeAttribute(settings, "RobotForwardSpeed",       RobotForwardSpeed);
@@ -304,10 +306,25 @@ void CPFA_controller::Searching() {
                 argos::Real USCV = LoopFunctions->UninformedSearchVariation.GetValue();
                 argos::Real rand = RNG->Gaussian(USCV);
                 argos::CRadians rotation(rand);
-                argos::CRadians angle1(rotation.UnsignedNormalize());
-                argos::CRadians angle2(GetHeading().UnsignedNormalize());
+                argos::CRadians angle1(rotation);
+                argos::CRadians angle2(GetHeading());
                 argos::CRadians turn_angle(angle1 + angle2);
                 argos::CVector2 turn_vector(SearchStepSize, turn_angle);
+
+		/*
+		ofstream log_output_stream;
+		log_output_stream.open("uninformed_angle1.log", ios::app);
+		log_output_stream << angle1.GetValue() << endl;
+		log_output_stream.close();
+
+		log_output_stream.open("uninformed_angle2.log", ios::app);
+		log_output_stream << angle2.GetValue() << endl;
+		log_output_stream.close();
+
+		log_output_stream.open("uninformed_turning_angle.log", ios::app);
+		log_output_stream << turn_angle.GetValue() << endl;
+		log_output_stream.close();
+		*/
 
                 SetTarget(turn_vector + GetPosition());
             }
@@ -324,6 +341,21 @@ void CPFA_controller::Searching() {
                 argos::CRadians angle2(GetHeading());
                 argos::CRadians turn_angle(angle2 + angle1);
                 argos::CVector2 turn_vector(SearchStepSize, turn_angle);
+
+		/*
+		ofstream log_output_stream;
+		log_output_stream.open("informed_angle1.log", ios::app);
+		log_output_stream << angle1.GetValue() << endl;
+		log_output_stream.close();
+
+		log_output_stream.open("informed_angle2.log", ios::app);
+		log_output_stream << angle2.GetValue() << endl;
+		log_output_stream.close();
+
+		log_output_stream.open("informed_turning_angle.log", ios::app);
+		log_output_stream << turn_angle.GetValue() << endl;
+		log_output_stream.close();
+		*/
 
                 SetTarget(turn_vector + GetPosition());
             }
@@ -570,7 +602,7 @@ void CPFA_controller::SetLocalResourceDensity()
     for(size_t i = 0; i < LoopFunctions->FoodList.size(); i++) {
         distance = GetPosition() - LoopFunctions->FoodList[i];
 
-        if(distance.SquareLength() < LoopFunctions->SearchRadiusSquared) {
+        if(distance.SquareLength() < LoopFunctions->SearchRadiusSquared*2) {
             ResourceDensity++;
             LoopFunctions->FoodColoringList[i] = argos::CColor::ORANGE;
             LoopFunctions->ResourceDensityDelay = SimulationTick() + SimulationTicksPerSecond() * 10;

@@ -10,10 +10,10 @@
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_pointmass3d.so"
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_footbot.so"
 [INFO] Not using threads
-[INFO] Using random seed = 100790
-[INFO] Using simulation clock tick = 0.0625
-[INFO] Total experiment length in clock ticks = 28800
+[INFO] Using random seed = 619082
+[INFO] Using simulation clock tick = 0.03125
+[INFO] Total experiment length in clock ticks = 57600
 [INFO] Loaded library "./build/source/CPFA/libCPFA_controller.so"
 [INFO] Loaded library "./build/source/CPFA/libCPFA_loop_functions.so"
-[INFO] The physics engine "dyn2d" will perform 10 iterations per tick (dt = 0.00625 sec)
+[INFO] The physics engine "dyn2d" will perform 10 iterations per tick (dt = 0.003125 sec)
 [INFO] No visualization selected.

@@ -31,7 +31,7 @@ CPFA_loop_functions::CPFA_loop_functions() :
   NestRadius(0.25),
   NestRadiusSquared(0.0625),
   NestElevation(0.01),
-  SearchRadiusSquared((4.0 * FoodRadius) * (4.0 * FoodRadius)),
+  SearchRadiusSquared((4.0 * FoodRadius) * (4.0 * FoodRadius)), // We are looking at a 4 by 4 square (3 targets + 2*1/2 target gaps)
   score(0),
   PrintFinalScore(0)
 {}
