@@ -31,6 +31,7 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
     argos::GetNodeAttribute(settings, "RobotForwardSpeed",       RobotForwardSpeed);
     argos::GetNodeAttribute(settings, "RobotRotationSpeed",      RobotRotationSpeed);
     argos::GetNodeAttribute(settings, "ResultsDirectoryPath",      results_path);
+    argos::GetNodeAttribute(settings, "DestinationNoiseStdev",      DestinationNoiseStdev);
 
     argos::CVector2 p(GetPosition());
     SetStartPosition(argos::CVector3(p.GetX(), p.GetY(), 0.0));
@@ -113,18 +114,22 @@ void CPFA_controller::CPFA() {
   switch(CPFA_state) {
     // depart from nest after food drop off or simulation start
   case DEPARTING:
+    SetIsHeadingToNest(false);
     Departing();
     break;
     // after departing(), once conditions are met, begin searching()
   case SEARCHING:
+    SetIsHeadingToNest(false);
     if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
       Searching();
     break;
     // return to nest after food pick up or giving up searching()
   case RETURNING:
+    SetIsHeadingToNest(true);
     Returning();
     break;
   case SURVEYING:
+    SetIsHeadingToNest(false);
     Surveying();
     break;
   }

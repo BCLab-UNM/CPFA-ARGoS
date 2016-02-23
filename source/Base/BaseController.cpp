@@ -1,4 +1,7 @@
 #include "BaseController.h"
+#include <random>
+
+using namespace std;
 
 /**
  * Constructor for the BaseController. Several important variables are defined here.
@@ -17,7 +20,8 @@ BaseController::BaseController() :
     RobotRotationSpeed(4.0),
     TicksToWaitWhileMoving(0.0),
     CurrentMovementState(STOP),
-    heading_to_nest(true)
+    heading_to_nest(false),
+    DestinationNoiseStdev(0)
 {
     // calculate the forage range and compensate for the robot's radius of 0.085m
     argos::CVector3 ArenaSize = LF.GetSpace().GetArenaSize();
@@ -54,15 +58,42 @@ argos::CVector2 BaseController::GetTarget() {
 
 void BaseController::SetTarget(argos::CVector2 t) {
 
-    argos::Real x(t.GetX()), y(t.GetY());
+  argos::Real x(t.GetX()), y(t.GetY());
 
-    if(x > ForageRangeX.GetMax()) x = ForageRangeX.GetMax();
-    else if(x < ForageRangeX.GetMin()) x = ForageRangeX.GetMin();
+  // Add noise to the target location unless travelling to the nest
+  // Make the noise proportional to the distance to the target
+  if (!heading_to_nest)
+    {
+      argos::Real distanceToTarget = (t - GetPosition()).Length();
 
-    if(y > ForageRangeY.GetMax()) y = ForageRangeY.GetMax();
-    else if(y < ForageRangeY.GetMin()) y = ForageRangeY.GetMin();
+      argos::LOG << "Target distance: " << distanceToTarget << endl;
+      std::random_device rd;
+      std::mt19937 e2(rd());
+      std::normal_distribution<> dist_x(x, DestinationNoiseStdev*distanceToTarget);
+      std::normal_distribution<> dist_y(y, DestinationNoiseStdev*distanceToTarget);
+            
+      x = dist_x(e2);
+      y = dist_y(e2);
+    }
+  
 
-    TargetPosition = argos::CVector2(x, y);
+  //if(x > ForageRangeX.GetMax()) x = ForageRangeX.GetMax();
+  //else if(x < ForageRangeX.GetMin()) x = ForageRangeX.GetMin();
+  
+  //if(y > ForageRangeY.GetMax()) y = ForageRangeY.GetMax();
+  //else if(y < ForageRangeY.GetMin()) y = ForageRangeY.GetMin();
+  
+  if( y > ForageRangeY.GetMax() 
+      || y < ForageRangeY.GetMin()
+      || x > ForageRangeX.GetMax()
+      || x < ForageRangeX.GetMin() )
+    {
+      x = GetPosition().GetX();
+      y = GetPosition().GetY();
+      SetRightTurn(37.5);
+    }
+
+  TargetPosition = argos::CVector2(x, y);
 
 }
 
@@ -109,6 +140,8 @@ void BaseController::SetNextMovement()
         argos::CRadians headingToTarget = (TargetPosition - GetPosition()).Angle();
         argos::CRadians headingToTargetError = (GetHeading() - headingToTarget).SignedNormalize();
 
+	//argos::LOG << "Heading to target error: " << headingToTarget <<", Tol:" << AngleTol <<", Angle Tol:" << TargetAngleTolerance << "\n";
+
 	//cout << "headingToTarget: " << headingToTarget << endl;
 	//cout << "headingToTargetError: " << headingToTargetError << endl;
 
@@ -144,8 +177,9 @@ void BaseController::SetTargetAngleDistance(argos::Real newAngleToTurnInDegrees)
     // s = arc_length = robot_radius * turning_angle
     // NOTE: the footbot robot has a radius of 0.085 m... or 8.5 cm...
     // adjusting with + 0.02 m, or + 2 cm, increases accuracy...
-    argos::Real s = 0.105 * newAngleToTurnInDegrees;
-    TicksToWaitWhileMoving = std::ceil((SimulationTicksPerSecond() * s) / RobotRotationSpeed);
+    
+  argos::Real s = 0.105 * newAngleToTurnInDegrees;
+  TicksToWaitWhileMoving = std::ceil((SimulationTicksPerSecond() * s) / RobotRotationSpeed);
 }
 
 void BaseController::SetTargetTravelDistance(argos::Real newTargetDistance) {
@@ -251,11 +285,9 @@ bool BaseController::CollisionDetection() {
     argos::Real collisionAngle = ToDegrees(collisionVector.Angle()).GetValue();
     bool isCollisionDetected = false;
 
-    // argos::LOG << collisionAngle << std::endl << collisionVector << std::endl << std::endl;
-
     if(GoStraightAngleRangeInDegrees.WithinMinBoundIncludedMaxBoundIncluded(collisionAngle)
        && collisionVector.Length() > 0.0) {
-
+   
         Stop();
        isCollisionDetected = true;
        collision_counter++;
@@ -263,11 +295,16 @@ bool BaseController::CollisionDetection() {
 
         PushMovement(FORWARD, SearchStepSize);
 
-        if(collisionAngle <= 0.0) {
+        if(collisionAngle <= 0.0) 
+	  {
+	    //argos::LOG << collisionAngle << std::endl << collisionVector << std::endl << std::endl;
             SetLeftTurn(37.5 - collisionAngle);
-        } else {
+	  } 
+	else 
+	  {
+	    //argos::LOG << collisionAngle << std::endl << collisionVector << std::endl << std::endl;
             SetRightTurn(37.5 + collisionAngle);
-        }
+	  }
     }
 
     return isCollisionDetected;
@@ -307,6 +344,7 @@ void BaseController::Move() {
 
         /* stop movement */
         case STOP: {
+	  //argos::LOG << "STOP\n";
             wheelActuator->SetLinearVelocity(0.0, 0.0);
             SetNextMovement();
             break;
@@ -317,6 +355,7 @@ void BaseController::Move() {
             if((TicksToWaitWhileMoving--) <= 0.0) {
                 Stop();
             } else {
+	      //argos::LOG << "LEFT\n";
                 wheelActuator->SetLinearVelocity(-RobotRotationSpeed, RobotRotationSpeed);
             }
             break;
@@ -327,6 +366,7 @@ void BaseController::Move() {
             if((TicksToWaitWhileMoving--) <= 0.0) {
                 Stop();
             } else {
+	      //argos::LOG << "RIGHT\n";
                 wheelActuator->SetLinearVelocity(RobotRotationSpeed, -RobotRotationSpeed);
             }
             break;
@@ -337,6 +377,7 @@ void BaseController::Move() {
             if((TicksToWaitWhileMoving--) <= 0.0) {
                 Stop();
             } else {
+	      //argos::LOG << "FORWARD\n";
                 wheelActuator->SetLinearVelocity(RobotForwardSpeed, RobotForwardSpeed);             
             }
             break;
@@ -347,6 +388,7 @@ void BaseController::Move() {
             if((TicksToWaitWhileMoving--) <= 0.0) {
                 Stop();
             } else {
+	      //argos::LOG << "BACK\n";
                 wheelActuator->SetLinearVelocity(-RobotForwardSpeed, -RobotForwardSpeed);
             }
             break;
@@ -407,6 +449,9 @@ bool BaseController::IsAtTarget()
     }
 
     argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
+
+    //argos::LOG << distanceToTarget << endl;
+
     return (distanceToTarget < DistTol) ? (true) : (false);
 }
 

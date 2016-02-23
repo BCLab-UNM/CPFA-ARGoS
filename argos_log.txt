@@ -10,7 +10,7 @@
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_pointmass3d.so"
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_footbot.so"
 [INFO] Not using threads
-[INFO] Using random seed = 619082
+[INFO] Using random seed = 958509
 [INFO] Using simulation clock tick = 0.03125
 [INFO] Total experiment length in clock ticks = 57600
 [INFO] Loaded library "./build/source/CPFA/libCPFA_controller.so"

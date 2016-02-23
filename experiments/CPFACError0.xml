@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <?xml version="1.0" ?>
 <argos-configuration>
 
@@ -33,7 +34,7 @@
 					/>	
 
 
-	<positioning          implementation = "default"/>
+	
 
         <footbot_motor_ground implementation = "rot_z_only"/>
       </sensors>
@@ -47,7 +48,7 @@
                   NestAngleTolerance = "0.05"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                  RobotRotationSpeed                = "8.0"
+                   RobotRotationSpeed                = "8.0" DestinationNoiseStdev = "0.0"
 		  ResultsDirectoryPath              = "results/"/>
       </params>
 
@@ -61,11 +62,11 @@
     <!-- evolvable parameters -->
         <CPFA       ProbabilityOfSwitchingToSearching = "0.504"
                     ProbabilityOfReturningToNest      = "0.001"
-                    UninformedSearchVariation         = "7.0"
-                    RateOfInformedSearchDecay         = "0.28"
-                    RateOfSiteFidelity                = "4.27"
-                    RateOfLayingPheromone             = "3.75"
-                    RateOfPheromoneDecay              = "0.03"
+                    UninformedSearchVariation         = "6.0"
+                    RateOfInformedSearchDecay         = "0.249"
+                    RateOfSiteFidelity                = "2.51"
+                    RateOfLayingPheromone             = "2.24"
+                    RateOfPheromoneDecay              = "0.038"
 
 		    PrintFinalScore = "1"
 		    />

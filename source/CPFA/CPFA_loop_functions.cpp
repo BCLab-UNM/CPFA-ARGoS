@@ -169,7 +169,7 @@ bool CPFA_loop_functions::IsExperimentFinished() {
 
 void CPFA_loop_functions::PostExperiment() 
 {
-  if (PrintFinalScore == 1) printf("%f\n", score);
+  if (PrintFinalScore == 1) printf("%f, %f\n", getSimTimeInSeconds(), score);
 }
 
 argos::CColor CPFA_loop_functions::GetFloorColor(const argos::CVector2 &c_pos_on_floor) {
@@ -465,6 +465,10 @@ void CPFA_loop_functions::SetTrial( unsigned int v )
 void CPFA_loop_functions::setScore(double s)
 {
   score = s;
+  if (score >= FoodItemCount) 
+    {
+      PostExperiment();
+    }
 }
 
 double CPFA_loop_functions::Score()

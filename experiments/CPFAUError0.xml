@@ -33,7 +33,7 @@
 					/>	
 
 
-	<positioning          implementation = "default"/>
+	
 
         <footbot_motor_ground implementation = "rot_z_only"/>
       </sensors>
@@ -47,7 +47,7 @@
                   NestAngleTolerance = "0.05"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                  RobotRotationSpeed                = "8.0"
+                   RobotRotationSpeed                = "8.0" DestinationNoiseStdev = "0.0"
 		  ResultsDirectoryPath              = "results/"/>
       </params>
 
@@ -60,12 +60,12 @@
 
     <!-- evolvable parameters -->
         <CPFA       ProbabilityOfSwitchingToSearching = "0.504"
-                    ProbabilityOfReturningToNest      = "0.001"
-                    UninformedSearchVariation         = "7.0"
-                    RateOfInformedSearchDecay         = "0.28"
-                    RateOfSiteFidelity                = "4.27"
-                    RateOfLayingPheromone             = "3.75"
-                    RateOfPheromoneDecay              = "0.03"
+                    ProbabilityOfReturningToNest      = "0.00001"
+                    UninformedSearchVariation         = "5.0"
+                    RateOfInformedSearchDecay         = "0.37"
+                    RateOfSiteFidelity                = "7.79"
+                    RateOfLayingPheromone             = "10.7"
+                    RateOfPheromoneDecay              = "0.15"
 
 		    PrintFinalScore = "1"
 		    />

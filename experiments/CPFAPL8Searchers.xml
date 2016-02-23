@@ -47,7 +47,7 @@
                   NestAngleTolerance = "0.05"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                  RobotRotationSpeed                = "8.0"
+                   RobotRotationSpeed                = "8.0" DestinationNoiseStdev = "0.0"
 		  ResultsDirectoryPath              = "results/"/>
       </params>
 

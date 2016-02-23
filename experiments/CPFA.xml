@@ -47,8 +47,9 @@
                   NestAngleTolerance = "0.05"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                  RobotRotationSpeed                = "8.0"
-		  ResultsDirectoryPath              = "results/"/>
+                   RobotRotationSpeed                = "8.0" 
+		   DestinationNoiseStdev = "0.0"
+		   ResultsDirectoryPath              = "results/"/>
       </params>
 
     </CPFA_controller>
@@ -66,7 +67,6 @@
                     RateOfSiteFidelity                = "4.27"
                     RateOfLayingPheromone             = "3.75"
                     RateOfPheromoneDecay              = "0.03"
-
 		    PrintFinalScore = "1"
 		    />
 
@@ -128,15 +128,14 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization><!--
-
+  <visualization>
+<!--
 <qt-opengl>
       <camera>
         <placement idx="0" position="  0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
       </camera>
       <user_functions label="CPFA_qt_user_functions"/>
     </qt-opengl>
-
-  --></visualization>
-
+-->
+  </visualization>
 </argos-configuration>
