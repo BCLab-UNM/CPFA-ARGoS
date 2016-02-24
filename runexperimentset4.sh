@@ -1,5 +1,5 @@
 #!/bin/bash
-for i in 0 1 2 3 4 5 6 7 8 9 10
+for i in 10 12 14 16 18 20
 do
-    ./runntimes.sh 25 experiments/CPFAUError${i}.xml results/CPFAUError${i}.txt
+    ./runntimes.sh $1 experiments/CPFAU60minSize${i}x${i}.xml results/CPFAU60minSize${i}x${i}.txt
 done
