@@ -46,8 +46,11 @@ class BaseController : public argos::CCI_Controller {
 
     protected:
 
+	argos::CRandom::CRNG* RNG;
+
 	unsigned int collision_counter;
 	float DestinationNoiseStdev; // for introducing error in destination positions
+	float PositionNoiseStdev; // for introducing error in current position
 
         size_t WaitTime;
 

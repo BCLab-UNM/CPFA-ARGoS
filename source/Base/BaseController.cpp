@@ -21,7 +21,9 @@ BaseController::BaseController() :
     TicksToWaitWhileMoving(0.0),
     CurrentMovementState(STOP),
     heading_to_nest(false),
-    DestinationNoiseStdev(0)
+    DestinationNoiseStdev(0),
+    PositionNoiseStdev(0),
+    RNG(argos::CRandom::CreateRNG("argos"))
 {
     // calculate the forage range and compensate for the robot's radius of 0.085m
     argos::CVector3 ArenaSize = LF.GetSpace().GetArenaSize();
@@ -42,6 +44,7 @@ argos::CRadians BaseController::GetHeading() {
     orientation.ToEulerAngles(z_angle, y_angle, x_angle);
 
     /* the angle to the z-axis represents the compass heading */
+
     return z_angle;
 }
 
@@ -49,7 +52,23 @@ argos::CVector2 BaseController::GetPosition() {
     /* the robot's compass sensor gives us a 3D position */
     argos::CVector3 position3D = compassSensor->GetReading().Position;
     /* return the 2D position components of the compass sensor reading */
-    return argos::CVector2(position3D.GetX(), position3D.GetY());
+
+    float x = position3D.GetX();
+    float y = position3D.GetY();
+
+// Add noise to the current position unless travelling to the nest
+  // Make the noise proportional to the distance to the target
+    /*
+  if (!heading_to_nest)
+    {
+      argos::Real noise_x = RNG->Gaussian(PositionNoiseStdev);
+      argos::Real noise_y = RNG->Gaussian(PositionNoiseStdev);
+
+      x += noise_x;
+      y += noise_y;
+    }
+    */
+    return argos::CVector2(x, y);
 }
 
 argos::CVector2 BaseController::GetTarget() {
@@ -60,29 +79,35 @@ void BaseController::SetTarget(argos::CVector2 t) {
 
   argos::Real x(t.GetX()), y(t.GetY());
 
-  // Add noise to the target location unless travelling to the nest
-  // Make the noise proportional to the distance to the target
-  if (!heading_to_nest)
-    {
-      argos::Real distanceToTarget = (t - GetPosition()).Length();
-
-      argos::LOG << "Target distance: " << distanceToTarget << endl;
-      std::random_device rd;
-      std::mt19937 e2(rd());
-      std::normal_distribution<> dist_x(x, DestinationNoiseStdev*distanceToTarget);
-      std::normal_distribution<> dist_y(y, DestinationNoiseStdev*distanceToTarget);
-            
-      x = dist_x(e2);
-      y = dist_y(e2);
-    }
-  
-
   //if(x > ForageRangeX.GetMax()) x = ForageRangeX.GetMax();
   //else if(x < ForageRangeX.GetMin()) x = ForageRangeX.GetMin();
   
   //if(y > ForageRangeY.GetMax()) y = ForageRangeY.GetMax();
   //else if(y < ForageRangeY.GetMin()) y = ForageRangeY.GetMin();
   
+  //argos::LOG << "<<Updating Target Position>>" << std::endl;
+
+  //argos::LOG << "x: "<< x << std::endl;
+  //argos::LOG << "y:" << y << std::endl;
+
+  if (!heading_to_nest)
+    {
+      argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
+      argos::Real noise_x = RNG->Gaussian(DestinationNoiseStdev*distanceToTarget);
+      argos::Real noise_y = RNG->Gaussian(DestinationNoiseStdev*distanceToTarget);
+      
+      x += noise_x;
+      y += noise_y;
+
+      //argos::LOG << "Not Heading to Nest " << std::endl;
+      //argos::LOG << "Noise x: "<< noise_x << std::endl;
+      //argos::LOG << "Noise y:" << noise_y << std::endl;
+    }
+  else
+    {
+      //argos::LOG << "Heading to Nest " << std::endl;
+    }
+
   if( y > ForageRangeY.GetMax() 
       || y < ForageRangeY.GetMin()
       || x > ForageRangeX.GetMax()
@@ -93,7 +118,15 @@ void BaseController::SetTarget(argos::CVector2 t) {
       SetRightTurn(37.5);
     }
 
+  //argos::LOG << "New Target x: "<< x << std::endl;
+  //argos::LOG << "New Target y:" << y << std::endl;
+
   TargetPosition = argos::CVector2(x, y);
+  argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
+  
+  //argos::LOG << "Distance: " << distanceToTarget << std::endl;
+  
+  //argos::LOG << "<<New Target Set>>" << std::endl;
 
 }
 
@@ -450,7 +483,8 @@ bool BaseController::IsAtTarget()
 
     argos::Real distanceToTarget = (TargetPosition - GetPosition()).Length();
 
-    //argos::LOG << distanceToTarget << endl;
+    //argos::LOG << "IsAtTarget: Distance to Target: " << distanceToTarget << endl;
+    //argos::LOG << "IsAtTarget: TargetDistanceTolerance: " << DistTol << endl;
 
     return (distanceToTarget < DistTol) ? (true) : (false);
 }

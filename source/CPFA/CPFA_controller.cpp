@@ -32,12 +32,13 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
     argos::GetNodeAttribute(settings, "RobotRotationSpeed",      RobotRotationSpeed);
     argos::GetNodeAttribute(settings, "ResultsDirectoryPath",      results_path);
     argos::GetNodeAttribute(settings, "DestinationNoiseStdev",      DestinationNoiseStdev);
+    argos::GetNodeAttribute(settings, "PositionNoiseStdev",      PositionNoiseStdev);
 
     argos::CVector2 p(GetPosition());
     SetStartPosition(argos::CVector3(p.GetX(), p.GetY(), 0.0));
 
     FoodDistanceTolerance *= FoodDistanceTolerance;
-
+    SetIsHeadingToNest(true);
     SetTarget(argos::CVector2(0,0));
 }
 
@@ -114,21 +115,25 @@ void CPFA_controller::CPFA() {
   switch(CPFA_state) {
     // depart from nest after food drop off or simulation start
   case DEPARTING:
+    //argos::LOG << "DEPARTING" << std::endl;
     SetIsHeadingToNest(false);
     Departing();
     break;
     // after departing(), once conditions are met, begin searching()
   case SEARCHING:
+    //argos::LOG << "SEARCHING" << std::endl;
     SetIsHeadingToNest(false);
     if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0)
       Searching();
     break;
     // return to nest after food pick up or giving up searching()
   case RETURNING:
+    //argos::LOG << "RETURNING" << std::endl;
     SetIsHeadingToNest(true);
     Returning();
     break;
   case SURVEYING:
+    //argos::LOG << "SURVEYING" << std::endl;
     SetIsHeadingToNest(false);
     Surveying();
     break;
@@ -244,13 +249,13 @@ void CPFA_controller::Departing()
 	  argos::CRadians angle2(GetHeading().UnsignedNormalize());
 	  argos::CRadians turn_angle(angle1 + angle2);
 	  argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-	  
+
+	  SetIsHeadingToNest(false);
 	  SetTarget(turn_vector + GetPosition());
 	}
     }
     /* Are we informed? I.E. using site fidelity or pheromones. */
       
-
     if(isInformed && distanceToTarget < TargetDistanceTolerance) 
       {
 	
@@ -292,7 +297,8 @@ void CPFA_controller::Searching() {
 
 	  // randomly give up searching
 	  if(random < LoopFunctions->ProbabilityOfReturningToNest) {
-            SetTarget(LoopFunctions->NestPosition);
+            SetIsHeadingToNest(true);
+	    SetTarget(LoopFunctions->NestPosition);
             isGivingUpSearch = true;
             CPFA_state = RETURNING;
 	    
@@ -316,6 +322,9 @@ void CPFA_controller::Searching() {
                 argos::CRadians turn_angle(angle1 + angle2);
                 argos::CVector2 turn_vector(SearchStepSize, turn_angle);
 
+		//argos::LOG << "UNINFORMED SEARCH: rotation: " << angle1 << std::endl;
+		//argos::LOG << "UNINFORMED SEARCH: old heading: " << angle2 << std::endl;
+
 		/*
 		ofstream log_output_stream;
 		log_output_stream.open("uninformed_angle1.log", ios::app);
@@ -330,7 +339,7 @@ void CPFA_controller::Searching() {
 		log_output_stream << turn_angle.GetValue() << endl;
 		log_output_stream.close();
 		*/
-
+		SetIsHeadingToNest(false);
                 SetTarget(turn_vector + GetPosition());
             }
             // informed search
@@ -347,6 +356,9 @@ void CPFA_controller::Searching() {
                 argos::CRadians turn_angle(angle2 + angle1);
                 argos::CVector2 turn_vector(SearchStepSize, turn_angle);
 
+		//argos::LOG << "INFORMED SEARCH: rotation: " << angle1 << std::endl;
+		//argos::LOG << "INFORMED SEARCH: old heading: " << angle2 << std::endl;
+
 		/*
 		ofstream log_output_stream;
 		log_output_stream.open("informed_angle1.log", ios::app);
@@ -362,10 +374,21 @@ void CPFA_controller::Searching() {
 		log_output_stream.close();
 		*/
 
-                SetTarget(turn_vector + GetPosition());
+		      SetIsHeadingToNest(false);
+		      SetTarget(turn_vector + GetPosition());
             }
         }
+	else
+	  {
+	    //argos::LOG << "SEARCH: Haven't reached destination. " << GetPosition() << "," << GetTarget() << std::endl;
+	  }
     }
+    else
+      {
+	//argos::LOG << "SEARCH: Carrying food." << std::endl;
+      }
+
+    
     // Food has been found, change state to RETURNING and go to the nest
     //else {
     //    SetTarget(LoopFunctions->NestPosition);
@@ -382,6 +405,7 @@ void CPFA_controller::Surveying()
       CRadians rotation(survey_count*3.14/2); // divide by 10 so the vecot is small and the linear motion is minimized
       argos::CVector2 turn_vector(SearchStepSize, rotation.SignedNormalize());
       
+      SetIsHeadingToNest(true); // Turn off error for this
       SetTarget(turn_vector + GetPosition());
 /*
       ofstream log_output_stream;
@@ -395,6 +419,7 @@ void CPFA_controller::Surveying()
     }
   else // Set the survey countdown
     {
+      SetIsHeadingToNest(true); // Turn off error for this
       SetTarget(LoopFunctions->NestPosition);
       CPFA_state = RETURNING;
       survey_count = 0; // Reset
@@ -442,7 +467,9 @@ void CPFA_controller::Returning() {
         // use site fidelity
         if((isUsingSiteFidelity == true) && (poissonCDF_sFollowRate > r2)) 
 	  {
-	    //log_output_stream << "Using site fidelity" << endl;	    
+	    //log_output_stream << "Using site fidelity" << endl;
+	
+	    SetIsHeadingToNest(false);
             SetTarget(SiteFidelityPosition);
             isInformed = true;
         }
@@ -487,6 +514,7 @@ void CPFA_controller::Returning() {
     }
     else // Take a small step towards the nest so we don't overshoot by too much is we miss it
       {
+	SetIsHeadingToNest(true); // Turn off error for this
     	SetTarget(LoopFunctions->NestPosition);
       }
       
@@ -517,7 +545,8 @@ void CPFA_controller::SetRandomSearchLocation() {
         x = ForageRangeX.GetMin();
         y = RNG->Uniform(ForageRangeY);
     }
-
+    
+    SetIsHeadingToNest(true); // Turn off error for this
     SetTarget(argos::CVector2(x, y));
 }
 
@@ -540,7 +569,7 @@ void CPFA_controller::SetHoldingFood() {
 
         for(i = 0; i < LoopFunctions->FoodList.size(); i++) 
 	  {
-            if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance) {
+            if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance ) {
                 // We found food! Calculate the nearby food density.
                 isHoldingFood = true;
 		CPFA_state = SURVEYING;
@@ -560,6 +589,7 @@ void CPFA_controller::SetHoldingFood() {
 
         // We picked up food. Update the food list minus what we picked up.
         if(IsHoldingFood() == true) {
+	  SetIsHeadingToNest(true);
 	  SetTarget(LoopFunctions->NestPosition);
             LoopFunctions->FoodList = newFoodList;
             SetLocalResourceDensity();
@@ -681,6 +711,7 @@ bool CPFA_controller::SetTargetPheromone() {
     // LoopFunctions->UpdatePheromoneList();
 
     /* default target = nest; in case we have 0 active pheromones */
+    SetIsHeadingToNest(true);
     SetTarget(LoopFunctions->NestPosition);
 
     /* Calculate a maximum strength based on active pheromone weights. */
@@ -697,6 +728,7 @@ bool CPFA_controller::SetTargetPheromone() {
     for(size_t i = 0; i < LoopFunctions->PheromoneList.size(); i++) {
         if(randomWeight < LoopFunctions->PheromoneList[i].GetWeight()) {
             /* We've chosen a pheromone! */
+	  SetIsHeadingToNest(false);
             SetTarget(LoopFunctions->PheromoneList[i].GetLocation());
             TrailToFollow = LoopFunctions->PheromoneList[i].GetTrail();
             isPheromoneSet = true;
