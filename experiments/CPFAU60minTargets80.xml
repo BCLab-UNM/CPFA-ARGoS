@@ -7,7 +7,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1800"
+    <experiment length="3600"
                 ticks_per_second="32"
 		random_seed="0"/>
   </framework>
@@ -27,27 +27,23 @@
         <footbot_proximity    implementation = "default" show_rays = "false"/>
 
 	<positioning          implementation = "default"
-                                        pos_noise_range= "-0.001:0.001"
-                                        angle_noise_range= "-0.7:0.7"
-                                        axis_noise_range= "-0.0001:0.0001"
 					/>	
-
-
-	
 
         <footbot_motor_ground implementation = "rot_z_only"/>
       </sensors>
 
       <params>
 
-        <settings TargetDistanceTolerance           = "0.7"
-		  TargetAngleTolerance               = "0.7"
+        <settings TargetDistanceTolerance           = "0.05"
+		  TargetAngleTolerance               = "0.1"
 		  FoodDistanceTolerance              = "0.13"
-                  NestDistanceTolerance = "0.01"  
-                  NestAngleTolerance = "0.05"
+                  NestDistanceTolerance = "0.05"  
+                  NestAngleTolerance = "0.1"
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
-                   RobotRotationSpeed                = "8.0" DestinationNoiseStdev = "0.0"
+                  RobotRotationSpeed                = "8.0"
+		  DestinationNoiseStdev             = "0.0"
+		  PositionNoiseStdev             = "0.00"
 		  ResultsDirectoryPath              = "results/"/>
       </params>
 
@@ -66,7 +62,6 @@
                     RateOfSiteFidelity                = "4.27"
                     RateOfLayingPheromone             = "3.75"
                     RateOfPheromoneDecay              = "0.03"
-
 		    PrintFinalScore = "1"
 		    />
 
@@ -80,7 +75,7 @@
 	     DrawTrails = "1"
 	     DrawTargetRays = "1"
 	     FoodDistribution = "0"
-	     FoodItemCount = "256"
+	     FoodItemCount = "80"
 	     NumberOfClusters = "4"
 	     ClusterWidthX = "8"
 	     ClusterLengthY = "8"
@@ -128,7 +123,7 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
-  <visualization><!--
+  <visualization>
 <!--
 <qt-opengl>
       <camera>
@@ -137,6 +132,6 @@
       <user_functions label="CPFA_qt_user_functions"/>
     </qt-opengl>
 -->
-  --></visualization>
+  </visualization>
 
 </argos-configuration>
