@@ -131,7 +131,6 @@
       </camera>
       <user_functions label="CPFA_qt_user_functions"/>
     </qt-opengl>
-
-  </visualization>
 -->
+  </visualization>
 </argos-configuration>
