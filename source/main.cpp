@@ -44,6 +44,7 @@ int mpi_tasks, mpi_rank;
 int elitism = 0;
 int n_trials = 20; // used by the objective function
 double mutation_stdev = 1.00; // Gaussian mutation stdev - will be scaled by possible range
+string experiment_path;
 
 void CPFAInitializer(GAGenome & c);
 int GARealGaussianMutatorStdev(GAGenome &, float);
@@ -71,9 +72,12 @@ int main(int argc, char **argv)
 
     char c='h';
   // Handle command line arguments
-  while ((c = getopt (argc, argv, "t:g:p:c:m:s:h:e:")) != -1)
+  while ((c = getopt (argc, argv, "t:g:p:c:m:s:h:e:x:")) != -1)
     switch (c)
       {
+      case 'x':
+	experiment_path = optarg;
+      break;
       case 't':
 	n_trials = atoi(optarg);
 	break;
@@ -122,6 +126,12 @@ int main(int argc, char **argv)
 	printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation}", argv[0]);
         abort ();
       }
+
+  if (experiment_path.empty())
+    {
+      printf("Usage: %s -p {population size} -g {number of generations} -t {number of trials} -c {crossover rate} -m {mutation rate} -s {mutation standard deviation} -x {argos experiment file}", argv[0]);
+      exit(1);
+    }
 
   float max_float = std::numeric_limits<float>::max();
 
@@ -472,7 +482,7 @@ float LaunchARGoS(GAGenome& c_genome)
       argos::CSimulator& cSimulator = argos::CSimulator::GetInstance();
 
       // Set the .argos configuration file
-      cSimulator.SetExperimentFileName("experiments/CPFAEvolver.xml");
+      cSimulator.SetExperimentFileName(experiment_path);
       
       // Load it to configure ARGoS 
       cSimulator.LoadExperiment();
