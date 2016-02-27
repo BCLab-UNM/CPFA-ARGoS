@@ -150,7 +150,7 @@ int main(int argc, char **argv)
   
   if (mpi_rank==0)
     {
-      printf("Population size: %d\nNumer of trials: %d\nNumber of generations: %d\nCrossover rate: %f\nMutation rate: %f\nMutation stdev: %f\nAllocated MPI workers: %d\n", population_size, n_trials, n_generations, crossover_rate, mutation_rate, mutation_stdev, mpi_tasks);
+      printf("Population size: %d\nNumber of trials: %d\nNumber of generations: %d\nCrossover rate: %f\nMutation rate: %f\nMutation stdev: %f\nAllocated MPI workers: %d\n", population_size, n_trials, n_generations, crossover_rate, mutation_rate, mutation_stdev, mpi_tasks);
       	printf("elitism: %d\n", elitism);
     }
 
