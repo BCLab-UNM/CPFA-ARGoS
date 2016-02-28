@@ -66,6 +66,9 @@ find_package(GALIB)
 	  include_directories(${GALIB_INCLUDE_DIRS})
 	endif(GALIB_FOUND)
 
+find_package( Boost REQUIRED COMPONENTS system filesystem )
+include_directories( ${Boost_INCLUDE_DIRS} )
+
 # Set ARGoS include directory.
 include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${LUA_INCLUDE_DIR} source)
 
@@ -81,7 +84,8 @@ target_link_libraries(cpfa_evolver CPFA_controller
 				   CPFA_loop_functions
 				   ga-mpi	    
 				   #${GALIB_LIBRARIES}
-				   ${MPI_LIBRARIES}		   
+				   ${MPI_LIBRARIES}
+		   		   ${Boost_LIBRARIES}
 				   argos3core_simulator)
 
 

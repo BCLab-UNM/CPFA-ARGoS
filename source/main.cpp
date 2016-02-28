@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <unistd.h> // For usleep and optargs
 
+#include <boost/filesystem.hpp> // For extracting file names from strings
+
 // For random numbers in genome initialization
 #include <random>
 
@@ -208,8 +210,10 @@ int main(int argc, char **argv)
     struct tm * now = localtime( & t );
     stringstream ss;
 
+    boost::filesystem::path exp_path(experiment_path);
+    
     ss << "results/CPFA-evolution-"
-       << "powerlaw-6rovers" << '-'
+       << exp_path.stem().string() << '-'
        <<GIT_BRANCH<<"-"<<GIT_COMMIT_HASH<<"-"
        << (now->tm_year) << '-'
        << (now->tm_mon + 1) << '-'

@@ -1,18 +1,18 @@
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_genericrobot.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_footbot.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3core_simulator.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_eyebot.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_pointmass3d.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_dynamics2d.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_epuck.so"
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_entities.so"
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_media.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_epuck.so"
-[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_spiri.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_pointmass3d.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_genericrobot.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3core_simulator.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_eyebot.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_dynamics2d.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_footbot.so"
 [INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_qtopengl.so"
+[INFO] Loaded library "/usr/lib/argos3/libargos3plugin_simulator_spiri.so"
 [INFO] Not using threads
-[INFO] Using random seed = 893899
+[INFO] Using random seed = 283629
 [INFO] Using simulation clock tick = 0.03125
-[INFO] Total experiment length in clock ticks = 115200
+[INFO] Total experiment length in clock ticks = 57600
 [INFO] Loaded library "./build/source/CPFA/libCPFA_controller.so"
 [INFO] Loaded library "./build/source/CPFA/libCPFA_loop_functions.so"
 [INFO] The physics engine "dyn2d" will perform 10 iterations per tick (dt = 0.003125 sec)
