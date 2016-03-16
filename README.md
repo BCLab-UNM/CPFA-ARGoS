@@ -1,4 +1,4 @@
-#iAnt-ARGoS
+#CPFA-ARGoS
 
 ARGoS (Autonomous Robots Go Swarming) is a multi-physics robot simulator. iAnt-ARGoS is an extension to ARGoS that implements the iAnt CPFA algorithm and provides a mechanism for performing experiments with iAnts.
 
@@ -51,31 +51,45 @@ ARGoS is available for Linux and Macintosh systems. It is currently not supporte
   $ brew upgrade argos3
   ```
 
-#####2. Compiling and Running the iAnt CPFA in ARGoS
+#####2. Compiling and Running the CPFA in ARGoS
 
 Once ARGoS is installed on your system. You can download the files in this repo, compile them for your system, and run the iAnt CPFA in ARGoS.
 
-1. [Download](https://github.com/BCLab-UNM/iAnt-ARGoS/archive/master.zip) the iAnt-ARGoS files and unzip the folder in a directory of your choice.
+1. Pull the code from this repository.
 
-2. From the Terminal, use the following commands to compile the iAnt CPFA code:
+2. From the terminal, use build.sh script to compile the code:
   ```
-  $ cd iAnt-ARGoS-master  # go into the iAnt-ARGoS directory
-  $ cd build              # go into the build directory
-  $ cmake ..              # setup compilation with cmake
-  $ make                  # compile the iAnt CPFA code
-  $ cd ..                 # get out of the build directory
+  $ ./build.sh
   ```
 
-3. Launch ARGoS with the XML configuration file for your system:
-  * for Linux systems:
-    ```
-    $ argos3 -c experiments/iAnt_linux.argos
-    ```
+CPFA-ARGoS includes CPFA evolver. This program uses a distributed version of ga-lib to evolve CPFA parameters. An example script for running cpfa_evolver is provided: evolve_EXAMPLE.sh.
 
-  * for Mac systems:
-    ```
-    $ argos3 -c experiments/iAnt_mac.argos
-    ```
+CPFA evolver uses MPI to distribute argos evaluations across a cluster. An example machine file (moses_cluster) specifies the hostnames of the MPI nodes to use and the number of processes to run on each node.
+
+evolve_EXAMPLE.sh takes two arguments. The number of MPI processes to run and the machine file name for the MPI cluster. 
+
+Since the evolver relies on MPI packages that are not required for compiling the CPFA, compilation of the evolver is turned off by default. 
+
+To build the CPFA evolver modify the build.sh script and change
+
+```
+cmake -DBUILD_EVOLVER=NO ..
+```
+
+to 
+
+```
+cmake -DBUILD_EVOLVER=YES ..
+```
+
+The evolver takes an experiment xml file argument that specifies the simulation parameters. The CPFA genome in that experient file is ignored and evolved parameters used instead. Make sure visualisation is turned off in this experiment file. 
+
+######3. Running an Experiment
+To run an experiment launch ARGoS with the XML configuration file for your system:
+  ```
+  $ argos3 -c experiments/experiment_file.xml
+  ```
+
 
 ###Useful Links
 
@@ -84,3 +98,4 @@ Once ARGoS is installed on your system. You can download the files in this repo,
 | official ARGoS website and documentation    | http://www.argos-sim.info/          |
 | homebrew utility for Mac OSX installations  | http://brew.sh/                     |
 | cmake utility information                   | http://www.cmake.org/documentation/ |
+| running MPI programs                        | https://www.shodor.org/refdesk/Resources/Tutorials/RunningMPI/ |
