@@ -13,5 +13,7 @@ cmake -DBUILD_EVOLVER=NO ..
 echo "Making..."
 make
 
+cd ..
+
 echo "Finished."
 
