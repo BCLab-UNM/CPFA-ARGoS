@@ -5,21 +5,13 @@
     mkdir build
 #fi
 
-echo "Compiling ga-mpi library..."
-cd source
-make clean
-make lib
-cd ..
-
 cd build
+
 echo "Configuring Makefiles with CMAKE..."
-cmake ..
+cmake -DBUILD_EVOLVER=NO .. 
 
-echo "Making code..."
+echo "Making..."
 make
-cd ..
 
-echo "Finished. Call run.sh to run the CPFA 
-or evolve.sh to run the openmpi genetic algorithm 
-to optimize CPFA paramters."
+echo "Finished."
 

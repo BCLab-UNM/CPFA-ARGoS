@@ -3,9 +3,14 @@
 ###############################################
 cmake_minimum_required(VERSION 2.8)
 
-ADD_CUSTOM_TARGET(
-  libga-mpi.a ALL
-  COMMAND ${CMAKE_MAKE_PROGRAM}
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/..
-  )
+file(GLOB GA-MPI_LIB_SRC
+    "*.h"
+    "*.C"
+)
 
+# Check for the MPI package.
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
+
+add_library(GA-MPI STATIC ${GA-MPI_LIB_SRC})
+target_link_libraries(GA-MPI ${MPI_LIBRARIES})

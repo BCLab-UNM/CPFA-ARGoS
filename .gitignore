@@ -1,5 +1,9 @@
-# ...silly Macs
+# OS X
 .DS_Store
+
+# Object files
+.o
+.a
 
 # Emacs
 *~
@@ -10,6 +14,7 @@
 auto-save-list
 tramp
 .\#*
+
 
 build
 results
