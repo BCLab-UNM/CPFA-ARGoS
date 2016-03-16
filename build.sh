@@ -8,7 +8,7 @@
 cd build
 
 echo "Configuring Makefiles with CMAKE..."
-cmake -DBUILD_EVOLVER=NO .. 
+cmake -DBUILD_EVOLVER=NO -DCMAKE_BUILD_TYPE=Debug .. 
 
 echo "Making..."
 make
