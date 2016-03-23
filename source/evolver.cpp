@@ -316,7 +316,7 @@ void CPFAInitializer(GAGenome & c)
 {
   // For the exponential PDF needed to initialize some of the genes
   std::default_random_engine generator;
-  std::exponential_distribution<double> exponential_distribution_20(10.0);
+  std::exponential_distribution<double> exponential_distribution_10(10.0);
   std::exponential_distribution<double> exponential_distribution_5(5.0);
   std::uniform_real_distribution<double> uniform_distribution_0_1(0.0, 1.0);
   std::uniform_real_distribution<double> uniform_distribution_0_4PI(0.0, 4.0*M_PI);
@@ -331,7 +331,7 @@ void CPFAInitializer(GAGenome & c)
   child.gene(3, exponential_distribution_5(generator)); // Rate of informed search decay
   child.gene(4, uniform_distribution_0_20(generator)); // Rate of site fidelity
   child.gene(5, uniform_distribution_0_20(generator)); // Rate of laying pheremone
-  child.gene(6, exponential_distribution_20(generator)); // Rate of pheremone decay
+  child.gene(6, exponential_distribution_10(generator)); // Rate of pheremone decay
 }
 
 // The mutation operator based on the original from GALib but adds stdev
