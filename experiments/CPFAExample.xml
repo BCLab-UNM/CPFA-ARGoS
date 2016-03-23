@@ -41,7 +41,7 @@
                   SearchStepSize                    = "0.08"
                   RobotForwardSpeed                 = "16.0"
                   RobotRotationSpeed                = "8.0"
-		  DestinationNoiseStdev             = "2.0"
+		  DestinationNoiseStdev             = "0.0"
 		  PositionNoiseStdev             = "0.00"
 		  ResultsDirectoryPath              = "results/"/>
       </params>
