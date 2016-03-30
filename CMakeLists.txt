@@ -67,6 +67,7 @@ link_directories(${ARGOS_LIBRARY_DIRS} build)
 
 # Descend into the source code directory and build the CPFA libraries. This is all that's needed to run experiments.
 add_subdirectory(source)
+add_subdirectory(test)
 
 # Only build the evolver program if selected.
 if (BUILD_EVOLVER)
@@ -80,7 +81,7 @@ find_package( Boost REQUIRED COMPONENTS system filesystem )
 include_directories( ${Boost_INCLUDE_DIRS} )
 
 # Specify the evolver program as a compile target.
-add_executable(cpfa_evolver source/evolver.cpp)
+add_executable(cpfa_evolver source/evolver.cpp test/CPFA/CPFA_loop_functions_test.c test/CPFA/CPFA_loop_funtions_test.h)
 
 # Specify the libraries needed to compile the evolver.
 target_link_libraries(cpfa_evolver CPFA_controller
