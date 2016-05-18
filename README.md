@@ -1,12 +1,47 @@
 #CPFA-ARGoS
 
-ARGoS (Autonomous Robots Go Swarming) is a multi-physics robot simulator. iAnt-ARGoS is an extension to ARGoS that implements the iAnt CPFA algorithm and provides a mechanism for performing experiments with iAnts.
+ARGoS (Autonomous Robots Go Swarming) is a multi-physics robot simulator. iAnt-ARGoS is an extension to ARGoS that implements the CPFA-ARGoS algorithm and provides a mechanism for performing experiments with iAnts.
 
 ###Quick Start Installation Guide
 
+The CPFA-ARGoS system has two components: the CPFA logic controllers that implement the CPFA algorithm in the ARGoS robot simulator, and the Genetic Algorithm that evolves the parameters that the CPFA algorithm uses. You can run the CPFA algorithm on ARGoS using OS X or Linux (see installation instructions below). To run the evolver you must use the Moses MPI cluster, which has 6 hosts with 24 cores. You can also use the cluster to run experiments without having to tie up your local machine.
+
+#####0. Setting up your MPI environment 
+
+#####A. Request an account on the MPI cluster by contacting the cluster admin (Matthew Fricke).
+#####B. Login to pragma.cs.unm.edu using your account
+#####C. Setup key based authentication so MPI can access the machines in the cluster
+
+    $ ssh-keygen -t rsa
+
+Add keychain key manager to your ~/.bashrc login script:
+
+     ### START-Keychain ###
+     # Let  re-use ssh-agent and/or gpg-agent between logins
+     /usr/bin/keychain $HOME/.ssh/id_rsa
+     source $HOME/.keychain/$HOSTNAME-sh
+     ### End-Keychain ###
+
+Save ~/.bashrc
+
+and apply the changes:
+
+    $ source ~/.bashrc
+
+Copy the ssh key to the cluster machines and follow the instructions that come up:
+
+    $ ssh-copy-id eros
+    $ ssh-copy-id pragma
+    $ ssh-copy-id ludus
+    $ ssh-copy-id philia
+    $ ssh-copy-id philautia
+    $ ssh-copy-id agape
+
+Now when you run the CPFA evolution run script MPI will work correctly.
+
 In order to use the iAnt CPFA in ARGoS, you must first install ARGoS on your system then download and compile the code in this repo to run with ARGoS.
 
-#####1. Installing ARGoS
+#####1. Installing ARGoS (ARGoS is already installed on the Moses cluster)
 
 ARGoS is available for Linux and Macintosh systems. It is currently not supported on Windows. Detailed installation instructions can be found on the [ARGoS Website](http://www.argos-sim.info/user_manual.php).
 
