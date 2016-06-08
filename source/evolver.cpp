@@ -64,9 +64,7 @@ int main(int argc, char **argv)
   char hostname[1024];                                                                                                       
   hostname[1023] = '\0';                                          
   gethostname(hostname, 1023);
-
-  srand(time(NULL));
-
+  
   double mutation_rate = 0.01;
   double crossover_rate = 0.01;
   int population_size = 10;
@@ -146,7 +144,10 @@ int main(int argc, char **argv)
   for(int i=1 ; i<argc ; i++)
     if(strcmp(argv[i++],"seed") == 0)
       seed = atoi(argv[i]);
-	
+
+  srand(seed);
+  std::default_random_engine generator;
+  generator.seed(seed);
   // popsize / mpi_tasks must be an integer
   population_size = mpi_tasks * int((double)population_size/(double)mpi_tasks+0.999);
   
@@ -315,7 +316,7 @@ int main(int argc, char **argv)
 void CPFAInitializer(GAGenome & c)
 {
   // For the exponential PDF needed to initialize some of the genes
-  std::default_random_engine generator;
+  
   std::exponential_distribution<double> exponential_distribution_10(10.0);
   std::exponential_distribution<double> exponential_distribution_5(5.0);
   std::uniform_real_distribution<double> uniform_distribution_0_1(0.0, 1.0);
@@ -355,7 +356,7 @@ int GARealGaussianMutatorStdev(GAGenome& g, float pmut)
 	   child.alleleset(i).type() == GAAllele::DISCRETIZED)
 	  value = child.alleleset(i).allele();
 	else if(child.alleleset(i).type() == GAAllele::BOUNDED){
-	  value += GAUnitGaussian()*mutation_stdev*(child.alleleset(i).upper()-child.alleleset(i).lower()); // since the standard deviation varies proportionally to a constant multiplier 
+	  value += GAUnitGaussian()*mutation_stdev;//*(child.alleleset(i).upper()-child.alleleset(i).lower()); // since the standard deviation varies proportionally to a constant multiplier 
 	  value = GAMax(child.alleleset(i).lower(), value);
 	  value = GAMin(child.alleleset(i).upper(), value);
 	}
