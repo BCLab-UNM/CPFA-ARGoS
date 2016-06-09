@@ -51,6 +51,8 @@ string experiment_path;
 void CPFAInitializer(GAGenome & c);
 int GARealGaussianMutatorStdev(GAGenome &, float);
 
+std::default_random_engine generator;
+
 int main(int argc, char **argv)
 {
   std::chrono::time_point<std::chrono::system_clock> program_start, program_end;
@@ -146,7 +148,6 @@ int main(int argc, char **argv)
       seed = atoi(argv[i]);
 
   srand(seed);
-  std::default_random_engine generator;
   generator.seed(seed);
   // popsize / mpi_tasks must be an integer
   population_size = mpi_tasks * int((double)population_size/(double)mpi_tasks+0.999);
