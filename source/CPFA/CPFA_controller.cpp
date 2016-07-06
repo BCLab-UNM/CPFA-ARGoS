@@ -375,7 +375,7 @@ void CPFA_controller::Searching() {
 		*/
 
 		      SetIsHeadingToNest(false);
-		      SetTarget(turn_vector + GetPosition());
+		      if(IsAtTarget())SetTarget(turn_vector + GetPosition());
             }
         }
 	else
