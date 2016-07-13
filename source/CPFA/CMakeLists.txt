@@ -5,7 +5,7 @@
 
 add_library(CPFA_loop_functions SHARED CPFA_loop_functions.h
                                        CPFA_loop_functions.cpp
-									   CPFA_qt_user_functions.h
+                                       CPFA_qt_user_functions.h
                                        CPFA_qt_user_functions.cpp)
 
 add_library(CPFA_controller     SHARED CPFA_controller.h
@@ -18,8 +18,8 @@ add_library(CPFA_controller     SHARED CPFA_controller.h
 ###############################################
 
 target_link_libraries(CPFA_controller
-					  BaseController
-					  Pheromone)
+                      BaseController
+                      Pheromone)
 
 target_link_libraries(CPFA_loop_functions
                       CPFA_controller

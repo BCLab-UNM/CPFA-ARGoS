@@ -1,16 +1,15 @@
-
 ###############################################
 # define shared object files
 ###############################################
 
 add_library(BaseController SHARED BaseController.h
-                                      BaseController.cpp)
+                                  BaseController.cpp)
 
 add_library(Food           SHARED Food.h
-                                      Food.cpp)
+                                  Food.cpp)
 
-add_library(Pheromone           SHARED Pheromone.h
-                                      Pheromone.cpp)
+add_library(Pheromone      SHARED Pheromone.h
+                                  Pheromone.cpp)
 
 ###############################################
 # link shared object files to dependencies

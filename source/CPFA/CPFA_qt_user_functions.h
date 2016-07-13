@@ -18,20 +18,20 @@ class CPFA_qt_user_functions : public argos::CQTOpenGLUserFunctions {
 
 		CPFA_qt_user_functions();
 
-        /* interface functions between QT and ARGoS */
-        void DrawOnRobot(argos::CFootBotEntity& entity);
-        void DrawOnArena(argos::CFloorEntity& entity);
+		/* interface functions between QT and ARGoS */
+		void DrawOnRobot(argos::CFootBotEntity& entity);
+		void DrawOnArena(argos::CFloorEntity& entity);
 
-    private:
+	private:
 
-        /* private helper drawing functions */
-        void DrawNest();
-        void DrawFood();
-        void DrawFidelity();
-        void DrawPheromones();
-        void DrawTargetRays();
+		/* private helper drawing functions */
+		void DrawNest();
+		void DrawFood();
+		void DrawFidelity();
+		void DrawPheromones();
+		void DrawTargetRays();
 
-        CPFA_loop_functions& loopFunctions;
+		CPFA_loop_functions& loopFunctions;
 
 };
 

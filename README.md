@@ -124,9 +124,10 @@ To run an experiment launch ARGoS with the XML configuration file for your syste
 
 ###Useful Links
 
-| Description                                 | Website                             |
-|:--------------------------------------------|:------------------------------------|
-| official ARGoS website and documentation    | http://www.argos-sim.info/          |
-| homebrew utility for Mac OSX installations  | http://brew.sh/                     |
-| cmake utility information                   | http://www.cmake.org/documentation/ |
-| running MPI programs                        | https://www.shodor.org/refdesk/Resources/Tutorials/RunningMPI/ |
+| Description                                | Website                                                        |
+|:-------------------------------------------|:---------------------------------------------------------------|
+| BCLab Git Branching Model                  | https://github.com/BCLab-UNM/git-branch-model                  |
+| official ARGoS website and documentation   | http://www.argos-sim.info/                                     |
+| homebrew utility for Mac OSX installations | http://brew.sh/                                                |
+| cmake utility information                  | http://www.cmake.org/documentation/                            |
+| running MPI programs                       | https://www.shodor.org/refdesk/Resources/Tutorials/RunningMPI/ |
