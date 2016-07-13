@@ -252,6 +252,7 @@ void CPFA_controller::Departing()
 
 	  SetIsHeadingToNest(false);
 	  SetTarget(turn_vector + GetPosition());
+	  Stop();
 	}
     }
     /* Are we informed? I.E. using site fidelity or pheromones. */
