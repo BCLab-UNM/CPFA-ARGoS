@@ -244,6 +244,7 @@ void CPFA_controller::Departing()
 
 			SetIsHeadingToNest(false);
 			SetTarget(turn_vector + GetPosition());
+			Stop();
 		}
 	}
 	
