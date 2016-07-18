@@ -234,17 +234,19 @@ void CPFA_controller::Departing()
 		if(!isInformed && randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching) {
 			SearchTime = 0;
 			CPFA_state = SEARCHING;
-			argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
+			/*argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
 			argos::Real rand = RNG->Gaussian(USV);
 			argos::CRadians rotation(rand);
 			argos::CRadians angle1(rotation.UnsignedNormalize());
 			argos::CRadians angle2(GetHeading().UnsignedNormalize());
 			argos::CRadians turn_angle(angle1 + angle2);
 			argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-
+            
 			SetIsHeadingToNest(false);
 			SetTarget(turn_vector + GetPosition());
-			Stop();
+			Stop(); */
+			SetIsHeadingToNest(false);
+			SetTarget(GetPosition());
 		}
 	}
 	
