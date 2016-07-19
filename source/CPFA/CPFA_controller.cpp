@@ -334,39 +334,41 @@ void CPFA_controller::Searching() {
 			}
 			// informed search
 			else if(isInformed == true) {
-				size_t          t           = SearchTime++;
-				argos::Real     twoPi       = (argos::CRadians::TWO_PI).GetValue();
-				argos::Real     pi          = (argos::CRadians::PI).GetValue();
-				argos::Real     isd         = LoopFunctions->RateOfInformedSearchDecay;
-				argos::Real     correlation = GetExponentialDecay((2.0 * twoPi) - LoopFunctions->UninformedSearchVariation.GetValue(), t, isd);
-				argos::Real     rand = RNG->Gaussian(correlation + LoopFunctions->UninformedSearchVariation.GetValue());
-				argos::CRadians rotation(GetBound(rand, -pi, pi));
-				argos::CRadians angle1(rotation);
-				argos::CRadians angle2(GetHeading());
-				argos::CRadians turn_angle(angle2 + angle1);
-				argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-
-				//argos::LOG << "INFORMED SEARCH: rotation: " << angle1 << std::endl;
-				//argos::LOG << "INFORMED SEARCH: old heading: " << angle2 << std::endl;
-
-				/*
-				ofstream log_output_stream;
-				log_output_stream.open("informed_angle1.log", ios::app);
-				log_output_stream << angle1.GetValue() << endl;
-				log_output_stream.close();
-
-				log_output_stream.open("informed_angle2.log", ios::app);
-				log_output_stream << angle2.GetValue() << endl;
-				log_output_stream.close();
-
-				log_output_stream.open("informed_turning_angle.log", ios::app);
-				log_output_stream << turn_angle.GetValue() << endl;
-				log_output_stream.close();
-				*/
-
+				
 				SetIsHeadingToNest(false);
 				
-				if(IsAtTarget()) SetTarget(turn_vector + GetPosition());
+				if(IsAtTarget()) {
+				    size_t          t           = SearchTime++;
+				    argos::Real     twoPi       = (argos::CRadians::TWO_PI).GetValue();
+				    argos::Real     pi          = (argos::CRadians::PI).GetValue();
+				    argos::Real     isd         = LoopFunctions->RateOfInformedSearchDecay;
+				    argos::Real     correlation = GetExponentialDecay((2.0 * twoPi) - LoopFunctions->UninformedSearchVariation.GetValue(), t, isd);
+				    argos::Real     rand = RNG->Gaussian(correlation + LoopFunctions->UninformedSearchVariation.GetValue());
+				    argos::CRadians rotation(GetBound(rand, -pi, pi));
+				    argos::CRadians angle1(rotation);
+				    argos::CRadians angle2(GetHeading());
+				    argos::CRadians turn_angle(angle2 + angle1);
+				    argos::CVector2 turn_vector(SearchStepSize, turn_angle);
+
+				    //argos::LOG << "INFORMED SEARCH: rotation: " << angle1 << std::endl;
+				    //argos::LOG << "INFORMED SEARCH: old heading: " << angle2 << std::endl;
+
+				    /*
+				    ofstream log_output_stream;
+				    log_output_stream.open("informed_angle1.log", ios::app);
+				    log_output_stream << angle1.GetValue() << endl;
+				    log_output_stream.close();
+
+    				log_output_stream.open("informed_angle2.log", ios::app);
+	    			log_output_stream << angle2.GetValue() << endl;
+	    			log_output_stream.close();
+
+	    			log_output_stream.open("informed_turning_angle.log", ios::app);
+	    			log_output_stream << turn_angle.GetValue() << endl;
+	    			log_output_stream.close();
+	    			*/
+				    SetTarget(turn_vector + GetPosition());
+				}
 			}
 		}
 		else {
