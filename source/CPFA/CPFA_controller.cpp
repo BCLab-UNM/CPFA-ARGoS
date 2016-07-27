@@ -231,21 +231,26 @@ void CPFA_controller::Departing()
 
 	/* When not informed, continue to travel until randomly switching to the searching state. */
 	if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
-		if(!isInformed && randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching) {
-			Stop();
-   SearchTime = 0;
-			CPFA_state = SEARCHING;
-			argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
-			argos::Real rand = RNG->Gaussian(USV);
-			argos::CRadians rotation(rand);
-			argos::CRadians angle1(rotation.UnsignedNormalize());
-			argos::CRadians angle2(GetHeading().UnsignedNormalize());
-			argos::CRadians turn_angle(angle1 + angle2);
-			argos::CVector2 turn_vector(SearchStepSize, turn_angle);
+		if(!isInformed){
+   if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching && GetTarget() != argos::CVector2(0,0)) {
+     Stop();
+     SearchTime = 0;
+			  CPFA_state = SEARCHING;
+			  argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
+			  argos::Real rand = RNG->Gaussian(USV);
+			  argos::CRadians rotation(rand);
+			  argos::CRadians angle1(rotation.UnsignedNormalize());
+			  argos::CRadians angle2(GetHeading().UnsignedNormalize());
+			  argos::CRadians turn_angle(angle1 + angle2);
+			  argos::CVector2 turn_vector(SearchStepSize, turn_angle);
             
-			SetIsHeadingToNest(false);
-			SetTarget(turn_vector + GetPosition());
-		}
+			  SetIsHeadingToNest(false);
+			  SetTarget(turn_vector + GetPosition());
+		  }
+    else if(distanceToTarget < TargetDistanceTolerance) {
+     SetRandomSearchLocation();
+    }
+  }
 	}
 	
 	/* Are we informed? I.E. using site fidelity or pheromones. */	
