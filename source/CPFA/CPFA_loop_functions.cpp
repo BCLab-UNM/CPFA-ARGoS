@@ -328,6 +328,39 @@ void CPFA_loop_functions::PowerLawFoodDistribution() {
 	FoodItemCount = foodPlaced;
 }
 
+void CPFA_loop_functions::CreateNest(argos::CVector2 position){ //qilu 07/26/2016
+     Real     x_coordinate = position.GetX();
+     Real     y_coordinate = position.GetY();
+    
+     argos::CRange<argos::Real>   RangeX;
+     RangeX.Set(x_coordinate - 2*NestRadius, x_coordinate + 2*NestRadius);
+     argos::CRange<argos::Real>   RangeY;
+     RangeY.Set(y_coordinate - 2*NestRadius, y_coordinate + 2*NestRadius);
+     while(IsOutOfBounds(position, NestRadius)){
+         position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
+     }
+     NestPositions.push_back(position);
+ }
+ 
+ 
+bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, argos::Real radius){ //qilu 07/26/2016
+  
+  argos::Real x_min = p.GetX() - radius;
+	 argos::Real x_max = p.GetX() + radius;
+
+	 argos::Real y_min = p.GetY() - radius;
+	 argos::Real y_max = p.GetY() + radius;
+  if((x_min < (ForageRangeX.GetMin() + radius))
+			|| (x_max > (ForageRangeX.GetMax() - radius)) ||
+			(y_min < (ForageRangeY.GetMin() + radius)) ||
+			(y_max > (ForageRangeY.GetMax() - radius)))		return true;
+  
+  if(IsCollidingWithFood(p, radius)) return true;
+  
+  if(IsCollidingWithNest(p, radius)) return true;
+
+  return false;
+}
 bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, size_t length, size_t width) {
 	argos::CVector2 placementPosition = p;
 
@@ -363,11 +396,35 @@ bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, size_t length, size_t
 	return false;
 }
 
+bool CPFA_loop_functions::IsCollidingWithNest(argos::CVector2 p, argos::Real radius){ //qilu 07/26/2016 for nest
+ argos::Real nestRadiusPlusBuffer = NestRadius + radius;
+	argos::Real NRPB_squared = nestRadiusPlusBuffer * nestRadiusPlusBuffer;
+ if(NestPositions.size()==0) return false; //qilu 07/26/2016
+ 
+ for(size_t i=0; i < NestPositions.size(); i++){ //qilu 07/26/2016
+      if( (p - NestPositions[i]).SquareLength() < NRPB_squared) return true;
+  }
+ }
+  
 bool CPFA_loop_functions::IsCollidingWithNest(argos::CVector2 p) {
 	argos::Real nestRadiusPlusBuffer = NestRadius + FoodRadius;
 	argos::Real NRPB_squared = nestRadiusPlusBuffer * nestRadiusPlusBuffer;
 
-	return ((p - NestPosition).SquareLength() < NRPB_squared);
+ if(NestPositions.size()==0) return false; //qilu 07/26/2016
+	//return ((p - NestPosition).SquareLength() < NRPB_squared);
+ for(size_t i=0; i < NestPositions.size(); i++){ //qilu 07/26/2016
+      if( (p - NestPositions[i]).SquareLength() < NRPB_squared) return true;
+  }
+  return false;
+}
+
+bool CPFA_loop_functions::IsCollidingWithFood(argos::CVector2 p, argos::Real radius){ //qilu 07/26/2016 for nest
+ argos::Real foodRadiusPlusBuffer = FoodRadius + radius;
+	argos::Real FRPB_squared = foodRadiusPlusBuffer * foodRadiusPlusBuffer;
+ 
+ for(size_t i=0; i < FoodList.size(); i++){ //qilu 07/26/2016
+      if( (p - FoodList[i]).SquareLength() < FRPB_squared) return true;
+  }
 }
 
 bool CPFA_loop_functions::IsCollidingWithFood(argos::CVector2 p) {

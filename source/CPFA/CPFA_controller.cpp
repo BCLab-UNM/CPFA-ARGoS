@@ -41,6 +41,7 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
 	FoodDistanceTolerance *= FoodDistanceTolerance;
 	SetIsHeadingToNest(true);
 	SetTarget(argos::CVector2(0,0));
+ controllerID= GetId();//qilu 07/26/2016
 }
 
 void CPFA_controller::ControlStep() {
@@ -141,15 +142,22 @@ void CPFA_controller::CPFA() {
 }
 
 bool CPFA_controller::IsInTheNest() {
-	return ((GetPosition() - LoopFunctions->NestPosition).SquareLength()
-		< LoopFunctions->NestRadiusSquared);
+	//return ((GetPosition() - LoopFunctions->NestPosition).SquareLength()
+		//< LoopFunctions->NestRadiusSquared);
+  for (size_t i=0; i<LoopFunctions->NestPositions.size(); i++) { //qilu 07/26/2016
+        if ((GetPosition() - LoopFunctions->NestPositions[i]).SquareLength()<LoopFunctions->NestRadiusSquared) {
+            return true;
+        }
+  }
+  return false;
 }
 
 void CPFA_controller::SetLoopFunctions(CPFA_loop_functions* lf) {
 	LoopFunctions = lf;
 
 	// Initialize the SiteFidelityPosition
-	SiteFidelityPosition = LoopFunctions->NestPosition;
+	//SiteFidelityPosition = LoopFunctions->NestPosition;
+SiteFidelityPosition = CVector2(0,0); //qilu 07/26/2016
 
 	// Create the output file here because it needs LoopFunctions
 		
@@ -232,25 +240,24 @@ void CPFA_controller::Departing()
 	/* When not informed, continue to travel until randomly switching to the searching state. */
 	if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 		if(!isInformed){
-   if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching && GetTarget() != argos::CVector2(0,0)) {
-     Stop();
-     SearchTime = 0;
-			  CPFA_state = SEARCHING;
-			  argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
-			  argos::Real rand = RNG->Gaussian(USV);
-			  argos::CRadians rotation(rand);
-			  argos::CRadians angle1(rotation.UnsignedNormalize());
-			  argos::CRadians angle2(GetHeading().UnsignedNormalize());
-			  argos::CRadians turn_angle(angle1 + angle2);
-			  argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-            
-			  SetIsHeadingToNest(false);
-			  SetTarget(turn_vector + GetPosition());
-		  }
-    else if(distanceToTarget < TargetDistanceTolerance) {
-     SetRandomSearchLocation();
-    }
-  }
+		    if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching && GetTarget() != argos::CVector2(0,0)){
+       Stop();
+       SearchTime = 0;
+			    CPFA_state = SEARCHING;
+			    argos::Real USV = LoopFunctions->UninformedSearchVariation.GetValue();
+			    argos::Real rand = RNG->Gaussian(USV);
+			    argos::CRadians rotation(rand);
+			    argos::CRadians angle1(rotation.UnsignedNormalize());
+			    argos::CRadians angle2(GetHeading().UnsignedNormalize());
+			    argos::CRadians turn_angle(angle1 + angle2);
+			    argos::CVector2 turn_vector(SearchStepSize, turn_angle);
+			    SetIsHeadingToNest(false);
+			    SetTarget(turn_vector + GetPosition());
+			  }
+			  else if(distanceToTarget < TargetDistanceTolerance){
+			    SetRandomSearchLocation();
+			  }
+		}
 	}
 	
 	/* Are we informed? I.E. using site fidelity or pheromones. */	
@@ -290,19 +297,25 @@ void CPFA_controller::Searching() {
 
 			// randomly give up searching
 			if(random < LoopFunctions->ProbabilityOfReturningToNest) {
-				SetIsHeadingToNest(true);
-				SetTarget(LoopFunctions->NestPosition);
-				isGivingUpSearch = true;
-				CPFA_state = RETURNING;
+    if (LoopFunctions->NestPositions.size() !=0){
+        SetClosestNest();//qilu 07/26/2016
+				    SetIsHeadingToNest(true);
+				    //SetTarget(LoopFunctions->NestPosition);
+				    SetTarget(ClosestNest);
+        isGivingUpSearch = true;
+        //LoopFunctions->FidelityList.erase(controllerID); //qilu 07/26/2016
+			     //fidelity= CVector2(10000,10000); //qilu 07/26/2016
+			     //updateFidelity = false; //qilu 07/26/2016
+				    CPFA_state = RETURNING;
 			
-				/*
-				ofstream log_output_stream;
-				log_output_stream.open("giveup.txt", ios::app);
-				log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
-				log_output_stream.close();
-				*/
+				    /*
+				    ofstream log_output_stream;
+				    log_output_stream.open("giveup.txt", ios::app);
+				    log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
+				    log_output_stream.close();
+				    */
 
-				return;
+    				return; }
 			}
 
 			// uninformed search
@@ -412,7 +425,7 @@ void CPFA_controller::Surveying() {
 	// Set the survey countdown
 	else {
 		SetIsHeadingToNest(true); // Turn off error for this
-		SetTarget(LoopFunctions->NestPosition);
+		SetTarget(ClosestNest); //qilu 07/26/2016
 		CPFA_state = RETURNING;
 		survey_count = 0; // Reset
 	}
@@ -439,7 +452,8 @@ void CPFA_controller::Returning() {
 
 		if (isHoldingFood) { 
 			if(poissonCDF_pLayRate > r1) {
-				TrailToShare.push_back(LoopFunctions->NestPosition); // For drawing the waypoints
+				//TrailToShare.push_back(LoopFunctions->NestPosition); // For drawing the waypoints
+    TrailToShare.push_back(ClosestNest); //qilu 07/26/2016
 				argos::Real timeInSeconds = (argos::Real)(SimulationTick() / SimulationTicksPerSecond());
 				Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay);
 				LoopFunctions->PheromoneList.push_back(sharedPheromone);
@@ -502,7 +516,8 @@ void CPFA_controller::Returning() {
 	// Take a small step towards the nest so we don't overshoot by too much is we miss it
 	else {
 		SetIsHeadingToNest(true); // Turn off error for this
-		SetTarget(LoopFunctions->NestPosition);
+		//SetTarget(LoopFunctions->NestPosition);
+  SetTarget(ClosestNest); //qilu 07/26/2016
 	}		
 }
 
@@ -571,8 +586,14 @@ void CPFA_controller::SetHoldingFood() {
 
 		// We picked up food. Update the food list minus what we picked up.
 		if(IsHoldingFood() == true) {
+   if (LoopFunctions->NestPositions.size() == 0){
+    LoopFunctions->CreateNest(GetPosition()); //qilu 07/26/2016
+    //LoopFunctions->NestPositions.push_back(GetPosition()); //qilu 07/26/2016
+    }
+   SetClosestNest();//qilu 07/26/2016
 			SetIsHeadingToNest(true);
-			SetTarget(LoopFunctions->NestPosition);
+			//SetTarget(LoopFunctions->NestPosition);
+   SetTarget(ClosestNest); //qilu 07/26/2016
 			LoopFunctions->FoodList = newFoodList;
 			SetLocalResourceDensity();
 		} 
@@ -692,7 +713,8 @@ bool CPFA_controller::SetTargetPheromone() {
 
 	/* default target = nest; in case we have 0 active pheromones */
 	SetIsHeadingToNest(true);
-	SetTarget(LoopFunctions->NestPosition);
+	//SetTarget(LoopFunctions->NestPosition);
+ SetTarget(ClosestNest); //qilu 07/26/2016
 
 	/* Calculate a maximum strength based on active pheromone weights. */
 	for(size_t i = 0; i < LoopFunctions->PheromoneList.size(); i++) {
@@ -807,4 +829,23 @@ void CPFA_controller::UpdateTargetRayList() {
 	}
 }
 
+void CPFA_controller::SetClosestNest(){//qilu 07/26/2016
+    CVector2 robotPos = GetPosition();
+    Real minSquaredLen = (LoopFunctions->NestPositions[0]-robotPos).SquareLength();
+    size_t minIdex =0;
+    Real squaredLen;
+    for(size_t i=1; i<LoopFunctions->NestPositions.size(); i++){
+        squaredLen = (LoopFunctions->NestPositions[i]-robotPos).SquareLength();
+        if (squaredLen < minSquaredLen) {
+            minSquaredLen = squaredLen;
+            minIdex = i;
+        }
+    }
+    if (ClosestNest != LoopFunctions->NestPositions[minIdex]){
+		//LOG<<"switch to other closest nest..."<<endl;
+		//LoopFunctions->FidelityList.erase(controllerID);
+		//fidelity=CVector2(10000,10000);
+		ClosestNest = LoopFunctions->NestPositions[minIdex];
+		}		
+}
 REGISTER_CONTROLLER(CPFA_controller, "CPFA_controller")

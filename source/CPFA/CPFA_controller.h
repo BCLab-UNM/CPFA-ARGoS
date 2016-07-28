@@ -30,8 +30,11 @@ class CPFA_controller : public BaseController {
 		Real FoodDistanceTolerance;
 
 		void SetLoopFunctions(CPFA_loop_functions* lf);
+  void SetClosestNest();//qilu 07/26/2016
 
 	private:
+  argos::CVector2 ClosestNest; //qilu 07/26/2016
+  string 			controllerID;//qilu 07/26/2016
 
 		CPFA_loop_functions* LoopFunctions;
 		argos::CRandom::CRNG* RNG;

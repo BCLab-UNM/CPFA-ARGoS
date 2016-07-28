@@ -113,8 +113,8 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		argos::CRange<argos::Real>   ForageRangeX;
 		argos::CRange<argos::Real>   ForageRangeY;
 
-		argos::CVector2 NestPosition;
-
+		//argos::CVector2 NestPosition;
+  std::vector<argos::CVector2> NestPositions; //qilu 07/26/2016
 	private:
 
 		/* private helper functions */
@@ -122,8 +122,12 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		void ClusterFoodDistribution();
 		void PowerLawFoodDistribution();
 		bool IsOutOfBounds(argos::CVector2 p, size_t length, size_t width);
+  bool IsOutOfBounds(argos::CVector2 p, argos::Real radius); //qilu 07/26/2016 for nest
 		bool IsCollidingWithNest(argos::CVector2 p);
 		bool IsCollidingWithFood(argos::CVector2 p);
+  bool IsCollidingWithNest(argos::CVector2 p, argos::Real radius); //qilu 07/26/2016 for nest
+  bool IsCollidingWithFood(argos::CVector2 p, argos::Real radius);//qilu 07/26/2016 for nest
+  void CreateNest(argos::CVector2 position); //qilu 07/26/2016 
 		double score;
 		int PrintFinalScore;
 };

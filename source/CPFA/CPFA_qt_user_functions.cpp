@@ -59,17 +59,23 @@ void CPFA_qt_user_functions::DrawOnArena(CFloorEntity& entity) {
  *****/
 void CPFA_qt_user_functions::DrawNest() {
 	/* 2d cartesian coordinates of the nest */
-	Real x_coordinate = loopFunctions.NestPosition.GetX();
-	Real y_coordinate = loopFunctions.NestPosition.GetX();
+//	Real x_coordinate = loopFunctions.NestPosition.GetX();
+//	Real y_coordinate = loopFunctions.NestPosition.GetX();
+Real x_coordinate, y_coordinate; //qilu 07/26/2016
+for (size_t i=0; i< loopFunctions.NestPositions.size(); i++){ 
+     
+     x_coordinate = loopFunctions.NestPositions[i].GetX(); //qilu 07/05
+     y_coordinate = loopFunctions.NestPositions[i].GetY();
+     /* required: leaving this 0.0 will draw the nest inside of the floor */
+	    //Real elevation = loopFunctions.NestElevation;
 
-	/* required: leaving this 0.0 will draw the nest inside of the floor */
-	Real elevation = loopFunctions.NestElevation;
+	    /* 3d cartesian coordinates of the nest */
+	    //CVector3 nest_3d(x_coordinate, y_coordinate, elevation);
 
-	/* 3d cartesian coordinates of the nest */
-	CVector3 nest_3d(x_coordinate, y_coordinate, elevation);
-
-	/* Draw the nest on the arena. */
-	DrawCircle(nest_3d, CQuaternion(), loopFunctions.NestRadius, CColor::GRAY50);
+    	/* Draw the nest on the arena. */
+	    //DrawCircle(nest_3d, CQuaternion(), loopFunctions.NestRadius, CColor::GRAY50);
+     DrawCylinder(CVector3(x_coordinate, y_coordinate, 0.002), CQuaternion(), loopFunctions.NestRadius, 0.025, CColor::RED);
+    }
 }
 
 void CPFA_qt_user_functions::DrawFood() {
