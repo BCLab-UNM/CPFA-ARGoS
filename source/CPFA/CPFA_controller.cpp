@@ -240,7 +240,7 @@ void CPFA_controller::Departing()
 	/* When not informed, continue to travel until randomly switching to the searching state. */
 	if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 		if(!isInformed){
-		    if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching && GetTarget() != argos::CVector2(0,0)){
+		    if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching){
        Stop();
        SearchTime = 0;
 			    CPFA_state = SEARCHING;
