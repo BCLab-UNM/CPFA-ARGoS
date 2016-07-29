@@ -211,6 +211,9 @@ void CPFA_loop_functions::SetFoodDistribution() {
 		case 2:
 			PowerLawFoodDistribution();
 			break;
+  case 3:
+			GaussianFoodDistribution();
+			break;
 		default:
 			argos::LOGERR << "ERROR: Invalid food distribution in XML file.\n";
 	}
@@ -233,8 +236,31 @@ void CPFA_loop_functions::RandomFoodDistribution() {
 	}
 }
 
-void CPFA_loop_functions::ClusterFoodDistribution() {
+void CPFA_loop_functions::GaussianFoodDistribution() {
+ FoodList.clear();
+ argos::CVector2 centerPosition;
+ argos::CVector2 placementPosition;
+ 
+ for(size_t i = 0; i < NumberOfClusters; i++) {
+		  centerPosition.Set(RNG->Uniform(ForageRangeX), RNG->Uniform(ForageRangeY));
 
+		  while(IsOutOfArena(centerPosition) || IsCollidingWithNest(centerPosition, NestRadius)) {
+			  centerPosition.Set(RNG->Uniform(ForageRangeX), RNG->Uniform(ForageRangeY));
+		  }
+    for(size_t i=0; i<32; i++){
+       placementPosition.Set(centerPosition.GetX() + RNG->Gaussian(0.15, 0), centerPosition.GetY() + RNG->Gaussian(0.15, 0));
+       while(IsOutOfArena(placementPosition, FoodRadius)){
+            placementPosition.Set(centerPosition.GetX() + RNG->Gaussian(0.15, 0), centerPosition.GetY() + RNG->Gaussian(0.15, 0));
+        }
+       
+       FoodList.push_back(placementPosition);
+       FoodColoringList.push_back(argos::CColor::BLACK);
+     }
+   }
+ }
+ 
+void CPFA_loop_functions::ClusterFoodDistribution() {
+FoodList.clear();
 	argos::Real     foodOffset  = 3.0 * FoodRadius;
 	size_t          foodToPlace = NumberOfClusters * ClusterWidthX * ClusterLengthY;
 	size_t          foodPlaced = 0;
@@ -276,7 +302,9 @@ void CPFA_loop_functions::ClusterFoodDistribution() {
 	}
 }
 
+
 void CPFA_loop_functions::PowerLawFoodDistribution() {
+ FoodList.clear();
 	argos::Real foodOffset     = 3.0 * FoodRadius;
 	size_t      foodPlaced     = 0;
 	size_t      powerLawLength = 1;
@@ -343,8 +371,17 @@ void CPFA_loop_functions::CreateNest(argos::CVector2 position){ //qilu 07/26/201
  }
  
  
-bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, argos::Real radius){ //qilu 07/26/2016
+bool CPFA_loop_functions::IsOutOfArena(argos::CVector2 p){
+  argos::Real x = p.GetX();
+	 argos::Real y = p.GetY();
   
+  if((x < ForageRangeX.GetMin())
+			|| (x > ForageRangeX.GetMax()) ||
+			(y < ForageRangeY.GetMin()) ||
+			(y > ForageRangeY.GetMax()))		return true;
+   }
+ 
+ bool CPFA_loop_functions::IsOutOfArena(argos::CVector2 p, argos::Real radius){
   argos::Real x_min = p.GetX() - radius;
 	 argos::Real x_max = p.GetX() + radius;
 
@@ -354,6 +391,21 @@ bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, argos::Real radius){ 
 			|| (x_max > (ForageRangeX.GetMax() - radius)) ||
 			(y_min < (ForageRangeY.GetMin() + radius)) ||
 			(y_max > (ForageRangeY.GetMax() - radius)))		return true;
+   
+   }
+   
+bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, argos::Real radius){ //qilu 07/26/2016
+  /*
+  argos::Real x_min = p.GetX() - radius;
+	 argos::Real x_max = p.GetX() + radius;
+
+	 argos::Real y_min = p.GetY() - radius;
+	 argos::Real y_max = p.GetY() + radius;
+  if((x_min < (ForageRangeX.GetMin() + radius))
+			|| (x_max > (ForageRangeX.GetMax() - radius)) ||
+			(y_min < (ForageRangeY.GetMin() + radius)) ||
+			(y_max > (ForageRangeY.GetMax() - radius)))		return true;*/
+  if (IsOutOfArena(p, radius)) return true;
   
   if(IsCollidingWithFood(p, radius)) return true;
   

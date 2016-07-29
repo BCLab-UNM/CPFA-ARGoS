@@ -73,7 +73,7 @@
 	     DrawIDs = "1"
 	     DrawTrails = "1"
 	     DrawTargetRays = "1"
-	     FoodDistribution = "2"
+	     FoodDistribution = "3"
 	     FoodItemCount = "256"
 	     NumberOfClusters = "4"
 	     ClusterWidthX = "8"
@@ -98,7 +98,7 @@
                 distances="0.2, 0.2, 0.0"
                 layout="6, 6, 1" />
       <orientation method="constant" values="0.0, 0.0, 0.0" />
-      <entity quantity="1" max_trials="100">
+      <entity quantity="6" max_trials="100">
         <foot-bot id="CPFA_">
           <controller config="CPFA"/>
         </foot-bot>

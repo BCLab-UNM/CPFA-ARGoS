@@ -118,10 +118,13 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 	private:
 
 		/* private helper functions */
+  void GaussianFoodDistribution();
 		void RandomFoodDistribution();
 		void ClusterFoodDistribution();
 		void PowerLawFoodDistribution();
-		bool IsOutOfBounds(argos::CVector2 p, size_t length, size_t width);
+  bool IsOutOfArena(argos::CVector2 p);
+		bool IsOutOfArena(argos::CVector2 p, argos::Real radius);
+  bool IsOutOfBounds(argos::CVector2 p, size_t length, size_t width);
   bool IsOutOfBounds(argos::CVector2 p, argos::Real radius); //qilu 07/26/2016 for nest
 		bool IsCollidingWithNest(argos::CVector2 p);
 		bool IsCollidingWithFood(argos::CVector2 p);
