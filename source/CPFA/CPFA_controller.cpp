@@ -226,6 +226,7 @@ SiteFidelityPosition = CVector2(0,0); //qilu 07/26/2016
 
 void CPFA_controller::Departing()
 {
+ LOG<<"Departing..."<<endl;
 	argos::Real distanceToTarget = (GetPosition() - GetTarget()).Length();
 	argos::Real randomNumber = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
@@ -241,6 +242,7 @@ void CPFA_controller::Departing()
 	if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 		if(!isInformed){
 		    if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching){
+       LOG<<"Switch to search..."<<endl;
        Stop();
        SearchTime = 0;
 			    CPFA_state = SEARCHING;
@@ -280,6 +282,7 @@ void CPFA_controller::Departing()
 }
 
 void CPFA_controller::Searching() {
+ LOG<<"Searching..."<<endl;
 	// "scan" for food only every half of a second
 	//if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 		SetHoldingFood();
@@ -406,6 +409,7 @@ void CPFA_controller::Searching() {
 // Cause the robot to rotate in place as if surveying the surrounding targets
 // Turns 36 times by 10 degrees
 void CPFA_controller::Surveying() {
+ LOG<<"Surveying..."<<endl;
 	if (survey_count <= 4) { 
 		CRadians rotation(survey_count*3.14/2); // divide by 10 so the vecot is small and the linear motion is minimized
 		argos::CVector2 turn_vector(SearchStepSize, rotation.SignedNormalize());
@@ -438,6 +442,7 @@ void CPFA_controller::Surveying() {
  * up on searching and is returning to the nest.
  *****/
 void CPFA_controller::Returning() {
+ LOG<<"Returning..."<<endl;
 	//SetHoldingFood();
 	//SetTarget(LoopFunctions->NestPosition);
 

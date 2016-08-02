@@ -75,7 +75,7 @@
 	     DrawTargetRays = "1"
 	     FoodDistribution = "3"
 	     FoodItemCount = "256"
-	     NumberOfClusters = "4"
+	     NumberOfClusters = "60"
 	     ClusterWidthX = "8"
 	     ClusterLengthY = "8"
 	     PowerRank = "4"

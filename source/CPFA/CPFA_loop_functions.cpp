@@ -359,15 +359,16 @@ void CPFA_loop_functions::PowerLawFoodDistribution() {
 void CPFA_loop_functions::CreateNest(argos::CVector2 position){ //qilu 07/26/2016
      Real     x_coordinate = position.GetX();
      Real     y_coordinate = position.GetY();
-    
+     size_t  num_trail=0;    
      argos::CRange<argos::Real>   RangeX;
-     RangeX.Set(x_coordinate - 2*NestRadius, x_coordinate + 2*NestRadius);
+     RangeX.Set(x_coordinate - NestRadius, x_coordinate + NestRadius);
      argos::CRange<argos::Real>   RangeY;
-     RangeY.Set(y_coordinate - 2*NestRadius, y_coordinate + 2*NestRadius);
-     while(IsOutOfBounds(position, NestRadius)){
-         position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
-     }
-     NestPositions.push_back(position);
+     RangeY.Set(y_coordinate - NestRadius, y_coordinate + NestRadius);
+     while(IsOutOfBounds(position, NestRadius) && num_trail<20){
+             position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
+             num_trail++;
+      }
+      NestPositions.push_back(position);
  }
  
  
