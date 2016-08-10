@@ -6,8 +6,8 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1800"
-                ticks_per_second="32"
+    <experiment length="0"
+                ticks_per_second="16"
 		random_seed="0"/>
   </framework>
 
@@ -71,8 +71,8 @@
 	     OutputData = "0"
 	     DrawDensityRate = "4"
 	     DrawIDs = "1"
-	     DrawTrails = "1"
-	     DrawTargetRays = "1"
+	     DrawTrails = "0"
+	     DrawTargetRays = "0"
 	     FoodDistribution = "2"
 	     FoodItemCount = "256"
 	     NumberOfClusters = "4"

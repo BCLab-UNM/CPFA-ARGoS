@@ -99,6 +99,22 @@ void CPFA_controller::ControlStep() {
 }
 
 void CPFA_controller::Reset() {
+	num_targets_collected = 0;
+
+	/* pheromone trail variables */
+	TrailToShare.clear();
+	TrailToFollow.clear();
+	MyTrail.clear();
+
+	/* robot position variables */
+	SiteFidelityPosition = CVector2(0.0, 0.0);
+
+	myTrail.clear();
+
+	isInformed = false;
+	isHoldingFood = false;
+	isUsingSiteFidelity = false;
+	isGivingUpSearch = false;
 }
 
 bool CPFA_controller::IsHoldingFood() {

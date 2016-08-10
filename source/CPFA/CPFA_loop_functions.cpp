@@ -105,6 +105,7 @@ void CPFA_loop_functions::Reset() {
 	GetSpace().GetFloorEntity().Reset();
 	MaxSimCounter = SimCounter;
 	SimCounter = 0;
+  score = 0.0;
 
 	FoodList.clear();
 	FoodColoringList.clear();
@@ -112,7 +113,7 @@ void CPFA_loop_functions::Reset() {
 	FidelityList.clear();
 	TargetRayList.clear();
 
-	// SetFoodDistribution();
+	SetFoodDistribution();
 	argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
 	argos::CSpace::TMapPerType::iterator it;
 
@@ -122,6 +123,7 @@ void CPFA_loop_functions::Reset() {
 		CPFA_controller& c2 = dynamic_cast<CPFA_controller&>(c);
 
 		MoveEntity(footBot.GetEmbodiedEntity(), c2.GetStartPosition(), argos::CQuaternion(), false);
+    c2.Reset();
 	}
 }
 
