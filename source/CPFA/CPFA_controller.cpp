@@ -144,8 +144,8 @@ void CPFA_controller::CPFA() {
 bool CPFA_controller::IsInTheNest() {
 	//return ((GetPosition() - LoopFunctions->NestPosition).SquareLength()
 		//< LoopFunctions->NestRadiusSquared);
-  for (size_t i=0; i<LoopFunctions->NestPositions.size(); i++) { //qilu 07/26/2016
-        if ((GetPosition() - LoopFunctions->NestPositions[i]).SquareLength()<LoopFunctions->NestRadiusSquared) {
+  for (size_t i=0; i<LoopFunctions->Nests.size(); i++) { //qilu 07/26/2016
+        if ((GetPosition() - LoopFunctions->Nests[i].GetLocation()).SquareLength()<LoopFunctions->NestRadiusSquared) {
             return true;
         }
   }
@@ -226,7 +226,7 @@ SiteFidelityPosition = CVector2(0,0); //qilu 07/26/2016
 
 void CPFA_controller::Departing()
 {
- LOG<<"Departing..."<<endl;
+ //LOG<<"Departing..."<<endl;
 	argos::Real distanceToTarget = (GetPosition() - GetTarget()).Length();
 	argos::Real randomNumber = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
@@ -242,7 +242,7 @@ void CPFA_controller::Departing()
 	if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 		if(!isInformed){
 		    if(randomNumber < LoopFunctions->ProbabilityOfSwitchingToSearching){
-       LOG<<"Switch to search..."<<endl;
+       //LOG<<"Switch to search..."<<endl;
        Stop();
        SearchTime = 0;
 			    CPFA_state = SEARCHING;
@@ -282,7 +282,7 @@ void CPFA_controller::Departing()
 }
 
 void CPFA_controller::Searching() {
- LOG<<"Searching..."<<endl;
+ //LOG<<"Searching..."<<endl;
 	// "scan" for food only every half of a second
 	//if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 		SetHoldingFood();
@@ -300,7 +300,7 @@ void CPFA_controller::Searching() {
 
 			// randomly give up searching
 			if(random < LoopFunctions->ProbabilityOfReturningToNest) {
-    if (LoopFunctions->NestPositions.size() !=0){
+    if (LoopFunctions->Nests.size() !=0){
         SetClosestNest();//qilu 07/26/2016
 				    SetIsHeadingToNest(true);
 				    //SetTarget(LoopFunctions->NestPosition);
@@ -409,7 +409,7 @@ void CPFA_controller::Searching() {
 // Cause the robot to rotate in place as if surveying the surrounding targets
 // Turns 36 times by 10 degrees
 void CPFA_controller::Surveying() {
- LOG<<"Surveying..."<<endl;
+ //LOG<<"Surveying..."<<endl;
 	if (survey_count <= 4) { 
 		CRadians rotation(survey_count*3.14/2); // divide by 10 so the vecot is small and the linear motion is minimized
 		argos::CVector2 turn_vector(SearchStepSize, rotation.SignedNormalize());
@@ -442,7 +442,7 @@ void CPFA_controller::Surveying() {
  * up on searching and is returning to the nest.
  *****/
 void CPFA_controller::Returning() {
- LOG<<"Returning..."<<endl;
+ //LOG<<"Returning..."<<endl;
 	//SetHoldingFood();
 	//SetTarget(LoopFunctions->NestPosition);
 
@@ -591,7 +591,7 @@ void CPFA_controller::SetHoldingFood() {
 
 		// We picked up food. Update the food list minus what we picked up.
 		if(IsHoldingFood() == true) {
-   if (LoopFunctions->NestPositions.size() == 0){
+   if (LoopFunctions->Nests.size() == 0){
     LoopFunctions->CreateNest(GetPosition()); //qilu 07/26/2016
     //LoopFunctions->NestPositions.push_back(GetPosition()); //qilu 07/26/2016
     }
@@ -836,21 +836,21 @@ void CPFA_controller::UpdateTargetRayList() {
 
 void CPFA_controller::SetClosestNest(){//qilu 07/26/2016
     CVector2 robotPos = GetPosition();
-    Real minSquaredLen = (LoopFunctions->NestPositions[0]-robotPos).SquareLength();
+    Real minSquaredLen = (LoopFunctions->Nests[0].GetLocation()-robotPos).SquareLength();
     size_t minIdex =0;
     Real squaredLen;
-    for(size_t i=1; i<LoopFunctions->NestPositions.size(); i++){
-        squaredLen = (LoopFunctions->NestPositions[i]-robotPos).SquareLength();
+    for(size_t i=1; i<LoopFunctions->Nests.size(); i++){
+        squaredLen = (LoopFunctions->Nests[i].GetLocation()-robotPos).SquareLength();
         if (squaredLen < minSquaredLen) {
             minSquaredLen = squaredLen;
             minIdex = i;
         }
     }
-    if (ClosestNest != LoopFunctions->NestPositions[minIdex]){
+    if (ClosestNest != LoopFunctions->Nests[minIdex].GetLocation()){
 		//LOG<<"switch to other closest nest..."<<endl;
 		//LoopFunctions->FidelityList.erase(controllerID);
 		//fidelity=CVector2(10000,10000);
-		ClosestNest = LoopFunctions->NestPositions[minIdex];
+		ClosestNest = LoopFunctions->Nests[minIdex].GetLocation();
 		}		
 }
 REGISTER_CONTROLLER(CPFA_controller, "CPFA_controller")

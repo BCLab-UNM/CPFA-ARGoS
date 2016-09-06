@@ -32,7 +32,7 @@ class CPFA_qt_user_functions : public argos::CQTOpenGLUserFunctions {
 		void DrawTargetRays();
 
 		CPFA_loop_functions& loopFunctions;
-
+ 
 };
 
 #endif /* CPFA_QT_USER_FUNCTIONS_H */

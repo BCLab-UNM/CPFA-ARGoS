@@ -62,10 +62,10 @@ void CPFA_qt_user_functions::DrawNest() {
 //	Real x_coordinate = loopFunctions.NestPosition.GetX();
 //	Real y_coordinate = loopFunctions.NestPosition.GetX();
 Real x_coordinate, y_coordinate; //qilu 07/26/2016
-for (size_t i=0; i< loopFunctions.NestPositions.size(); i++){ 
+for (size_t i=0; i< loopFunctions.Nests.size(); i++){ 
      
-     x_coordinate = loopFunctions.NestPositions[i].GetX(); //qilu 07/05
-     y_coordinate = loopFunctions.NestPositions[i].GetY();
+     x_coordinate = loopFunctions.Nests[i].GetLocation().GetX(); //qilu 07/05
+     y_coordinate = loopFunctions.Nests[i].GetLocation().GetY();
      /* required: leaving this 0.0 will draw the nest inside of the floor */
 	    //Real elevation = loopFunctions.NestElevation;
 

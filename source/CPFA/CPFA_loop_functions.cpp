@@ -38,6 +38,8 @@ CPFA_loop_functions::CPFA_loop_functions() :
 {}
 
 void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {	
+ CVector2		NestPosition; //qilu 09/06
+ 
 	argos::CDegrees USV_InDegrees;
 	argos::TConfigurationNode CPFA_node = argos::GetNode(node, "CPFA");
 
@@ -72,6 +74,25 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	argos::GetNodeAttribute(settings_node, "FoodRadius", FoodRadius);
 	argos::GetNodeAttribute(settings_node, "NestElevation", NestElevation);
 	
+ argos::GetNodeAttribute(settings_node, "NestPosition_0", NestPosition);
+ Nest nest0= Nest(NestPosition); //qilu 09/06
+ Nests.push_back(nest0);
+    
+    
+ argos::GetNodeAttribute(settings_node, "NestPosition_1", NestPosition);
+ Nest nest1= Nest(NestPosition); //qilu 09/06
+ Nests.push_back(nest1);
+ 
+ argos::GetNodeAttribute(settings_node, "NestPosition_2", NestPosition);
+ Nest nest2= Nest(NestPosition); //qilu 09/06
+ Nests.push_back(nest2);
+ 
+ 
+ argos::GetNodeAttribute(settings_node, "NestPosition_3", NestPosition);
+ Nest nest3= Nest(NestPosition); //qilu 09/06
+ Nests.push_back(nest3);
+ 
+ 
 	FoodRadiusSquared = FoodRadius*FoodRadius;
 
 	// calculate the forage range and compensate for the robot's radius of 0.085m
@@ -108,10 +129,17 @@ void CPFA_loop_functions::Reset() {
 
 	FoodList.clear();
 	FoodColoringList.clear();
-	PheromoneList.clear();
+	/*PheromoneList.clear(); //qilu 09/06
 	FidelityList.clear();
-	TargetRayList.clear();
+	TargetRayList.clear();*/
 
+for(size_t i=0; i<Nests.size(); i++){ //qilu 09/06
+		Nests[i].PheromoneList.clear();
+		FidelityList.clear();
+	 TargetRayList.clear();
+  SetFoodDistribution();}
+    
+    
 	// SetFoodDistribution();
 	argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
 	argos::CSpace::TMapPerType::iterator it;
@@ -134,11 +162,20 @@ void CPFA_loop_functions::PreStep() {
 		}
 	}
 
-	if(FoodList.size() == 0) {
+	/*if(FoodList.size() == 0) {
 		FidelityList.clear();
 		//TargetRayList.clear();
 		PheromoneList.clear();
-	}
+	} */ //qilu 09/06
+ 
+  if(FoodList.size() == 0) {
+		for(size_t i=0; i<Nests.size(); i++)
+			Nests[i].PheromoneList.clear();//qilu 07/13
+   FidelityList.clear();//qilu 07/16
+   TargetRayList.clear();//qilu 07/13
+    }
+    
+ 
 }
 
 void CPFA_loop_functions::PostStep() {
@@ -368,7 +405,7 @@ void CPFA_loop_functions::CreateNest(argos::CVector2 position){ //qilu 07/26/201
              position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
              num_trail++;
       }
-      NestPositions.push_back(position);
+      Nests.push_back(Nest(position));
  }
  
  
@@ -452,10 +489,10 @@ bool CPFA_loop_functions::IsOutOfBounds(argos::CVector2 p, size_t length, size_t
 bool CPFA_loop_functions::IsCollidingWithNest(argos::CVector2 p, argos::Real radius){ //qilu 07/26/2016 for nest
  argos::Real nestRadiusPlusBuffer = NestRadius + radius;
 	argos::Real NRPB_squared = nestRadiusPlusBuffer * nestRadiusPlusBuffer;
- if(NestPositions.size()==0) return false; //qilu 07/26/2016
+ if(Nests.size()==0) return false; //qilu 07/26/2016
  
- for(size_t i=0; i < NestPositions.size(); i++){ //qilu 07/26/2016
-      if( (p - NestPositions[i]).SquareLength() < NRPB_squared) return true;
+ for(size_t i=0; i < Nests.size(); i++){ //qilu 07/26/2016
+      if( (p - Nests[i].GetLocation()).SquareLength() < NRPB_squared) return true;
   }
  }
   
@@ -463,10 +500,10 @@ bool CPFA_loop_functions::IsCollidingWithNest(argos::CVector2 p) {
 	argos::Real nestRadiusPlusBuffer = NestRadius + FoodRadius;
 	argos::Real NRPB_squared = nestRadiusPlusBuffer * nestRadiusPlusBuffer;
 
- if(NestPositions.size()==0) return false; //qilu 07/26/2016
+ if(Nests.size()==0) return false; //qilu 07/26/2016
 	//return ((p - NestPosition).SquareLength() < NRPB_squared);
- for(size_t i=0; i < NestPositions.size(); i++){ //qilu 07/26/2016
-      if( (p - NestPositions[i]).SquareLength() < NRPB_squared) return true;
+ for(size_t i=0; i < Nests.size(); i++){ //qilu 07/26/2016
+      if( (p - Nests[i].GetLocation()).SquareLength() < NRPB_squared) return true;
   }
   return false;
 }

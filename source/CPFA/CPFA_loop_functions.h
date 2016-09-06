@@ -87,6 +87,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		size_t ClusterLengthY;
 		size_t PowerRank;
 
+  
 		/* CPFA variables */
 		argos::Real ProbabilityOfSwitchingToSearching;
 		argos::Real ProbabilityOfReturningToNest;
@@ -104,6 +105,11 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		argos::Real NestElevation;
 		argos::Real SearchRadiusSquared;
 
+  argos::Real NestPosition_0; //qilu 09/06/2016
+  argos::Real NestPosition_1;
+  argos::Real NestPosition_2;
+  argos::Real NestPosition_3;
+  
 		/* list variables for food & pheromones */
 		std::vector<argos::CVector2> FoodList;
 		std::vector<argos::CColor>   FoodColoringList;
@@ -112,9 +118,11 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		std::vector<argos::CRay3>    TargetRayList;
 		argos::CRange<argos::Real>   ForageRangeX;
 		argos::CRange<argos::Real>   ForageRangeY;
-
+  
+  std::vector<Nest> Nests; //qilu 09/06
+  
 		//argos::CVector2 NestPosition;
-  std::vector<argos::CVector2> NestPositions; //qilu 07/26/2016
+  //std::vector<argos::CVector2> NestPositions; //qilu 07/26/2016
 	private:
 
 		/* private helper functions */

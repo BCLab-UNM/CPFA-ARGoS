@@ -3,6 +3,7 @@
 
 #include <source/Base/BaseController.h>
 #include <source/Base/Pheromone.h>
+#include <source/Base/Nest.h> //qilu 09/06
 #include <source/CPFA/CPFA_loop_functions.h>
 
 using namespace std;
