@@ -74,7 +74,7 @@ for (size_t i=0; i< loopFunctions.Nests.size(); i++){
 
     	/* Draw the nest on the arena. */
 	    //DrawCircle(nest_3d, CQuaternion(), loopFunctions.NestRadius, CColor::GRAY50);
-     DrawCylinder(CVector3(x_coordinate, y_coordinate, 0.002), CQuaternion(), loopFunctions.NestRadius, 0.025, CColor::RED);
+     DrawCylinder(CVector3(x_coordinate, y_coordinate, 0.0), CQuaternion(), loopFunctions.NestRadius, 0.025, CColor::RED);
     }
 }
 
@@ -85,18 +85,28 @@ void CPFA_qt_user_functions::DrawFood() {
 	for(size_t i = 0; i < loopFunctions.FoodList.size(); i++) {
 		x = loopFunctions.FoodList[i].GetX();
 		y = loopFunctions.FoodList[i].GetY();
-		DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, loopFunctions.FoodColoringList[i]);
+		DrawCylinder(CVector3(x, y, 0.002), CQuaternion(), loopFunctions.FoodRadius, 0.025, loopFunctions.FoodColoringList[i]);
 	}
+ 
+ //draw food in nests
+ for (size_t i=0; i< loopFunctions.Nests.size(); i++){ 
+   for (size_t j=0; j< loopFunctions.Nests[i].FoodList.size(); j++){
+        x = loopFunctions.Nests[i].FoodList[j].GetX();
+        y = loopFunctions.Nests[i].FoodList[j].GetY();
+        DrawCylinder(CVector3(x, y, 0.002), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::YELLOW);
+     }
+  }
+  
 }
 
 void CPFA_qt_user_functions::DrawFidelity() {
 
 	Real x, y;
 
-	for(size_t i = 0; i < loopFunctions.FidelityList.size(); i++) {
-		x = loopFunctions.FidelityList[i].GetX();
-		y = loopFunctions.FidelityList[i].GetY();
-		DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::CYAN);
+	for(map<string, CVector2>::iterator it= loopFunctions.FidelityList.begin(); it!=loopFunctions.FidelityList.end(); ++it) {
+		x = it->second.GetX();
+		y = it->second.GetY();
+		DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::BROWN);
 	}
 }
 
@@ -106,44 +116,46 @@ void CPFA_qt_user_functions::DrawPheromones() {
 	vector<CVector2> trail;
 	CColor trailColor = CColor::GREEN, pColor = CColor::GREEN;
 
-	for(size_t i = 0; i < loopFunctions.PheromoneList.size(); i++) {
-		x = loopFunctions.PheromoneList[i].GetLocation().GetX();
-		y = loopFunctions.PheromoneList[i].GetLocation().GetY();
+ for(size_t n=0; n<loopFunctions.Nests.size(); n++){
+	    for(size_t i = 0; i < loopFunctions.Nests[n].PheromoneList.size(); i++) {
+		    x = loopFunctions.Nests[n].PheromoneList[i].GetLocation().GetX();
+		    y = loopFunctions.Nests[n].PheromoneList[i].GetLocation().GetY();
 
-		if(loopFunctions.DrawTrails == 1) {
-			trail  = loopFunctions.PheromoneList[i].GetTrail();
-			weight = loopFunctions.PheromoneList[i].GetWeight();
+		    if(loopFunctions.DrawTrails == 1) {
+			    trail  = loopFunctions.Nests[n].PheromoneList[i].GetTrail();
+			    weight = loopFunctions.Nests[n].PheromoneList[i].GetWeight();
 
-			if(weight > 0.25 && weight <= 1.0)        // [ 100.0% , 25.0% )
-				pColor = trailColor = CColor::GREEN;
-			else if(weight > 0.05 && weight <= 0.25)  // [  25.0% ,  5.0% )
-				pColor = trailColor = CColor::YELLOW;
-			else                                      // [   5.0% ,  0.0% ]
-				pColor = trailColor = CColor::RED;
+			    if(weight > 0.25 && weight <= 1.0)        // [ 100.0% , 25.0% )
+				    pColor = trailColor = CColor::GREEN;
+			    else if(weight > 0.05 && weight <= 0.25)  // [  25.0% ,  5.0% )
+				    pColor = trailColor = CColor::YELLOW;
+			    else                                      // [   5.0% ,  0.0% ]
+				    pColor = trailColor = CColor::RED;
 
-			CRay3 ray;
-			size_t j = 0;
+			    CRay3 ray;
+			    size_t j = 0;
 
-			for(j = 1; j < trail.size(); j++) {
-				ray = CRay3(CVector3(trail[j - 1].GetX(), trail[j - 1].GetY(), 0.01),
-							CVector3(trail[j].GetX(), trail[j].GetY(), 0.01));
-				DrawRay(ray, trailColor, 1.0);
-			}
+			    for(j = 1; j < trail.size(); j++) {
+				    ray = CRay3(CVector3(trail[j - 1].GetX(), trail[j - 1].GetY(), 0.01),
+							 CVector3(trail[j].GetX(), trail[j].GetY(), 0.01));
+				    DrawRay(ray, trailColor, 1.0);
+			    }
 
-			DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, pColor);
-		} else {
-			weight = loopFunctions.PheromoneList[i].GetWeight();
+			    DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, pColor);
+		    } else {
+			    weight = loopFunctions.Nests[n].PheromoneList[i].GetWeight();
 
-			if(weight > 0.25 && weight <= 1.0)        // [ 100.0% , 25.0% )
-				pColor = CColor::GREEN;
-			else if(weight > 0.05 && weight <= 0.25)  // [  25.0% ,  5.0% )
-				pColor = CColor::YELLOW;
-			else                                      // [   5.0% ,  0.0% ]
-				pColor = CColor::RED;
+			    if(weight > 0.25 && weight <= 1.0)        // [ 100.0% , 25.0% )
+				    pColor = CColor::GREEN;
+			     else if(weight > 0.05 && weight <= 0.25)  // [  25.0% ,  5.0% )
+				    pColor = CColor::YELLOW;
+			    else                                      // [   5.0% ,  0.0% ]
+				    pColor = CColor::RED;
 
-			DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, pColor);
-		}
-	}
+			    DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, pColor);
+		    }
+	    }
+    }
 }
 
 void CPFA_qt_user_functions::DrawTargetRays() {

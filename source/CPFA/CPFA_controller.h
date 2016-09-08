@@ -34,7 +34,7 @@ class CPFA_controller : public BaseController {
   void SetClosestNest();//qilu 07/26/2016
 
 	private:
-  argos::CVector2 ClosestNest; //qilu 07/26/2016
+  Nest* ClosestNest; //qilu 07/26/2016
   string 			controllerID;//qilu 07/26/2016
 
 		CPFA_loop_functions* LoopFunctions;
@@ -47,7 +47,8 @@ class CPFA_controller : public BaseController {
 
 		/* robot position variables */
 		argos::CVector2 SiteFidelityPosition;
-
+  bool			 updateFidelity; //qilu 09/07/2016
+  
 		vector<CRay3> myTrail;
 		CColor        TrailColor;
 
@@ -55,11 +56,11 @@ class CPFA_controller : public BaseController {
 		bool isHoldingFood;
 		bool isUsingSiteFidelity;
 		bool isGivingUpSearch;
-
+  
 		size_t ResourceDensity;
 		size_t MaxTrailSize;
 		size_t SearchTime;
-
+  
 		/* iAnt CPFA state variable */
 		enum CPFA_state {
 			DEPARTING = 0,

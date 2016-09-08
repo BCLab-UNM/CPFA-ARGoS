@@ -12,8 +12,11 @@ CPFA_controller::CPFA_controller() :
 	SearchTime(0),
 	CPFA_state(DEPARTING),
 	LoopFunctions(NULL),
+ ClosestNest(NULL), //qilu 09/07
 	survey_count(0),
-	isUsingPheromone(0)
+	isUsingPheromone(0),
+ SiteFidelityPosition(1000, 1000), //qilu 09/07/2016
+ updateFidelity(false)
 {
 }
 
@@ -100,6 +103,21 @@ void CPFA_controller::ControlStep() {
 }
 
 void CPFA_controller::Reset() {
+ isHoldingFood   = false;
+    isInformed      = false;
+    SearchTime      = 0;
+    ResourceDensity = 0;
+    
+	/* data->CollisionTime=0; //qilu 10/30
+	data->currCollisionTime =0; //qilu 10/30
+    data->lastCollisionTime =0; //qilu 10/30
+    /* Set LED color */
+    /* m_pcLEDs->SetAllColors(CColor::BLACK); //qilu 09/04 */
+    SetTarget(ClosestNest->GetLocation()); //qilu 09/08
+    SiteFidelityPosition = ClosestNest->GetLocation();//qilu 09/08
+    
+    TrailToShare.clear();
+    TrailToFollow.clear();
 }
 
 bool CPFA_controller::IsHoldingFood() {
@@ -304,11 +322,12 @@ void CPFA_controller::Searching() {
         SetClosestNest();//qilu 07/26/2016
 				    SetIsHeadingToNest(true);
 				    //SetTarget(LoopFunctions->NestPosition);
-				    SetTarget(ClosestNest);
+				    SetTarget(ClosestNest->GetLocation());
         isGivingUpSearch = true;
-        //LoopFunctions->FidelityList.erase(controllerID); //qilu 07/26/2016
-			     //fidelity= CVector2(10000,10000); //qilu 07/26/2016
-			     //updateFidelity = false; //qilu 07/26/2016
+        LoopFunctions->FidelityList.erase(controllerID); //09/07/2016
+			     SiteFidelityPosition= CVector2(10000,10000); //09/07/2016
+        isUsingSiteFidelity = false; //qilu 09/07/2016
+			     updateFidelity = false; //qilu 09/07/2016
 				    CPFA_state = RETURNING;
 			
 				    /*
@@ -429,7 +448,7 @@ void CPFA_controller::Surveying() {
 	// Set the survey countdown
 	else {
 		SetIsHeadingToNest(true); // Turn off error for this
-		SetTarget(ClosestNest); //qilu 07/26/2016
+		SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
 		CPFA_state = RETURNING;
 		survey_count = 0; // Reset
 	}
@@ -456,14 +475,18 @@ void CPFA_controller::Returning() {
 		argos::Real r2 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
 		if (isHoldingFood) { 
-			if(poissonCDF_pLayRate > r1) {
+			if(poissonCDF_pLayRate > r1 && updateFidelity) {
 				//TrailToShare.push_back(LoopFunctions->NestPosition); // For drawing the waypoints
-    TrailToShare.push_back(ClosestNest); //qilu 07/26/2016
+    TrailToShare.push_back(ClosestNest->GetLocation()); //qilu 07/26/2016
 				argos::Real timeInSeconds = (argos::Real)(SimulationTick() / SimulationTicksPerSecond());
 				Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay);
-				LoopFunctions->PheromoneList.push_back(sharedPheromone);
-				TrailToShare.clear();
+    //LoopFunctions->PheromoneList.push_back(sharedPheromone);
+				ClosestNest->PheromoneList.push_back(sharedPheromone);//qilu 09/08/2016
+    
+    TrailToShare.clear();
 				sharedPheromone.Deactivate(); // make sure this won't get re-added later...
+    //DropoffFood();
+    LOG<<"Pheromone..."<<endl;
 			}
 		}
 
@@ -474,7 +497,7 @@ void CPFA_controller::Returning() {
 		//log_output_stream << "At the nest." << endl;	    
 		 
 		// use site fidelity
-		if((isUsingSiteFidelity == true) && (poissonCDF_sFollowRate > r2)) {
+		if(updateFidelity && poissonCDF_sFollowRate > r2) {
 			//log_output_stream << "Using site fidelity" << endl;
 	
 			SetIsHeadingToNest(false);
@@ -482,7 +505,7 @@ void CPFA_controller::Returning() {
 			isInformed = true;
 		}
 		// use pheromone waypoints
-		else if(SetTargetPheromone() == true) {
+		else if(SetTargetPheromone()) {
 			//log_output_stream << "Using site pheremone" << endl;	    
 			isInformed = true;
 			isUsingSiteFidelity = false;
@@ -514,15 +537,22 @@ void CPFA_controller::Returning() {
 
 		isGivingUpSearch = false;
 		CPFA_state = DEPARTING;   
-		isHoldingFood = false;
-
+		isHoldingFood = false; 
+  //drop off the food qilu 09/07/2016
+  argos::CVector2 placementPosition;
+		placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.2, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.2, 0));
+  while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2))
+      placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.2, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.2, 0));
+  
+  ClosestNest->FoodList.push_back(placementPosition);
+  
 		//log_output_stream.close();
 	}
 	// Take a small step towards the nest so we don't overshoot by too much is we miss it
 	else {
 		SetIsHeadingToNest(true); // Turn off error for this
 		//SetTarget(LoopFunctions->NestPosition);
-  SetTarget(ClosestNest); //qilu 07/26/2016
+  SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
 	}		
 }
 
@@ -569,39 +599,42 @@ void CPFA_controller::SetHoldingFood() {
 		std::vector<argos::CVector2> newFoodList;
 		std::vector<argos::CColor> newFoodColoringList;
 		size_t i = 0, j = 0;
-
-		for(i = 0; i < LoopFunctions->FoodList.size(); i++) {
-			if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance ) {
-				// We found food! Calculate the nearby food density.
-				isHoldingFood = true;
-				CPFA_state = SURVEYING;
-				j = i + 1;
-				break;
-			} else {
-				//Return this unfound-food position to the list
-				newFoodList.push_back(LoopFunctions->FoodList[i]);
-				newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
-			}
-		}
-
-		for(; j < LoopFunctions->FoodList.size(); j++) {
-			newFoodList.push_back(LoopFunctions->FoodList[j]);
-			newFoodColoringList.push_back(LoopFunctions->FoodColoringList[j]);
-		}
-
-		// We picked up food. Update the food list minus what we picked up.
-		if(IsHoldingFood() == true) {
-   if (LoopFunctions->Nests.size() == 0){
-    LoopFunctions->CreateNest(GetPosition()); //qilu 07/26/2016
-    //LoopFunctions->NestPositions.push_back(GetPosition()); //qilu 07/26/2016
-    }
-   SetClosestNest();//qilu 07/26/2016
-			SetIsHeadingToNest(true);
-			//SetTarget(LoopFunctions->NestPosition);
-   SetTarget(ClosestNest); //qilu 07/26/2016
-			LoopFunctions->FoodList = newFoodList;
-			SetLocalResourceDensity();
-		} 
+  if(CPFA_state != RETURNING){
+		  for(i = 0; i < LoopFunctions->FoodList.size(); i++) {
+			   if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance ) {
+				    // We found food! Calculate the nearby food density.
+				    isHoldingFood = true;
+				    CPFA_state = SURVEYING;
+				    j = i + 1;
+				    break;
+			    } else {
+				      //Return this unfound-food position to the list
+				      newFoodList.push_back(LoopFunctions->FoodList[i]);
+				      newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
+       }
+     }
+  }
+  if(j>0){
+     for(; j < LoopFunctions->FoodList.size(); j++) {
+        newFoodList.push_back(LoopFunctions->FoodList[j]);
+        newFoodColoringList.push_back(LoopFunctions->FoodColoringList[j]);
+        }
+   }
+   
+   // We picked up food. Update the food list minus what we picked up.
+   if(IsHoldingFood() == true) {
+    /*if (LoopFunctions->Nests.size() == 0){
+     LoopFunctions->CreateNest(GetPosition()); //qilu 07/26/2016
+     //LoopFunctions->NestPositions.push_back(GetPosition()); //qilu 07/26/2016
+     } */ //qilu 09/07/2016
+    
+     SetClosestNest();//qilu 07/26/2016
+     SetIsHeadingToNest(true);
+     //SetTarget(LoopFunctions->NestPosition);
+     SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
+     LoopFunctions->FoodList = newFoodList;
+     SetLocalResourceDensity();
+    } 
 	}
 		
 	// This shouldn't be checked here ---
@@ -652,7 +685,11 @@ void CPFA_controller::SetLocalResourceDensity() {
 
 	/* Set the fidelity position to the robot's current position. */
 	SiteFidelityPosition = GetPosition();
+ LOG<<"fidelity="<<SiteFidelityPosition<<endl;
 	isUsingSiteFidelity = true;
+ updateFidelity = true; //qilu 09/07/2016
+ TrailToShare.push_back(SiteFidelityPosition);//qilu 09/07/2016
+ LoopFunctions->FidelityList[controllerID] = SiteFidelityPosition; //qilu 09/07/2016
 
 	/* Delay for 4 seconds (simulate iAnts scannning rotation). */
 	//  Wait(4); // This function is broken. It causes the rover to move in the wrong direction after finishing its local resource density test 
@@ -671,20 +708,26 @@ void CPFA_controller::SetFidelityList(argos::CVector2 newFidelity) {
 	std::vector<argos::CVector2> newFidelityList;
 
 	/* Remove this robot's old fidelity position from the fidelity list. */
-	for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
-		if((LoopFunctions->FidelityList[i] - SiteFidelityPosition).SquareLength() != 0.0) {
+	/*for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
+  if((LoopFunctions->FidelityList[i] - SiteFidelityPosition).SquareLength() != 0.0) {
 			newFidelityList.push_back(LoopFunctions->FidelityList[i]);
 		}
-	}
+	} */
+
 
 	/* Update the global fidelity list. */
-	LoopFunctions->FidelityList = newFidelityList;
+	//LoopFunctions->FidelityList = newFidelityList;
+
+ LoopFunctions->FidelityList[controllerID] = newFidelity; //qilu 09/08/2016
 
 	/* Add the robot's new fidelity position to the global fidelity list. */
-	LoopFunctions->FidelityList.push_back(newFidelity);
+	//LoopFunctions->FidelityList.push_back(newFidelity);
+ 
 
 	/* Update the local fidelity position for this robot. */
 	SiteFidelityPosition = newFidelity;
+ 
+  updateFidelity = true;
 }
 
 /*****
@@ -694,14 +737,15 @@ void CPFA_controller::SetFidelityList() {
 	std::vector<argos::CVector2> newFidelityList;
 
 	/* Remove this robot's old fidelity position from the fidelity list. */
-	for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
+	/*for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
 		if((LoopFunctions->FidelityList[i] - SiteFidelityPosition).SquareLength() != 0.0) {
 			newFidelityList.push_back(LoopFunctions->FidelityList[i]);
-		}
-	}
-
+		}*/
 	/* Update the global fidelity list. */
-	LoopFunctions->FidelityList = newFidelityList;
+	//LoopFunctions->FidelityList = newFidelityList;
+ LoopFunctions->FidelityList.erase(controllerID); //qilu 09/08/2016
+ SiteFidelityPosition = CVector2(10000, 10000);
+ updateFidelity = false; 
 }
 
 /*****
@@ -713,18 +757,19 @@ bool CPFA_controller::SetTargetPheromone() {
 	argos::Real maxStrength = 0.0, randomWeight = 0.0;
 	bool isPheromoneSet = false;
 
+ if(ClosestNest->PheromoneList.size()==0) return isPheromoneSet; //qilu 09/08/2016 the case of no pheromone.
 	/* update the pheromone list and remove inactive pheromones */
 	// LoopFunctions->UpdatePheromoneList();
 
 	/* default target = nest; in case we have 0 active pheromones */
 	SetIsHeadingToNest(true);
 	//SetTarget(LoopFunctions->NestPosition);
- SetTarget(ClosestNest); //qilu 07/26/2016
+ SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
 
 	/* Calculate a maximum strength based on active pheromone weights. */
-	for(size_t i = 0; i < LoopFunctions->PheromoneList.size(); i++) {
-		if(LoopFunctions->PheromoneList[i].IsActive() == true) {
-			maxStrength += LoopFunctions->PheromoneList[i].GetWeight();
+	for(size_t i = 0; i < ClosestNest->PheromoneList.size(); i++) {
+		if(ClosestNest->PheromoneList[i].IsActive() == true) {
+			maxStrength += ClosestNest->PheromoneList[i].GetWeight();
 		}
 	}
 
@@ -732,19 +777,19 @@ bool CPFA_controller::SetTargetPheromone() {
 	randomWeight = RNG->Uniform(argos::CRange<argos::Real>(0.0, maxStrength));
 
 	/* Randomly select an active pheromone to follow. */
-	for(size_t i = 0; i < LoopFunctions->PheromoneList.size(); i++) {
-		if(randomWeight < LoopFunctions->PheromoneList[i].GetWeight()) {
+	for(size_t i = 0; i < ClosestNest->PheromoneList.size(); i++) {
+		if(randomWeight < ClosestNest->PheromoneList[i].GetWeight()) {
 			/* We've chosen a pheromone! */
 			SetIsHeadingToNest(false);
-			SetTarget(LoopFunctions->PheromoneList[i].GetLocation());
-			TrailToFollow = LoopFunctions->PheromoneList[i].GetTrail();
+			SetTarget(ClosestNest->PheromoneList[i].GetLocation());
+			TrailToFollow = ClosestNest->PheromoneList[i].GetTrail();
 			isPheromoneSet = true;
 			/* If we pick a pheromone, break out of this loop. */
 			break;
 		}
 
 		/* We didn't pick a pheromone! Remove its weight from randomWeight. */
-		randomWeight -= LoopFunctions->PheromoneList[i].GetWeight();
+		randomWeight -= ClosestNest->PheromoneList[i].GetWeight();
 	}
 
 	//ofstream log_output_stream;
@@ -846,11 +891,10 @@ void CPFA_controller::SetClosestNest(){//qilu 07/26/2016
             minIdex = i;
         }
     }
-    if (ClosestNest != LoopFunctions->Nests[minIdex].GetLocation()){
-		//LOG<<"switch to other closest nest..."<<endl;
-		//LoopFunctions->FidelityList.erase(controllerID);
-		//fidelity=CVector2(10000,10000);
-		ClosestNest = LoopFunctions->Nests[minIdex].GetLocation();
-		}		
+    LoopFunctions->FidelityList.erase(controllerID); //qilu 09/07/2016
+		  SiteFidelityPosition=CVector2(10000,10000);
+		
+    ClosestNest = &LoopFunctions->Nests[minIdex];
+    	
 }
 REGISTER_CONTROLLER(CPFA_controller, "CPFA_controller")

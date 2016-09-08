@@ -18,6 +18,9 @@ class Nest {
 		Nest(CVector2 location);
 		       
 		vector<Pheromone> PheromoneList;
+  
+  vector<CVector2> FoodList;
+   
         /* constructor function */
 		
 		/* public helper functions */

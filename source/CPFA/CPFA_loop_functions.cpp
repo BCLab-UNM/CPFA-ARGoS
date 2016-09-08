@@ -129,9 +129,11 @@ void CPFA_loop_functions::Reset() {
 
 	FoodList.clear();
 	FoodColoringList.clear();
-	/*PheromoneList.clear(); //qilu 09/06
-	FidelityList.clear();
-	TargetRayList.clear();*/
+	for(size_t i=0; i<Nests.size(); i++)
+     Nests[i].PheromoneList.clear(); //qilu 09/08/2016
+
+ FidelityList.clear();
+	TargetRayList.clear();
 
 for(size_t i=0; i<Nests.size(); i++){ //qilu 09/06
 		Nests[i].PheromoneList.clear();
@@ -224,19 +226,19 @@ void CPFA_loop_functions::UpdatePheromoneList() {
 	//log_output_stream.open("time.txt", ios::app);
 	//log_output_stream << t << ", " << GetSpace().GetSimulationClock() << ", " << GetSimulator().GetPhysicsEngine("default").GetInverseSimulationClockTick() << endl;
 	//log_output_stream.close();
+ for(size_t n=0; n<Nests.size();n++){
+	    for(size_t i = 0; i < Nests[n].PheromoneList.size(); i++) {
 
-	for(size_t i = 0; i < PheromoneList.size(); i++) {
+		        Nests[n].PheromoneList[i].Update(t);
 
-		PheromoneList[i].Update(t);
-
-		if(PheromoneList[i].IsActive() == true) {
-			new_p_list.push_back(PheromoneList[i]);
-		}
-	}
-
-	PheromoneList = new_p_list;
+		        if(Nests[n].PheromoneList[i].IsActive() == true) {
+			          new_p_list.push_back(Nests[n].PheromoneList[i]);
+		        }
+      }
+     	Nests[n].PheromoneList = new_p_list;
+      new_p_list.clear();//qilu 09/08/2016
+ }
 }
-
 void CPFA_loop_functions::SetFoodDistribution() {
 	switch(FoodDistribution) {
 		case 0:

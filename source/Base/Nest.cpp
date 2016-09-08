@@ -15,6 +15,7 @@
     /* required initializations */
 	nestLocation    = location;
     PheromoneList.clear();
+    FoodList.clear(); //qilu 09/07/2016
 }
 
 /*****
