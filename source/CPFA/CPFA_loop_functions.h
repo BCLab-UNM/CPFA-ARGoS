@@ -47,6 +47,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		void SetTrial(UInt32 un_trial);
 	
 		/* public helper functions */
+        //vector<CVector2> UpdateCollectedFoodList(vector<CVector2> foodList); //qilu 09/12/2016
 		void UpdatePheromoneList();
 		void SetFoodDistribution();
 

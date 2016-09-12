@@ -19,7 +19,8 @@ class Nest {
 		      Nest(CVector2 location);
 		       
 		      vector<Pheromone> PheromoneList;
-        map<string, argos::CVector2> FidelityList; //qilu 09/10/2016 
+        map<string, argos::CVector2> FidelityList; //qilu 09/10/2016
+        map<string, size_t> DensityOnFidelity; //qilu 09/11/2016
         vector<CVector2> FoodList;
    
         /* constructor function */
@@ -27,7 +28,8 @@ class Nest {
 		      /* public helper functions */
         CVector2		GetLocation();
         void		SetLocation();
-        void     MoveNest(); //qilu 09/10/2016
+        void		SetLocation(CVector2 newLocation); //qilu 09/11/2016
+        void     UpdateNestLocation(); //qilu 09/10/2016
 	private:
         CVector2 nestLocation;
         

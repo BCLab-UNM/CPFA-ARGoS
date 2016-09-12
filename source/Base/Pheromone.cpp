@@ -13,14 +13,15 @@
 Pheromone::Pheromone(argos::CVector2              newLocation,
                              std::vector<argos::CVector2> newTrail,
                              argos::Real                  newTime,
-                             argos::Real                  newDecayRate)
+                             argos::Real                  newDecayRate,
+                                size_t      density)
 {
     /* required initializations */
 	location    = newLocation;
   trail       = newTrail;
 	lastUpdated = newTime;
 	decayRate   = newDecayRate;
-
+    ResourceDensity = density; //qilu 09/11/2016
     /* standardized initializations */
 	weight      = 1.0;
 	threshold   = 0.001;
@@ -62,6 +63,9 @@ std::vector<argos::CVector2> Pheromone::GetTrail() {
  *****/
 argos::Real Pheromone::GetWeight() {
 	return weight;
+}
+size_t  Pheromone::GetResourceDensity(){
+    return ResourceDensity;
 }
 
 /*****

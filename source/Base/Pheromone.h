@@ -12,7 +12,7 @@ class Pheromone {
     public:
 
         /* constructor function */
-        Pheromone(argos::CVector2 newLocation, std::vector<argos::CVector2> newTrail, argos::Real newTime, argos::Real newDecayRate);
+        Pheromone(argos::CVector2 newLocation, std::vector<argos::CVector2> newTrail, argos::Real newTime, argos::Real newDecayRate, size_t      density); //qilu add the density 09/11/2016
 
         /* public helper functions */
         void                         Update(argos::Real time);
@@ -20,14 +20,16 @@ class Pheromone {
         argos::CVector2              GetLocation();
         std::vector<argos::CVector2> GetTrail();
         argos::Real                  GetWeight();
+    size_t                         GetResourceDensity();
         bool                         IsActive();
-
+        argos::CVector2              location;
+        size_t      ResourceDensity; //qilu 09/10/2016
 	private:
 
         /* pheromone position variables */
-        argos::CVector2              location;
+
         std::vector<argos::CVector2> trail;
-        size_t      ResourceDensity; //qilu 09/10/2016
+
         /* pheromone component variables */
         argos::Real lastUpdated;
         argos::Real decayRate;

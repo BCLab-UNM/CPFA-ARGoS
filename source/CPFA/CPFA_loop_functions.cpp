@@ -72,6 +72,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	argos::GetNodeAttribute(settings_node, "ClusterLengthY", ClusterLengthY);
 	argos::GetNodeAttribute(settings_node, "PowerRank", PowerRank);
 	argos::GetNodeAttribute(settings_node, "FoodRadius", FoodRadius);
+    argos::GetNodeAttribute(settings_node, "NestRadius", NestRadius); //qilu 09/12/2016
 	argos::GetNodeAttribute(settings_node, "NestElevation", NestElevation);
 	
  argos::GetNodeAttribute(settings_node, "NestPosition_0", NestPosition);
@@ -117,6 +118,18 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	SetFoodDistribution();
 }
 
+/*vector<CVector2> CPFA_loop_functions::UpdateCollectedFoodList(vector<CVector2> foodList){//qilu 09/12/2016
+    if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance )
+
+    for (size_t i=0; i<foodList.size(); i++) {
+        foodList[i]
+
+    }
+    return
+    
+}*/
+
+
 void CPFA_loop_functions::Reset() {
 	   if(VariableFoodPlacement == 0) {
 		      RNG->Reset();
@@ -135,6 +148,7 @@ void CPFA_loop_functions::Reset() {
     SetFoodDistribution();
     for(size_t i=0; i<Nests.size(); i++){ //qilu 09/06
       Nests[i].FidelityList.clear();
+      Nests[i].DensityOnFidelity.clear(); //qilu 09/11/2016
       Nests[i].PheromoneList.clear();
       }
     
@@ -166,8 +180,9 @@ void CPFA_loop_functions::PreStep() {
  
   if(FoodList.size() == 0) {
       for(size_t i=0; i<Nests.size(); i++){
-          Nests[i].PheromoneList.clear();//qilu 07/13
-          Nests[i].FidelityList.clear();//qilu 07/16
+          Nests[i].PheromoneList.clear();//qilu 09/11/16
+          Nests[i].FidelityList.clear();//qilu 09/11/16
+          Nests[i].DensityOnFidelity.clear(); //qilu 09/11/2016
       }
       TargetRayList.clear();//qilu 07/13 
   }
@@ -413,6 +428,7 @@ bool CPFA_loop_functions::IsOutOfArena(argos::CVector2 p){
 			|| (x > ForageRangeX.GetMax()) ||
 			(y < ForageRangeY.GetMin()) ||
 			(y > ForageRangeY.GetMax()))		return true;
+    return false;
    }
  
  bool CPFA_loop_functions::IsOutOfArena(argos::CVector2 p, argos::Real radius){
@@ -425,6 +441,7 @@ bool CPFA_loop_functions::IsOutOfArena(argos::CVector2 p){
 			|| (x_max > (ForageRangeX.GetMax() - radius)) ||
 			(y_min < (ForageRangeY.GetMin() + radius)) ||
 			(y_max > (ForageRangeY.GetMax() - radius)))		return true;
+     return false;
    
    }
    
@@ -490,6 +507,7 @@ bool CPFA_loop_functions::IsCollidingWithNest(argos::CVector2 p, argos::Real rad
  for(size_t i=0; i < Nests.size(); i++){ //qilu 07/26/2016
       if( (p - Nests[i].GetLocation()).SquareLength() < NRPB_squared) return true;
   }
+    return false;
  }
   
 bool CPFA_loop_functions::IsCollidingWithNest(argos::CVector2 p) {
@@ -511,6 +529,7 @@ bool CPFA_loop_functions::IsCollidingWithFood(argos::CVector2 p, argos::Real rad
  for(size_t i=0; i < FoodList.size(); i++){ //qilu 07/26/2016
       if( (p - FoodList[i]).SquareLength() < FRPB_squared) return true;
   }
+    return false;
 }
 
 bool CPFA_loop_functions::IsCollidingWithFood(argos::CVector2 p) {
