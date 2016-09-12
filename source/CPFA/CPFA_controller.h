@@ -89,7 +89,7 @@ class CPFA_controller : public BaseController {
 		argos::Real GetPoissonCDF(argos::Real k, argos::Real lambda);
 
 		void UpdateTargetRayList();
-
+  
 		CVector2 previous_position;
 
 		string results_path;

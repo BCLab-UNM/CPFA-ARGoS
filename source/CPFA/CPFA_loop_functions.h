@@ -114,7 +114,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		std::vector<argos::CVector2> FoodList;
 		std::vector<argos::CColor>   FoodColoringList;
 		//std::vector<argos::CVector2> FidelityList;
-  map<string, argos::CVector2> FidelityList; //qilu 09/08/2016
+  //map<string, argos::CVector2> FidelityList; //qilu 09/08/2016
 		//std::vector<Pheromone>   PheromoneList; //qilu 09/08/2016
 		std::vector<argos::CRay3>    TargetRayList;
 		argos::CRange<argos::Real>   ForageRangeX;

@@ -118,50 +118,44 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 }
 
 void CPFA_loop_functions::Reset() {
-	if(VariableFoodPlacement == 0) {
-		RNG->Reset();
-	}
+	   if(VariableFoodPlacement == 0) {
+		      RNG->Reset();
+	   }
 
-	GetSpace().Reset();
-	GetSpace().GetFloorEntity().Reset();
-	MaxSimCounter = SimCounter;
-	SimCounter = 0;
-
-	FoodList.clear();
-	FoodColoringList.clear();
-	for(size_t i=0; i<Nests.size(); i++)
-     Nests[i].PheromoneList.clear(); //qilu 09/08/2016
-
- FidelityList.clear();
-	TargetRayList.clear();
-
-for(size_t i=0; i<Nests.size(); i++){ //qilu 09/06
-		Nests[i].PheromoneList.clear();
-		FidelityList.clear();
-	 TargetRayList.clear();
-  SetFoodDistribution();}
+    GetSpace().Reset();
+    GetSpace().GetFloorEntity().Reset();
+    MaxSimCounter = SimCounter;
+    SimCounter = 0;
+   
+    FoodList.clear();
+    FoodColoringList.clear();
+   
+    TargetRayList.clear();
     
+    SetFoodDistribution();
+    for(size_t i=0; i<Nests.size(); i++){ //qilu 09/06
+      Nests[i].FidelityList.clear();
+      Nests[i].PheromoneList.clear();
+      }
     
-	// SetFoodDistribution();
-	argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
-	argos::CSpace::TMapPerType::iterator it;
-
-	for(it = footbots.begin(); it != footbots.end(); it++) {
-		argos::CFootBotEntity& footBot = *argos::any_cast<argos::CFootBotEntity*>(it->second);
-		BaseController& c = dynamic_cast<BaseController&>(footBot.GetControllableEntity().GetController());
-		CPFA_controller& c2 = dynamic_cast<CPFA_controller&>(c);
-
-		MoveEntity(footBot.GetEmbodiedEntity(), c2.GetStartPosition(), argos::CQuaternion(), false);
-	}
+    argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
+    argos::CSpace::TMapPerType::iterator it;
+   
+    for(it = footbots.begin(); it != footbots.end(); it++) {
+        argos::CFootBotEntity& footBot = *argos::any_cast<argos::CFootBotEntity*>(it->second);
+        BaseController& c = dynamic_cast<BaseController&>(footBot.GetControllableEntity().GetController());
+        CPFA_controller& c2 = dynamic_cast<CPFA_controller&>(c);
+        MoveEntity(footBot.GetEmbodiedEntity(), c2.GetStartPosition(), argos::CQuaternion(), false);
+    }
 }
 
 void CPFA_loop_functions::PreStep() {
 	UpdatePheromoneList();
 
 	if(GetSpace().GetSimulationClock() > ResourceDensityDelay) {
-		for(size_t i = 0; i < FoodColoringList.size(); i++) {
-			FoodColoringList[i] = argos::CColor::BLACK;
-		}
+     for(size_t i = 0; i < FoodColoringList.size(); i++) {
+         FoodColoringList[i] = argos::CColor::BLACK;
+     }
 	}
 
 	/*if(FoodList.size() == 0) {
@@ -171,13 +165,12 @@ void CPFA_loop_functions::PreStep() {
 	} */ //qilu 09/06
  
   if(FoodList.size() == 0) {
-		for(size_t i=0; i<Nests.size(); i++)
-			Nests[i].PheromoneList.clear();//qilu 07/13
-   FidelityList.clear();//qilu 07/16
-   TargetRayList.clear();//qilu 07/13
-    }
-    
- 
+      for(size_t i=0; i<Nests.size(); i++){
+          Nests[i].PheromoneList.clear();//qilu 07/13
+          Nests[i].FidelityList.clear();//qilu 07/16
+      }
+      TargetRayList.clear();//qilu 07/13 
+  }
 }
 
 void CPFA_loop_functions::PostStep() {
@@ -210,6 +203,7 @@ void CPFA_loop_functions::PostExperiment() {
 	if (PrintFinalScore == 1) printf("%f, %f\n", getSimTimeInSeconds(), score);
 }
 
+
 argos::CColor CPFA_loop_functions::GetFloorColor(const argos::CVector2 &c_pos_on_floor) {
 	return argos::CColor::WHITE;
 }
@@ -231,7 +225,7 @@ void CPFA_loop_functions::UpdatePheromoneList() {
 
 		        Nests[n].PheromoneList[i].Update(t);
 
-		        if(Nests[n].PheromoneList[i].IsActive() == true) {
+		        if(Nests[n].PheromoneList[i].IsActive()) {
 			          new_p_list.push_back(Nests[n].PheromoneList[i]);
 		        }
       }

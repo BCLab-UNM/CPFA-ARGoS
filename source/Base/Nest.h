@@ -1,6 +1,7 @@
 #ifndef NEST_H_
 #define NEST_H_
 
+#include <map> //qilu 09/11/2016
 #include <argos3/core/utility/math/vector2.h>
 //#include <argos3/core/utility/math/ray3.h>
 #include "Pheromone.h"
@@ -14,22 +15,21 @@ using namespace std;
 class Nest {
 
 	public:
-		Nest();
-		Nest(CVector2 location);
+		      Nest();
+		      Nest(CVector2 location);
 		       
-		vector<Pheromone> PheromoneList;
-  
-  vector<CVector2> FoodList;
+		      vector<Pheromone> PheromoneList;
+        map<string, argos::CVector2> FidelityList; //qilu 09/10/2016 
+        vector<CVector2> FoodList;
    
         /* constructor function */
 		
-		/* public helper functions */
+		      /* public helper functions */
         CVector2		GetLocation();
         void		SetLocation();
-        
+        void     MoveNest(); //qilu 09/10/2016
 	private:
-
-        CVector2        nestLocation;
+        CVector2 nestLocation;
         
 };
 

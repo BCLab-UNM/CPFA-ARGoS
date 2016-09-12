@@ -13,8 +13,9 @@
 	Nest::Nest(CVector2   location)
 {
     /* required initializations */
-	nestLocation    = location;
+	   nestLocation    = location;
     PheromoneList.clear();
+    FidelityList.clear();
     FoodList.clear(); //qilu 09/07/2016
 }
 
@@ -32,5 +33,8 @@ void Nest::SetLocation() {
     nestLocation=CVector2(0.0, 0.0);
 }
 
-        
+void Nest::MoveNest(){ //qilu 09/10/2016
+           
+       
+}
         
