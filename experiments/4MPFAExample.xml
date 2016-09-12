@@ -60,7 +60,7 @@
                     RateOfInformedSearchDecay         = "0.28"
                     RateOfSiteFidelity                = "4.27"
                     RateOfLayingPheromone             = "3.75"
-                    RateOfPheromoneDecay              = "0.03"
+                    RateOfPheromoneDecay              = "0.13"
 		    PrintFinalScore = "1"
 		    />
 
@@ -73,9 +73,9 @@
 	     DrawIDs = "1"
 	     DrawTrails = "1"
 	     DrawTargetRays = "0"
-	     FoodDistribution = "2"
+	     FoodDistribution = "1"
 	     FoodItemCount = "256"
-	     NumberOfClusters = "16"
+	     NumberOfClusters = "8"
 	     ClusterWidthX = "8"
 	     ClusterLengthY = "8"
 	     PowerRank = "4"

@@ -537,10 +537,10 @@ void CPFA_controller::Returning() {
 		    isHoldingFood = false; 
             //drop off the food qilu 09/07/2016
             argos::CVector2 placementPosition;
-		    placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.2, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.2, 0));
+		    placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
 
-            while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2))
-                placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.2, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.2, 0));
+            while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius/2.0-LoopFunctions->FoodRadius, 2))
+                placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
   
             ClosestNest->FoodList.push_back(placementPosition);
             //Update the location of the nest qilu 09/10
@@ -553,6 +553,24 @@ void CPFA_controller::Returning() {
                 ClosestNest->FoodList.erase(ClosestNest->FoodList.begin()+i);
             }
         }
+        //Update the food list and check whether there is some unknown resources have already been in the nest
+        std::vector<argos::CVector2> newFoodList;
+        std::vector<argos::CColor> newFoodColoringList;
+
+        for(size_t i = 0; i < LoopFunctions->FoodList.size(); i++) {
+            if((ClosestNest->GetLocation() - LoopFunctions->FoodList[i]).SquareLength() < pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)) {
+                // The unfound resource is in the nest.
+                ClosestNest->FoodList.push_back(LoopFunctions->FoodList[i]);
+            }
+            else{
+                newFoodList.push_back(LoopFunctions->FoodList[i]);
+                newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
+            }
+        }
+        LoopFunctions->FoodList = newFoodList;
+        LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
+
+
 
             //ClosestNest.FoodList = LoopFunctions->UpdateCollectedFoodList(ClosestNest.FoodList);
 		    //log_output_stream.close();
@@ -618,10 +636,10 @@ void CPFA_controller::SetHoldingFood() {
                                break;
 			             } else {
                       //Return this unfound-food position to the list
-				                  newFoodList.push_back(LoopFunctions->FoodList[i]);
-				                  newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
-                }
-           }
+                            newFoodList.push_back(LoopFunctions->FoodList[i]);
+                            newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
+                         }
+                 }
       }
       if(j>0){
           for(; j < LoopFunctions->FoodList.size(); j++) {
@@ -637,6 +655,7 @@ void CPFA_controller::SetHoldingFood() {
          //SetTarget(LoopFunctions->NestPosition);
          SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
          LoopFunctions->FoodList = newFoodList;
+          LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
          SetLocalResourceDensity();
       }
 	}
