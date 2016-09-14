@@ -317,28 +317,28 @@ void CPFA_controller::Searching() {
      if(distance.SquareLength() < TargetDistanceTolerance) {
          // randomly give up searching
          if(random < LoopFunctions->ProbabilityOfReturningToNest) {
-             if (LoopFunctions->Nests.size() !=0){
-                 SetClosestNest();//qilu 07/26/2016
-                 SetIsHeadingToNest(true);
-                 //SetTarget(LoopFunctions->NestPosition);
-                 SetTarget(ClosestNest->GetLocation());
-                 isGivingUpSearch = true;
-                 ClosestNest->FidelityList.erase(controllerID); //09/07/2016
-                 ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016
-                 SiteFidelityPosition= CVector2(10000,10000); //09/07/2016
-                 isUsingSiteFidelity = false; //qilu 09/07/2016
-                 updateFidelity = false; //qilu 09/07/2016
-                 CPFA_state = RETURNING;
-            
-                 /*
-                 ofstream log_output_stream;
-                 log_output_stream.open("giveup.txt", ios::app);
-                 log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
-                 log_output_stream.close();
-                 */
-         
-                 return; 
-             }
+             
+             SetClosestNest();//qilu 07/26/2016
+             SetIsHeadingToNest(true);
+             //SetTarget(LoopFunctions->NestPosition);
+             SetTarget(ClosestNest->GetLocation());
+             isGivingUpSearch = true;
+             ClosestNest->FidelityList.erase(controllerID); //09/07/2016
+             ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016
+             SiteFidelityPosition= CVector2(10000,10000); //09/07/2016
+             isUsingSiteFidelity = false; //qilu 09/07/2016
+             updateFidelity = false; //qilu 09/07/2016
+             CPFA_state = RETURNING;
+        
+             /*
+             ofstream log_output_stream;
+             log_output_stream.open("giveup.txt", ios::app);
+             log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
+             log_output_stream.close();
+             */
+     
+             return; 
+             
          }
 
          // uninformed search
@@ -475,18 +475,66 @@ void CPFA_controller::Returning() {
 		    argos::Real r2 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
 		    if (isHoldingFood) { 
-			       if(poissonCDF_pLayRate > r1 && updateFidelity) {
+			       
+          //drop off the food qilu 09/07/2016
+          argos::CVector2 placementPosition;
+          placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
+          
+          while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius/2.0-LoopFunctions->FoodRadius, 2))
+              placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
+     
+          ClosestNest->FoodList.push_back(placementPosition);
+          //Update the location of the nest qilu 09/10
+          ClosestNest->UpdateNestLocation();
+          //Update the collected resources in the nest after updating the location of the nest
+          for (size_t i=0; i<ClosestNest->FoodList.size(); i++) {
+             if((ClosestNest->FoodList[i] - ClosestNest->GetLocation()).SquareLength() > pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)){
+                 LoopFunctions->FoodList.push_back(ClosestNest->FoodList[i]);
+                 LoopFunctions->FoodColoringList.push_back(argos::CColor::BLACK);
+                 ClosestNest->FoodList.erase(ClosestNest->FoodList.begin()+i);
+             }
+          }
+       
+          //Update the food list and check whether there is some unknown resources have already been in the nest
+          std::vector<argos::CVector2> newFoodList;
+          std::vector<argos::CColor> newFoodColoringList;
+    
+          for(size_t i = 0; i < LoopFunctions->FoodList.size(); i++) {
+              if((ClosestNest->GetLocation() - LoopFunctions->FoodList[i]).SquareLength() < pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)) {
+                  // The unfound resource is in the nest.
+                  ClosestNest->FoodList.push_back(LoopFunctions->FoodList[i]);
+              }
+              else{
+                  newFoodList.push_back(LoopFunctions->FoodList[i]);
+                  newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
+              }
+          }
+          LoopFunctions->FoodList = newFoodList;
+          LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
+    
+          // Record that a target has been retrieved
+          num_targets_collected =0;
+          for(size_t n=0; n<LoopFunctions->Nests.size(); n++){
+           //LOG<<"FoodList "<<n<<" size ="<<LoopFunctions->Nests[n].FoodList.size()<<endl;
+              num_targets_collected += LoopFunctions->Nests[n].FoodList.size();
+          }
+      
+          LoopFunctions->setScore(num_targets_collected);
+          // We dropped off food. Clear the built-up pheromone trail.
+          TrailToShare.clear();
+              
+          if(poissonCDF_pLayRate > r1 && updateFidelity) {
 				          //TrailToShare.push_back(LoopFunctions->NestPosition); // For drawing the waypoints
-                          TrailToShare.push_back(ClosestNest->GetLocation()); //qilu 07/26/2016
+              TrailToShare.push_back(ClosestNest->GetLocation()); //qilu 07/26/2016
 				          argos::Real timeInSeconds = (argos::Real)(SimulationTick() / SimulationTicksPerSecond());
 				          Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay, ResourceDensity); //qilu add resource density 09/11/2016
-                          //LoopFunctions->PheromoneList.push_back(sharedPheromone);
+              //LoopFunctions->PheromoneList.push_back(sharedPheromone);
 				          ClosestNest->PheromoneList.push_back(sharedPheromone);//qilu 09/08/2016
-                          ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016 if it creates a pheromone trail, the sensed density on site fidelity should be removed. Otherwise, there is a repeated information.
-
-                          TrailToShare.clear();
+              ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016 if it creates a pheromone trail, the sensed density on site fidelity should be removed. Otherwise, there is a repeated information.
+              TrailToShare.clear();
 				          sharedPheromone.Deactivate(); // make sure this won't get re-added later...
-                   }
+          }
+          
 		    }
 
 		    // Determine probabilistically whether to use site fidelity, pheromone
@@ -502,77 +550,28 @@ void CPFA_controller::Returning() {
 			        SetTarget(SiteFidelityPosition);
 			        isInformed = true;
 		    }
-            // use pheromone waypoints
-            else if(SetTargetPheromone()) {
-                //log_output_stream << "Using site pheremone" << endl;
-                isInformed = true;
-                isUsingSiteFidelity = false;
-            }
-            // use random search
-            else {
-                //log_output_stream << "Using random search" << endl;
-                SetRandomSearchLocation();
-                isInformed = false;
-                isUsingSiteFidelity = false;
-            }
+      // use pheromone waypoints
+      else if(SetTargetPheromone()) {
+          //log_output_stream << "Using site pheremone" << endl;
+          isInformed = true;
+          isUsingSiteFidelity = false;
+      }
+       // use random search
+      else {
+           //log_output_stream << "Using random search" << endl;
+            SetRandomSearchLocation();
+            isInformed = false;
+            isUsingSiteFidelity = false;
+      }
 
-		    // Record that a target has been retrieved
-		    if (isHoldingFood) {
-			       num_targets_collected++;
-    			   /*
-			       ofstream results_output_stream;
-			       results_output_stream.open(results_full_path, ios::app);
-			       results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << num_targets_collected << endl;	    
-			       results_output_stream.close();
-			       */
-
-			       LoopFunctions->setScore(num_targets_collected);
-			
-                   // We dropped off food. Clear the built-up pheromone trail.
-			       TrailToShare.clear();
-            }
+		    
 
 		    isGivingUpSearch = false;
 		    CPFA_state = DEPARTING;   
 		    isHoldingFood = false; 
-            //drop off the food qilu 09/07/2016
-            argos::CVector2 placementPosition;
-		    placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
-
-            while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius/2.0-LoopFunctions->FoodRadius, 2))
-                placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
-  
-            ClosestNest->FoodList.push_back(placementPosition);
-            //Update the location of the nest qilu 09/10
-            ClosestNest->UpdateNestLocation();
-        //Update the collected resources in the nest after updating the location of the nest
-        for (size_t i=0; i<ClosestNest->FoodList.size(); i++) {
-            if((ClosestNest->FoodList[i] - ClosestNest->GetLocation()).SquareLength() > pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)){
-                LoopFunctions->FoodList.push_back(ClosestNest->FoodList[i]);
-                LoopFunctions->FoodColoringList.push_back(argos::CColor::BLACK);
-                ClosestNest->FoodList.erase(ClosestNest->FoodList.begin()+i);
-            }
-        }
-        //Update the food list and check whether there is some unknown resources have already been in the nest
-        std::vector<argos::CVector2> newFoodList;
-        std::vector<argos::CColor> newFoodColoringList;
-
-        for(size_t i = 0; i < LoopFunctions->FoodList.size(); i++) {
-            if((ClosestNest->GetLocation() - LoopFunctions->FoodList[i]).SquareLength() < pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)) {
-                // The unfound resource is in the nest.
-                ClosestNest->FoodList.push_back(LoopFunctions->FoodList[i]);
-            }
-            else{
-                newFoodList.push_back(LoopFunctions->FoodList[i]);
-                newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
-            }
-        }
-        LoopFunctions->FoodList = newFoodList;
-        LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
-
-
-
-            //ClosestNest.FoodList = LoopFunctions->UpdateCollectedFoodList(ClosestNest.FoodList);
+      
+          
+      //ClosestNest.FoodList = LoopFunctions->UpdateCollectedFoodList(ClosestNest.FoodList);
 		    //log_output_stream.close();
     }
 	// Take a small step towards the nest so we don't overshoot by too much is we miss it

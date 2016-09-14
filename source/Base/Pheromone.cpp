@@ -37,6 +37,10 @@ void Pheromone::Update(argos::Real time) {
     lastUpdated = time;
 }
 
+void Pheromone::UpdateLocation(argos::CVector2  location){ //qilu 09/12/2016
+
+
+}
 /*****
  * Turns off a pheromone and makes it inactive.
  *****/

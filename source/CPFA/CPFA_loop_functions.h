@@ -87,7 +87,9 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		size_t ClusterWidthX;
 		size_t ClusterLengthY;
 		size_t PowerRank;
-
+  size_t SimTime; //qilu 09/13/2016
+  size_t curr_time_in_minutes; //qilu 09/13/2016
+  size_t last_time_in_minutes; //qilu 09/13/2016
   
 		/* CPFA variables */
 		argos::Real ProbabilityOfSwitchingToSearching;
@@ -122,7 +124,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		argos::CRange<argos::Real>   ForageRangeY;
   
   std::vector<Nest> Nests; //qilu 09/06
-  
+  vector<size_t>			ForageList; //qilu 09/13
 		//argos::CVector2 NestPosition;
   //std::vector<argos::CVector2> NestPositions; //qilu 07/26/2016
 	private:

@@ -6,7 +6,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="1800"
+    <experiment length="3600"
                 ticks_per_second="32"
 		random_seed="0"/>
   </framework>
@@ -68,7 +68,7 @@
 	     MaxSimTimeInSeconds = "3600"
 	     MaxSimCounter = "1"
 	     VariableFoodPlacement = "0"
-	     OutputData = "0"
+	     OutputData = "1"
 	     DrawDensityRate = "4"
 	     DrawIDs = "1"
 	     DrawTrails = "1"
@@ -100,9 +100,9 @@
       <position method="grid"
                 center="0.0, 0.0, 0.0"
                 distances="0.2, 0.2, 0.0"
-                layout="6, 6, 1" />
+                layout="4, 6, 1" />
       <orientation method="constant" values="0.0, 0.0, 0.0" />
-      <entity quantity="16" max_trials="100">
+      <entity quantity="24" max_trials="100">
         <foot-bot id="CPFA_">
           <controller config="CPFA"/>
         </foot-bot>
@@ -126,6 +126,7 @@
   <!-- ****************** -->
   <!-- * Visualization * -->
   <!-- ****************** -->
+ <!--
   <visualization>
 
 <qt-opengl>
@@ -136,5 +137,5 @@
     </qt-opengl>
 
   </visualization>
-
+-->
 </argos-configuration>

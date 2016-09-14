@@ -2,6 +2,7 @@
 
 CPFA_loop_functions::CPFA_loop_functions() :
 	RNG(argos::CRandom::CreateRNG("argos")),
+ SimTime(0), //qilu 09/13/2016
 	MaxSimTime(3600 * GetSimulator().GetPhysicsEngine("dyn2d").GetInverseSimulationClockTick()),
 	ResourceDensityDelay(0),
 	RandomSeed(GetSimulator().GetRandomSeed()),
@@ -93,7 +94,6 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
  Nest nest3= Nest(NestPosition); //qilu 09/06
  Nests.push_back(nest3);
  
- 
 	FoodRadiusSquared = FoodRadius*FoodRadius;
 
 	// calculate the forage range and compensate for the robot's radius of 0.085m
@@ -116,6 +116,10 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	}
 
 	SetFoodDistribution();
+ 
+ ForageList.clear(); //qilu 09/13/2016
+ last_time_in_minutes=0; //qilu 09/13/2016
+ 
 }
 
 /*vector<CVector2> CPFA_loop_functions::UpdateCollectedFoodList(vector<CVector2> foodList){//qilu 09/12/2016
@@ -164,6 +168,18 @@ void CPFA_loop_functions::Reset() {
 }
 
 void CPFA_loop_functions::PreStep() {
+    SimTime++;
+    curr_time_in_minutes = getSimTimeInSeconds()/60.0;
+    if(curr_time_in_minutes - last_time_in_minutes==1){
+		      //data.CollisionTimeList.push_back(data.currCollisionTime - data.lastCollisionTime);
+		      //data.lastCollisionTime = data.currCollisionTime;
+				
+        ForageList.push_back(Score());
+        //data.lastNumCollectedFood = data.currNumCollectedFood;
+        last_time_in_minutes++;
+    }
+ 
+ 
 	UpdatePheromoneList();
 
 	if(GetSpace().GetSimulationClock() > ResourceDensityDelay) {
@@ -215,7 +231,36 @@ bool CPFA_loop_functions::IsExperimentFinished() {
 }
 
 void CPFA_loop_functions::PostExperiment() {
-	if (PrintFinalScore == 1) printf("%f, %f\n", getSimTimeInSeconds(), score);
+	   string type="";
+    if (FoodDistribution == 0)
+        type = "random";
+    else if (FoodDistribution == 1)
+        type = "cluster";
+    else
+        type = "powerlaw";
+                
+    if (PrintFinalScore == 1) {
+        printf("%f, %f, %d\n", getSimTimeInSeconds(), score, RandomSeed);
+        
+  
+        string header = type+"_CPFA_";
+        ofstream dataOutput( (header+ "iAntTagData.txt").c_str(), ios::app);
+        // output to file
+        if(dataOutput.tellp() == 0) {
+            dataOutput << "tags_collected, collisions, time_in_minutes, random_seed\n";//qilu 08/18
+        }
+    
+        //dataOutput <<data.CollisionTime/16.0<<", "<< time_in_minutes << ", " << data.RandomSeed << endl;
+        dataOutput << Score() << ", "<< curr_time_in_minutes << ", "<<RandomSeed<<endl;
+        dataOutput.close();
+    
+        ofstream forageDataOutput((header+"ForageData.txt").c_str(), ios::app);
+        if(ForageList.size()!=0) forageDataOutput<<"Forage: "<< ForageList[0];
+            for(size_t i=1; i< ForageList.size(); i++) forageDataOutput<<", "<<ForageList[i];
+            forageDataOutput<<"\n";
+            forageDataOutput.close();
+      }  
+
 }
 
 

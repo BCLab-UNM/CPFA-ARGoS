@@ -16,6 +16,7 @@ class Pheromone {
 
         /* public helper functions */
         void                         Update(argos::Real time);
+        void                         UpdateLocation(argos::CVector2  location); //qilu 09/12/2016
         void                         Deactivate();
         argos::CVector2              GetLocation();
         std::vector<argos::CVector2> GetTrail();
