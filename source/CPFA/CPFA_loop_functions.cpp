@@ -243,7 +243,7 @@ void CPFA_loop_functions::PostExperiment() {
         printf("%f, %f, %d\n", getSimTimeInSeconds(), score, RandomSeed);
         
   
-        string header = type+"_CPFA_";
+        string header = type+"_Dynamical_";
         ofstream dataOutput( (header+ "iAntTagData.txt").c_str(), ios::app);
         // output to file
         if(dataOutput.tellp() == 0) {
