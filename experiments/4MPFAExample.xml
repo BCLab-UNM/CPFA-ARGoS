@@ -80,13 +80,14 @@
 	     ClusterLengthY = "8"
 	     PowerRank = "4"
 	     FoodRadius = "0.05"
-	     NestRadius = "0.5"
+	     NestRadius = "0.25"
 	     NestElevation = "0.01"
-      NestPosition_0="2.5, 2.5" 
+/>
+      <!--NestPosition_0="2.5, 2.5" 
       NestPosition_1="2.5, -2.5" 
       NestPosition_2="-2.5, 2.5" 
-      NestPosition_3="-2.5, -2.5"/>
-
+      NestPosition_3="-2.5, -2.5"-->
+      
   </loop_functions>
 
   <!-- *********************** -->

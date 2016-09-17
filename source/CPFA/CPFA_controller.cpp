@@ -477,47 +477,51 @@ void CPFA_controller::Returning() {
 		    if (isHoldingFood) { 
 			       
           //drop off the food qilu 09/07/2016
-          argos::CVector2 placementPosition;
+          argos::CVector2 placementPosition, newNestPosition;
           placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
           
-          while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius/2.0-LoopFunctions->FoodRadius, 2))
+          while((placementPosition-ClosestNest->GetLocation()).SquareLength()>pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2))
               placementPosition.Set(ClosestNest->GetLocation().GetX()+RNG->Gaussian(0.1, 0), ClosestNest->GetLocation().GetY()+RNG->Gaussian(0.1, 0));
      
           ClosestNest->FoodList.push_back(placementPosition);
+          
+          num_targets_collected ++;
+          
           //Update the location of the nest qilu 09/10
-          ClosestNest->UpdateNestLocation();
-          //Update the collected resources in the nest after updating the location of the nest
-          for (size_t i=0; i<ClosestNest->FoodList.size(); i++) {
-             if((ClosestNest->FoodList[i] - ClosestNest->GetLocation()).SquareLength() > pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)){
-                 LoopFunctions->FoodList.push_back(ClosestNest->FoodList[i]);
-                 LoopFunctions->FoodColoringList.push_back(argos::CColor::BLACK);
-                 ClosestNest->FoodList.erase(ClosestNest->FoodList.begin()+i);
-             }
-          }
-       
-          //Update the food list and check whether there is some unknown resources have already been in the nest
-          std::vector<argos::CVector2> newFoodList;
-          std::vector<argos::CColor> newFoodColoringList;
-    
-          for(size_t i = 0; i < LoopFunctions->FoodList.size(); i++) {
-              if((ClosestNest->GetLocation() - LoopFunctions->FoodList[i]).SquareLength() < pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)) {
-                  // The unfound resource is in the nest.
-                  ClosestNest->FoodList.push_back(LoopFunctions->FoodList[i]);
+          //LOG<<"LoopFunctions->ForageRangeX.GetMax()="<<LoopFunctions->ForageRangeX.GetMax()<<endl;
+          //newNestPosition = ClosestNest->ComputeNestNewPosition();
+          //if ((ClosestNest->GetLocation() - newNestPosition).SquareLength()>pow(LoopFunctions->ForageRangeX.GetMax()/2.0, 2)){
+              //Clear the food list of the nest
+              //num_targets_collected += ClosestNest->FoodList.size();
+              //ClosestNest->FoodList.clear();
+              // update the position
+              //ClosestNest->SetLocation(newNestPosition);
+            //  Nest* newNest = LoopFunctions->CreateNest(newNestPosition);
+              //Update the collected resources in the nest after updating the location of the nest
+              /*for (size_t i=0; i<ClosestNest->FoodList.size(); i++) {
+                  if((ClosestNest->FoodList[i] - ClosestNest->GetLocation()).SquareLength() > pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)){
+                      LoopFunctions->FoodList.push_back(ClosestNest->FoodList[i]);
+                      LoopFunctions->FoodColoringList.push_back(argos::CColor::BLACK);
+                      ClosestNest->FoodList.erase(ClosestNest->FoodList.begin()+i);
+                  }
+              }*/
+              //Update the food list and check whether there is some unknown resources have already been in the nest
+              for(size_t i = 0; i < LoopFunctions->FoodList.size(); i++) {
+                  if((ClosestNest->GetLocation() - LoopFunctions->FoodList[i]).SquareLength() < pow(LoopFunctions->NestRadius-LoopFunctions->FoodRadius, 2)) {
+                      // The unfound resource is in the nest.
+                      ClosestNest->FoodList.push_back(LoopFunctions->FoodList[i]);
+                      LoopFunctions->FoodList.erase(LoopFunctions->FoodList.begin()+i);
+                      LoopFunctions->FoodColoringList.erase(LoopFunctions->FoodColoringList.begin()+i);
+                      num_targets_collected ++;
+                  }
               }
-              else{
-                  newFoodList.push_back(LoopFunctions->FoodList[i]);
-                  newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
-              }
-          }
-          LoopFunctions->FoodList = newFoodList;
-          LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
-    
+          //}
           // Record that a target has been retrieved
-          num_targets_collected =0;
+          /*num_targets_collected =0;
           for(size_t n=0; n<LoopFunctions->Nests.size(); n++){
            //LOG<<"FoodList "<<n<<" size ="<<LoopFunctions->Nests[n].FoodList.size()<<endl;
               num_targets_collected += LoopFunctions->Nests[n].FoodList.size();
-          }
+          }*/
       
           LoopFunctions->setScore(num_targets_collected);
           // We dropped off food. Clear the built-up pheromone trail.
@@ -649,13 +653,14 @@ void CPFA_controller::SetHoldingFood() {
    
       // We picked up food. Update the food list minus what we picked up.
       if(IsHoldingFood()) {
-         SetClosestNest();//qilu 07/26/2016
-         SetIsHeadingToNest(true);
-         //SetTarget(LoopFunctions->NestPosition);
-         SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
-         LoopFunctions->FoodList = newFoodList;
-          LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
-         SetLocalResourceDensity();
+           if(LoopFunctions->Nests.size() == 0)   LoopFunctions->CreateNest(GetPosition());
+           SetClosestNest();//qilu 07/26/2016
+           SetIsHeadingToNest(true);
+           //SetTarget(LoopFunctions->NestPosition);
+           SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
+           LoopFunctions->FoodList = newFoodList;
+           LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
+           SetLocalResourceDensity();
       }
 	}
 		

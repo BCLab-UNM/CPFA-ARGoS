@@ -76,7 +76,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
     argos::GetNodeAttribute(settings_node, "NestRadius", NestRadius); //qilu 09/12/2016
 	argos::GetNodeAttribute(settings_node, "NestElevation", NestElevation);
 	
- argos::GetNodeAttribute(settings_node, "NestPosition_0", NestPosition);
+/* argos::GetNodeAttribute(settings_node, "NestPosition_0", NestPosition);
  Nest nest0= Nest(NestPosition); //qilu 09/06
  Nests.push_back(nest0);
     
@@ -93,6 +93,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
  argos::GetNodeAttribute(settings_node, "NestPosition_3", NestPosition);
  Nest nest3= Nest(NestPosition); //qilu 09/06
  Nests.push_back(nest3);
+ */
  
 	FoodRadiusSquared = FoodRadius*FoodRadius;
 
@@ -461,7 +462,8 @@ void CPFA_loop_functions::CreateNest(argos::CVector2 position){ //qilu 07/26/201
              position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
              num_trail++;
       }
-      Nests.push_back(Nest(position));
+      Nest   newNest = Nest(position);  //qilu 09/16/2016
+      Nests.push_back(newNest);
  }
  
  

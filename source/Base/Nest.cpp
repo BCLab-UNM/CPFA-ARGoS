@@ -38,7 +38,7 @@ void Nest::SetLocation(CVector2 newLocation) {
     nestLocation = newLocation;
 }
 
-void Nest::UpdateNestLocation(){ //qilu 09/10/2016
+CVector2 Nest::ComputeNestNewPosition(){ //qilu 09/10/2016
     CVector2 Sum_locations = CVector2(0.0, 0.0);
     size_t Num_points = 0;
 
@@ -55,11 +55,10 @@ void Nest::UpdateNestLocation(){ //qilu 09/10/2016
         Num_points += it->second;
     }
 
-    //if (FoodList.size() !=0)
-    for (size_t i=0; i<FoodList.size(); i++) {
+    /*for (size_t i=0; i<FoodList.size(); i++) {
         Sum_locations += FoodList[i];
         Num_points ++;
-    }
-    if (Num_points !=0) SetLocation(Sum_locations / Num_points);
+    }*/ //qilu 09/16/2016 if the nest will not be moved after allocation, the resources in the nest will not be considered for calculating the new location of the nest.
+    if (Num_points !=0) return Sum_locations / Num_points;
 }
         

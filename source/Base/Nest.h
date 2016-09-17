@@ -29,7 +29,7 @@ class Nest {
         CVector2		GetLocation();
         void		SetLocation();
         void		SetLocation(CVector2 newLocation); //qilu 09/11/2016
-        void     UpdateNestLocation(); //qilu 09/10/2016
+        CVector2     ComputeNestNewPosition(); //qilu 09/10/2016
 	private:
         CVector2 nestLocation;
         
