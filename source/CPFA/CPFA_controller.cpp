@@ -141,6 +141,8 @@ void CPFA_controller::CPFA() {
 		case SEARCHING:
 			//argos::LOG << "SEARCHING" << std::endl;
 			SetIsHeadingToNest(false);
+            //LOG<<"SimulationTick()="<<SimulationTick()<<endl;
+            //LOG<<SimulationTicksPerSecond()<<endl;
 			if((SimulationTick() % (SimulationTicksPerSecond() / 2)) == 0) {
 				Searching();
 			}
@@ -311,113 +313,118 @@ void CPFA_controller::Searching() {
 		   argos::CVector2 distance = GetPosition() - GetTarget();
 		   argos::Real     random   = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
      
-     // If we reached our target search location, set a new one. The 
-     // new search location calculation is different based on whether
-     // we are currently using informed or uninformed search.
-     if(distance.SquareLength() < TargetDistanceTolerance) {
-         // randomly give up searching
-         if(random < LoopFunctions->ProbabilityOfReturningToNest) {
-             
-             SetClosestNest();//qilu 07/26/2016
-             SetIsHeadingToNest(true);
-             //SetTarget(LoopFunctions->NestPosition);
-             SetTarget(ClosestNest->GetLocation());
-             isGivingUpSearch = true;
-             ClosestNest->FidelityList.erase(controllerID); //09/07/2016
-             ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016
-             SiteFidelityPosition= CVector2(10000,10000); //09/07/2016
-             isUsingSiteFidelity = false; //qilu 09/07/2016
-             updateFidelity = false; //qilu 09/07/2016
-             CPFA_state = RETURNING;
-        
-             /*
-             ofstream log_output_stream;
-             log_output_stream.open("giveup.txt", ios::app);
-             log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
-             log_output_stream.close();
-             */
-     
-             return; 
-             
-         }
+         // If we reached our target search location, set a new one. The
+         // new search location calculation is different based on whether
+         // we are currently using informed or uninformed search.
+         if(distance.SquareLength() < TargetDistanceTolerance) {
+             // randomly give up searching
+             if(random < LoopFunctions->ProbabilityOfReturningToNest) {
+                // LOG<<"giveup ..."<<endl;
+                 SetClosestNest();//qilu 07/26/2016
+                 SetIsHeadingToNest(true);
+                 //SetTarget(LoopFunctions->NestPosition);
+                 SetTarget(ClosestNest->GetLocation());
+                 isGivingUpSearch = true;
+                 ClosestNest->FidelityList.erase(controllerID); //09/07/2016
+                 ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016
+                 SiteFidelityPosition= CVector2(10000,10000); //09/07/2016
+                 isUsingSiteFidelity = false; //qilu 09/07/2016
+                 updateFidelity = false; //qilu 09/07/2016
+                 CPFA_state = RETURNING;
+            
+                 /*
+                 ofstream log_output_stream;
+                 log_output_stream.open("giveup.txt", ios::app);
+                 log_output_stream << "Give up: " << SimulationTick() / SimulationTicksPerSecond() << endl;
+                 log_output_stream.close();
+                 */
+         
+                 return; 
+                 
+             }
 
-         // uninformed search
-         if(isInformed == false) {
-          argos::Real USCV = LoopFunctions->UninformedSearchVariation.GetValue();
-          argos::Real rand = RNG->Gaussian(USCV);
-          argos::CRadians rotation(rand);
-          argos::CRadians angle1(rotation);
-          argos::CRadians angle2(GetHeading());
-          argos::CRadians turn_angle(angle1 + angle2);
-          argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-      
-          //argos::LOG << "UNINFORMED SEARCH: rotation: " << angle1 << std::endl;
-          //argos::LOG << "UNINFORMED SEARCH: old heading: " << angle2 << std::endl;
-      
-          /*
-          ofstream log_output_stream;
-          log_output_stream.open("uninformed_angle1.log", ios::app);
-          log_output_stream << angle1.GetValue() << endl;
-          log_output_stream.close();
-      
-          log_output_stream.open("uninformed_angle2.log", ios::app);
-          log_output_stream << angle2.GetValue() << endl;
-          log_output_stream.close();
-      
-          log_output_stream.open("uninformed_turning_angle.log", ios::app);
-          log_output_stream << turn_angle.GetValue() << endl;
-          log_output_stream.close();
-          */
-          SetIsHeadingToNest(false);
-          SetTarget(turn_vector + GetPosition());
-         }
-         // informed search
-         else{
+             // uninformed search
+             if(isInformed == false) {
+                // LOG<<"uninform ..."<<endl;
+              argos::Real USCV = LoopFunctions->UninformedSearchVariation.GetValue();
+              argos::Real rand = RNG->Gaussian(USCV);
+              argos::CRadians rotation(rand);
+              argos::CRadians angle1(rotation);
+              argos::CRadians angle2(GetHeading());
+              argos::CRadians turn_angle(angle1 + angle2);
+              argos::CVector2 turn_vector(SearchStepSize, turn_angle);
           
+              //argos::LOG << "UNINFORMED SEARCH: rotation: " << angle1 << std::endl;
+              //argos::LOG << "UNINFORMED SEARCH: old heading: " << angle2 << std::endl;
+          
+              /*
+              ofstream log_output_stream;
+              log_output_stream.open("uninformed_angle1.log", ios::app);
+              log_output_stream << angle1.GetValue() << endl;
+              log_output_stream.close();
+          
+              log_output_stream.open("uninformed_angle2.log", ios::app);
+              log_output_stream << angle2.GetValue() << endl;
+              log_output_stream.close();
+          
+              log_output_stream.open("uninformed_turning_angle.log", ios::app);
+              log_output_stream << turn_angle.GetValue() << endl;
+              log_output_stream.close();
+              */
               SetIsHeadingToNest(false);
+                 //LOG<<"GetPosition()="<<GetPosition()<<endl;
+                 //LOG<<"turn_vector="<<turn_vector<<endl;
+              SetTarget(turn_vector + GetPosition());
+             }
+             // informed search
+             else{
+                 //LOG<<"informed ..."<<endl;
+                  SetIsHeadingToNest(false);
+                  
+                  if(IsAtTarget()) {
+                      size_t          t           = SearchTime++;
+                      argos::Real     twoPi       = (argos::CRadians::TWO_PI).GetValue();
+                      argos::Real     pi          = (argos::CRadians::PI).GetValue();
+                      argos::Real     isd         = LoopFunctions->RateOfInformedSearchDecay;
+                      argos::Real     correlation = GetExponentialDecay((2.0 * twoPi) - LoopFunctions->UninformedSearchVariation.GetValue(), t, isd);
+                      argos::Real     rand = RNG->Gaussian(correlation + LoopFunctions->UninformedSearchVariation.GetValue());
+                      argos::CRadians rotation(GetBound(rand, -pi, pi));
+                      argos::CRadians angle1(rotation);
+                      argos::CRadians angle2(GetHeading());
+                      argos::CRadians turn_angle(angle2 + angle1);
+                      argos::CVector2 turn_vector(SearchStepSize, turn_angle);
               
-              if(IsAtTarget()) {
-                  size_t          t           = SearchTime++;
-                  argos::Real     twoPi       = (argos::CRadians::TWO_PI).GetValue();
-                  argos::Real     pi          = (argos::CRadians::PI).GetValue();
-                  argos::Real     isd         = LoopFunctions->RateOfInformedSearchDecay;
-                  argos::Real     correlation = GetExponentialDecay((2.0 * twoPi) - LoopFunctions->UninformedSearchVariation.GetValue(), t, isd);
-                  argos::Real     rand = RNG->Gaussian(correlation + LoopFunctions->UninformedSearchVariation.GetValue());
-                  argos::CRadians rotation(GetBound(rand, -pi, pi));
-                  argos::CRadians angle1(rotation);
-                  argos::CRadians angle2(GetHeading());
-                  argos::CRadians turn_angle(angle2 + angle1);
-                  argos::CVector2 turn_vector(SearchStepSize, turn_angle);
-          
-                  //argos::LOG << "INFORMED SEARCH: rotation: " << angle1 << std::endl;
-                  //argos::LOG << "INFORMED SEARCH: old heading: " << angle2 << std::endl;
-          
-                  /*
-                  ofstream log_output_stream;
-                  log_output_stream.open("informed_angle1.log", ios::app);
-                  log_output_stream << angle1.GetValue() << endl;
-                  log_output_stream.close();
-          
-                  log_output_stream.open("informed_angle2.log", ios::app);
-                  log_output_stream << angle2.GetValue() << endl;
-                  log_output_stream.close();
-          
-                  log_output_stream.open("informed_turning_angle.log", ios::app);
-                  log_output_stream << turn_angle.GetValue() << endl;
-                  log_output_stream.close();
-                  */
-                  SetTarget(turn_vector + GetPosition());
-              }
-         }
-		   }
-		   else {
+                      //argos::LOG << "INFORMED SEARCH: rotation: " << angle1 << std::endl;
+                      //argos::LOG << "INFORMED SEARCH: old heading: " << angle2 << std::endl;
+              
+                      /*
+                      ofstream log_output_stream;
+                      log_output_stream.open("informed_angle1.log", ios::app);
+                      log_output_stream << angle1.GetValue() << endl;
+                      log_output_stream.close();
+              
+                      log_output_stream.open("informed_angle2.log", ios::app);
+                      log_output_stream << angle2.GetValue() << endl;
+                      log_output_stream.close();
+              
+                      log_output_stream.open("informed_turning_angle.log", ios::app);
+                      log_output_stream << turn_angle.GetValue() << endl;
+                      log_output_stream.close();
+                      */
+                      //LOG<<"GetPosition()="<<GetPosition()<<endl;
+                      //LOG<<"turn_vector="<<turn_vector<<endl;
+                      SetTarget(turn_vector + GetPosition());
+                  }
+             }
+        }
+        else {
 			      //argos::LOG << "SEARCH: Haven't reached destination. " << GetPosition() << "," << GetTarget() << std::endl;
-		   }
+		    }
 	}
 	else {
 		   //argos::LOG << "SEARCH: Carrying food." << std::endl;
 	}
-
+    //LOG<<"end one time search..."<<endl;
 	// Food has been found, change state to RETURNING and go to the nest
 	//else {
 	//	SetTarget(LoopFunctions->NestPosition);
@@ -534,6 +541,7 @@ void CPFA_controller::Returning() {
 				          Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay, ResourceDensity); //qilu add resource density 09/11/2016
               //LoopFunctions->PheromoneList.push_back(sharedPheromone);
 				          ClosestNest->PheromoneList.push_back(sharedPheromone);//qilu 09/08/2016
+              //LOG<<"Create pheromone..."<<endl;
               ClosestNest->DensityOnFidelity.erase(controllerID); //09/11/2016 if it creates a pheromone trail, the sensed density on site fidelity should be removed. Otherwise, there is a repeated information.
               TrailToShare.clear();
 				          sharedPheromone.Deactivate(); // make sure this won't get re-added later...
@@ -622,14 +630,17 @@ void CPFA_controller::SetRandomSearchLocation() {
  *****/
 void CPFA_controller::SetHoldingFood() {
 	// Is the iAnt already holding food?
+    //LOG<<"c..."<<endl;
 	if(IsHoldingFood() == false) {
 		// No, the iAnt isn't holding food. Check if we have found food at our
 		// current position and update the food list if we have.
 
-		    std::vector<argos::CVector2> newFoodList;
-		    std::vector<argos::CColor> newFoodColoringList;
-		    size_t i = 0, j = 0;
-      if(CPFA_state != RETURNING){
+          std::vector<argos::CVector2> newFoodList;
+          std::vector<argos::CColor> newFoodColoringList;
+          size_t i = 0, j = 0;
+          if(CPFA_state != RETURNING){
+              //LOG<<"c..."<<endl;
+              //LOG<<"1. LoopFunctions->FoodList.size()="<<LoopFunctions->FoodList.size()<<endl;
 		         for(i = 0; i < LoopFunctions->FoodList.size(); i++) {
 			            if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance ) {
 				               // We found food! Calculate the nearby food density.
@@ -637,31 +648,65 @@ void CPFA_controller::SetHoldingFood() {
 				               CPFA_state = SURVEYING;
 				               j = i + 1;
                                break;
-			             } else {
-                      //Return this unfound-food position to the list
+                            //LOG<<"hodling food..."<<endl;
+			             }
+                        else {
+                            //Return this unfound-food position to the list
+                            //LOG<<"2. LoopFunctions->FoodList.size()="<<LoopFunctions->FoodList.size()<<endl;
+                            //LOG<<"LoopFunctions->FoodColoringList.size()="<<LoopFunctions->FoodColoringList.size()<<endl;
+                            //LOG<<"i="<<i<<endl;
                             newFoodList.push_back(LoopFunctions->FoodList[i]);
                             newFoodColoringList.push_back(LoopFunctions->FoodColoringList[i]);
                          }
                  }
-      }
-      if(j>0){
-          for(; j < LoopFunctions->FoodList.size(); j++) {
-              newFoodList.push_back(LoopFunctions->FoodList[j]);
-              newFoodColoringList.push_back(LoopFunctions->FoodColoringList[j]);
           }
-      }
-   
-      // We picked up food. Update the food list minus what we picked up.
-      if(IsHoldingFood()) {
-           if(LoopFunctions->Nests.size() == 0)   LoopFunctions->CreateNest(GetPosition());
-           SetClosestNest();//qilu 07/26/2016
-           SetIsHeadingToNest(true);
-           //SetTarget(LoopFunctions->NestPosition);
-           SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
-           LoopFunctions->FoodList = newFoodList;
-           LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
-           SetLocalResourceDensity();
-      }
+          if(j>0){
+              //LOG<<"j="<<j<<endl;
+              for(; j < LoopFunctions->FoodList.size(); j++) {
+                  newFoodList.push_back(LoopFunctions->FoodList[j]);
+                  newFoodColoringList.push_back(LoopFunctions->FoodColoringList[j]);
+              }
+          }
+        //LOG<<"IsHoldingFood()="<<IsHoldingFood()<<endl;
+          // We picked up food. Update the food list minus what we picked up.
+          if(IsHoldingFood()) {
+              //LOG<<"d..."<<endl;
+               if(LoopFunctions->Nests.size() == 0)   LoopFunctions->CreateNest(GetPosition());
+               else {
+                   //LOG<<"e..."<<endl;
+               argos::Real Distance = (GetTarget() - GetPosition()).Length();
+               argos::Real poissonCDF_pCreateNestByDistance    = GetPoissonCDF(Distance, LoopFunctions->RateOfCreateNestByDistance);
+
+                   //LOG<<"ResourceDensity="<<ResourceDensity<<endl;
+               argos::Real poissonCDF_pCreateNestByDensity = GetPoissonCDF(ResourceDensity, LoopFunctions->RateOfCreateNestByDensity);
+                   argos::Real p1 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
+                  argos::Real p2 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
+
+                   //if(poissonCDF_pCreateNestByDistance > r1 && poissonCDF_pCreateNestByDensity > r2){
+                   if(poissonCDF_pCreateNestByDistance > p1){
+                       LoopFunctions->CreateNest2(GetPosition());
+                       LOG<<"Create one more nest ..."<<endl;
+                       LOG<<"LoopFunctions->Nests.size()="<<LoopFunctions->Nests.size()<<endl;
+
+                   }
+               }
+
+               SetClosestNest();//qilu 07/26/2016
+              LOG<<"ClosestNest->GetLocation()="<<ClosestNest->GetLocation()<<endl;
+              LOG<<"Current position()="<<GetPosition()<<endl;
+              LOG<<"1..."<<endl;
+               SetIsHeadingToNest(true);
+              LOG<<"2..."<<endl;
+
+               SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
+              LOG<<"3..."<<endl;
+               LoopFunctions->FoodList = newFoodList;
+              LOG<<"4..."<<endl;
+               LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
+              LOG<<"5..."<<endl;
+               SetLocalResourceDensity();
+              LOG<<"6..."<<endl;
+          }
 	}
 		
 	// This shouldn't be checked here ---
@@ -721,6 +766,8 @@ void CPFA_controller::SetLocalResourceDensity() {
     //ClosestNest->FidelityList.size()<<endl;
     ClosestNest->FidelityList[controllerID] = SiteFidelityPosition; //qilu 09/07/2016
     ClosestNest->DensityOnFidelity[controllerID]= ResourceDensity; //09/11/2016
+
+
 	/* Delay for 4 seconds (simulate iAnts scannning rotation). */
 	//  Wait(4); // This function is broken. It causes the rover to move in the wrong direction after finishing its local resource density test 
 
@@ -911,7 +958,7 @@ void CPFA_controller::UpdateTargetRayList() {
 }
 
 void CPFA_controller::SetClosestNest(){//qilu 07/26/2016
-    Nest* NewClosestNest;
+    //Nest* NewClosestNest;
     CVector2 robotPos = GetPosition();
     Real minSquaredLen = (LoopFunctions->Nests[0].GetLocation()-robotPos).SquareLength();
     size_t minIdex =0;
@@ -926,12 +973,12 @@ void CPFA_controller::SetClosestNest(){//qilu 07/26/2016
     //ClosestNest->FidelityList.erase(controllerID); //qilu 09/07/2016
 		  //SiteFidelityPosition=CVector2(10000,10000);
 		
-    NewClosestNest = &LoopFunctions->Nests[minIdex];
+    //NewClosestNest = &LoopFunctions->Nests[minIdex];
     if(ClosestNest != NULL){
-        if(ClosestNest->GetLocation() != NewClosestNest->GetLocation())
+        if(ClosestNest->GetLocation() != LoopFunctions->Nests[minIdex].GetLocation())
             SetFidelityList();
-            ClosestNest = NewClosestNest;
+            ClosestNest = &LoopFunctions->Nests[minIdex];
     }
-    else ClosestNest = NewClosestNest;
+    else ClosestNest = &LoopFunctions->Nests[minIdex];
 }
 REGISTER_CONTROLLER(CPFA_controller, "CPFA_controller")

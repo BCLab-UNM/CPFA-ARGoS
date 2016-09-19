@@ -27,7 +27,9 @@ CPFA_loop_functions::CPFA_loop_functions() :
 	RateOfSiteFidelity(0.0),
 	RateOfLayingPheromone(0.0),
 	RateOfPheromoneDecay(0.0),
-	FoodRadius(0.05),
+    RateOfCreateNestByDistance(0.0),
+    RateOfCreateNestByDensity(0.0),
+    FoodRadius(0.05),
 	FoodRadiusSquared(0.0025),
 	NestRadius(0.25),
 	NestRadiusSquared(0.0625),
@@ -51,7 +53,9 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	argos::GetNodeAttribute(CPFA_node, "RateOfSiteFidelity",                RateOfSiteFidelity);
 	argos::GetNodeAttribute(CPFA_node, "RateOfLayingPheromone",             RateOfLayingPheromone);
 	argos::GetNodeAttribute(CPFA_node, "RateOfPheromoneDecay",              RateOfPheromoneDecay);
-	argos::GetNodeAttribute(CPFA_node, "PrintFinalScore",                   PrintFinalScore);
+    argos::GetNodeAttribute(CPFA_node, "RateOfCreateNestByDistance",              RateOfCreateNestByDistance);//qilu 09/17/2016
+    argos::GetNodeAttribute(CPFA_node, "RateOfCreateNestByDensity",              RateOfCreateNestByDensity);//qilu 09/17/2016
+    argos::GetNodeAttribute(CPFA_node, "PrintFinalScore",                   PrintFinalScore);
 
 	UninformedSearchVariation = ToRadians(USV_InDegrees);
 	argos::TConfigurationNode settings_node = argos::GetNode(node, "settings");
@@ -76,7 +80,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
     argos::GetNodeAttribute(settings_node, "NestRadius", NestRadius); //qilu 09/12/2016
 	argos::GetNodeAttribute(settings_node, "NestElevation", NestElevation);
 	
-/* argos::GetNodeAttribute(settings_node, "NestPosition_0", NestPosition);
+/*argos::GetNodeAttribute(settings_node, "NestPosition_0", NestPosition);
  Nest nest0= Nest(NestPosition); //qilu 09/06
  Nests.push_back(nest0);
     
@@ -93,8 +97,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
  argos::GetNodeAttribute(settings_node, "NestPosition_3", NestPosition);
  Nest nest3= Nest(NestPosition); //qilu 09/06
  Nests.push_back(nest3);
- */
- 
+*/
 	FoodRadiusSquared = FoodRadius*FoodRadius;
 
 	// calculate the forage range and compensate for the robot's radius of 0.085m
@@ -241,7 +244,7 @@ void CPFA_loop_functions::PostExperiment() {
         type = "powerlaw";
                 
     if (PrintFinalScore == 1) {
-        printf("%f, %f, %d\n", getSimTimeInSeconds(), score, RandomSeed);
+        printf("%f, %f, %lu\n", getSimTimeInSeconds(), score, RandomSeed);
         
   
         string header = type+"_Dynamical_";
@@ -458,15 +461,33 @@ void CPFA_loop_functions::CreateNest(argos::CVector2 position){ //qilu 07/26/201
      RangeX.Set(x_coordinate - NestRadius, x_coordinate + NestRadius);
      argos::CRange<argos::Real>   RangeY;
      RangeY.Set(y_coordinate - NestRadius, y_coordinate + NestRadius);
-     while(IsOutOfBounds(position, NestRadius) && num_trail<20){
+     /*while(IsOutOfBounds(position, NestRadius) && num_trail<20){
              position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
              num_trail++;
-      }
+      }*/
       Nest   newNest = Nest(position);  //qilu 09/16/2016
       Nests.push_back(newNest);
  }
- 
- 
+
+void CPFA_loop_functions::CreateNest2(argos::CVector2 position){ //qilu 07/26/2016
+    Real     x_coordinate = position.GetX();
+    Real     y_coordinate = position.GetY();
+    size_t  num_trail=0;
+    argos::CRange<argos::Real>   RangeX;
+    RangeX.Set(x_coordinate - NestRadius, x_coordinate + NestRadius);
+    argos::CRange<argos::Real>   RangeY;
+    RangeY.Set(y_coordinate - NestRadius, y_coordinate + NestRadius);
+    /*while(IsOutOfBounds(position, NestRadius) && num_trail<20){
+     position.Set(RNG->Uniform(RangeX), RNG->Uniform(RangeY));
+     num_trail++;
+     }*/
+     //Nest   newNest = Nest(position);  //qilu 09/16/2016
+    LOG<<"new nest location= "<<position+CVector2(0.25, 0.25)<<endl;
+     Nests.push_back(Nest(position+CVector2(0.25, 0.25)));
+}
+
+
+
 bool CPFA_loop_functions::IsOutOfArena(argos::CVector2 p){
   argos::Real x = p.GetX();
 	 argos::Real y = p.GetY();
