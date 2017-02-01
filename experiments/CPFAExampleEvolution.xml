@@ -73,8 +73,8 @@
 	     DrawIDs = "1"
 	     DrawTrails = "1"
 	     DrawTargetRays = "1"
-	     FoodDistribution = "1"
-	     FoodItemCount = "256"
+	     FoodDistribution = "2"
+	     FoodItemCount = "512"
 	     NumberOfClusters = "4"
 	     ClusterWidthX = "8"
 	     ClusterLengthY = "8"
@@ -123,14 +123,14 @@
   <!-- * Visualization * -->
   <!-- ****************** -->
   <visualization>
-<!--
+
 <qt-opengl>
       <camera>
         <placement idx="0" position="  0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
       </camera>
       <user_functions label="CPFA_qt_user_functions"/>
     </qt-opengl>
--->
+
   </visualization>
 
 </argos-configuration>
