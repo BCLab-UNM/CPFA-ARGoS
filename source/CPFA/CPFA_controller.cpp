@@ -13,7 +13,9 @@ CPFA_controller::CPFA_controller() :
 	CPFA_state(DEPARTING),
 	LoopFunctions(NULL),
 	survey_count(0),
-	isUsingPheromone(0)
+	isUsingPheromone(0),
+    SiteFidelityPosition(1000, 1000),
+    updateFidelity(false)
 {
 }
 
@@ -41,6 +43,7 @@ void CPFA_controller::Init(argos::TConfigurationNode &node) {
 	FoodDistanceTolerance *= FoodDistanceTolerance;
 	SetIsHeadingToNest(true);
 	SetTarget(argos::CVector2(0,0));
+    controllerID= GetId();
 }
 
 void CPFA_controller::ControlStep() {
@@ -102,12 +105,12 @@ void CPFA_controller::Reset() {
 	num_targets_collected = 0;
 
 	/* pheromone trail variables */
+    updateFidelity = false;
 	TrailToShare.clear();
 	TrailToFollow.clear();
 	MyTrail.clear();
 
 	/* robot position variables */
-	SiteFidelityPosition = CVector2(0.0, 0.0);
 
 	myTrail.clear();
 
@@ -165,7 +168,6 @@ void CPFA_controller::SetLoopFunctions(CPFA_loop_functions* lf) {
 	LoopFunctions = lf;
 
 	// Initialize the SiteFidelityPosition
-	SiteFidelityPosition = LoopFunctions->NestPosition;
 
 	// Create the output file here because it needs LoopFunctions
 		
@@ -306,9 +308,14 @@ void CPFA_controller::Searching() {
 
 			// randomly give up searching
 			if(random < LoopFunctions->ProbabilityOfReturningToNest) {
+             SetFidelityList();
+   	         TrailToShare.clear();
 				SetIsHeadingToNest(true);
 				SetTarget(LoopFunctions->NestPosition);
 				isGivingUpSearch = true;
+	         LoopFunctions->FidelityList.erase(controllerID); 
+             isUsingSiteFidelity = false; 
+             updateFidelity = false; 
 				CPFA_state = RETURNING;
 			
 				/*
@@ -454,7 +461,10 @@ void CPFA_controller::Returning() {
 		argos::Real r2 = RNG->Uniform(argos::CRange<argos::Real>(0.0, 1.0));
 
 		if (isHoldingFood) { 
-			if(poissonCDF_pLayRate > r1) {
+	          num_targets_collected++;
+	          LoopFunctions->currNumCollectedFood++;
+	          LoopFunctions->setScore(num_targets_collected);
+			if(poissonCDF_pLayRate > r1 && updateFidelity) {
 				TrailToShare.push_back(LoopFunctions->NestPosition); // For drawing the waypoints
 				argos::Real timeInSeconds = (argos::Real)(SimulationTick() / SimulationTicksPerSecond());
 				Pheromone sharedPheromone(SiteFidelityPosition, TrailToShare, timeInSeconds, LoopFunctions->RateOfPheromoneDecay);
@@ -471,7 +481,7 @@ void CPFA_controller::Returning() {
 		//log_output_stream << "At the nest." << endl;	    
 		 
 		// use site fidelity
-		if((isUsingSiteFidelity == true) && (poissonCDF_sFollowRate > r2)) {
+		if((updateFidelity == true) && (poissonCDF_sFollowRate > r2)) {
 			//log_output_stream << "Using site fidelity" << endl;
 	
 			SetIsHeadingToNest(false);
@@ -565,7 +575,7 @@ void CPFA_controller::SetHoldingFood() {
 		std::vector<argos::CVector2> newFoodList;
 		std::vector<argos::CColor> newFoodColoringList;
 		size_t i = 0, j = 0;
-
+      if(CPFA_state != RETURNING){
 		for(i = 0; i < LoopFunctions->FoodList.size(); i++) {
 			if((GetPosition() - LoopFunctions->FoodList[i]).SquareLength() < FoodDistanceTolerance ) {
 				// We found food! Calculate the nearby food density.
@@ -584,12 +594,13 @@ void CPFA_controller::SetHoldingFood() {
 			newFoodList.push_back(LoopFunctions->FoodList[j]);
 			newFoodColoringList.push_back(LoopFunctions->FoodColoringList[j]);
 		}
-
+}
 		// We picked up food. Update the food list minus what we picked up.
 		if(IsHoldingFood() == true) {
 			SetIsHeadingToNest(true);
 			SetTarget(LoopFunctions->NestPosition);
 			LoopFunctions->FoodList = newFoodList;
+         LoopFunctions->FoodColoringList = newFoodColoringList; //qilu 09/12/2016
 			SetLocalResourceDensity();
 		} 
 	}
@@ -643,7 +654,9 @@ void CPFA_controller::SetLocalResourceDensity() {
 	/* Set the fidelity position to the robot's current position. */
 	SiteFidelityPosition = GetPosition();
 	isUsingSiteFidelity = true;
-
+    updateFidelity = true;
+    TrailToShare.push_back(SiteFidelityPosition);
+    LoopFunctions->FidelityList[controllerID] = SiteFidelityPosition;
 	/* Delay for 4 seconds (simulate iAnts scannning rotation). */
 	//  Wait(4); // This function is broken. It causes the rover to move in the wrong direction after finishing its local resource density test 
 
@@ -661,17 +674,18 @@ void CPFA_controller::SetFidelityList(argos::CVector2 newFidelity) {
 	std::vector<argos::CVector2> newFidelityList;
 
 	/* Remove this robot's old fidelity position from the fidelity list. */
-	for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
+	/*for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
 		if((LoopFunctions->FidelityList[i] - SiteFidelityPosition).SquareLength() != 0.0) {
 			newFidelityList.push_back(LoopFunctions->FidelityList[i]);
 		}
-	}
+	}*/
 
 	/* Update the global fidelity list. */
-	LoopFunctions->FidelityList = newFidelityList;
+	//LoopFunctions->FidelityList = newFidelityList;
 
+        LoopFunctions->FidelityList[controllerID] = newFidelity;
 	/* Add the robot's new fidelity position to the global fidelity list. */
-	LoopFunctions->FidelityList.push_back(newFidelity);
+	//LoopFunctions->FidelityList.push_back(newFidelity);
 
 	/* Update the local fidelity position for this robot. */
 	SiteFidelityPosition = newFidelity;
@@ -684,14 +698,15 @@ void CPFA_controller::SetFidelityList() {
 	std::vector<argos::CVector2> newFidelityList;
 
 	/* Remove this robot's old fidelity position from the fidelity list. */
-	for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
+	LoopFunctions->FidelityList.erase(controllerID);
+	/*for(size_t i = 0; i < LoopFunctions->FidelityList.size(); i++) {
 		if((LoopFunctions->FidelityList[i] - SiteFidelityPosition).SquareLength() != 0.0) {
 			newFidelityList.push_back(LoopFunctions->FidelityList[i]);
 		}
-	}
+	}*/
 
 	/* Update the global fidelity list. */
-	LoopFunctions->FidelityList = newFidelityList;
+	//LoopFunctions->FidelityList = newFidelityList;
 }
 
 /*****
@@ -703,6 +718,7 @@ bool CPFA_controller::SetTargetPheromone() {
 	argos::Real maxStrength = 0.0, randomWeight = 0.0;
 	bool isPheromoneSet = false;
 
+ if(LoopFunctions->PheromoneList.size()==0) return isPheromoneSet; //The case of no pheromone.
 	/* update the pheromone list and remove inactive pheromones */
 	// LoopFunctions->UpdatePheromoneList();
 

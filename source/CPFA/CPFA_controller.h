@@ -32,7 +32,7 @@ class CPFA_controller : public BaseController {
 		void SetLoopFunctions(CPFA_loop_functions* lf);
 
 	private:
-
+        string controllerID;
 		CPFA_loop_functions* LoopFunctions;
 		argos::CRandom::CRNG* RNG;
 
@@ -43,7 +43,7 @@ class CPFA_controller : public BaseController {
 
 		/* robot position variables */
 		argos::CVector2 SiteFidelityPosition;
-
+        bool	updateFidelity;
 		vector<CRay3> myTrail;
 		CColor        TrailColor;
 

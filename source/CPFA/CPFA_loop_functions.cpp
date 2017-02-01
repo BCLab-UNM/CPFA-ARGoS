@@ -33,6 +33,7 @@ CPFA_loop_functions::CPFA_loop_functions() :
 	NestElevation(0.01),
 	// We are looking at a 4 by 4 square (3 targets + 2*1/2 target gaps)
 	SearchRadiusSquared((4.0 * FoodRadius) * (4.0 * FoodRadius)),
+	NumDistributedFood(0),
 	score(0),
 	PrintFinalScore(0)
 {}
@@ -68,12 +69,17 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	argos::GetNodeAttribute(settings_node, "NumberOfClusters", NumberOfClusters);
 	argos::GetNodeAttribute(settings_node, "ClusterWidthX", ClusterWidthX);
 	argos::GetNodeAttribute(settings_node, "ClusterLengthY", ClusterLengthY);
-	argos::GetNodeAttribute(settings_node, "PowerRank", PowerRank);
 	argos::GetNodeAttribute(settings_node, "FoodRadius", FoodRadius);
 	argos::GetNodeAttribute(settings_node, "NestElevation", NestElevation);
 	
 	FoodRadiusSquared = FoodRadius*FoodRadius;
 
+    //Number of distributed foods
+    if (FoodDistribution == 1){
+        NumDistributedFood = ClusterWidthX*ClusterLengthY*NumberOfClusters;
+    }
+    else
+    NumDistributedFood = FoodItemCount;  
 	// calculate the forage range and compensate for the robot's radius of 0.085m
 	argos::CVector3 ArenaSize = GetSpace().GetArenaSize();
 	argos::Real rangeX = (ArenaSize.GetX() / 2.0) - 0.085;
@@ -85,6 +91,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
 	argos::CSpace::TMapPerType::iterator it;
 
+    Num_robots = footbots.size();
 	for(it = footbots.begin(); it != footbots.end(); it++) {
 		argos::CFootBotEntity& footBot = *argos::any_cast<argos::CFootBotEntity*>(it->second);
 		BaseController& c = dynamic_cast<BaseController&>(footBot.GetControllableEntity().GetController());
@@ -94,6 +101,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	}
 
 	SetFoodDistribution();
+    ForageList.clear(); 
 }
 
 void CPFA_loop_functions::Reset() {
@@ -138,7 +146,7 @@ void CPFA_loop_functions::PreStep() {
 
 	if(FoodList.size() == 0) {
 		FidelityList.clear();
-		//TargetRayList.clear();
+		TargetRayList.clear();
 		PheromoneList.clear();
 	}
 }
@@ -236,7 +244,7 @@ void CPFA_loop_functions::RandomFoodDistribution() {
 }
 
 void CPFA_loop_functions::ClusterFoodDistribution() {
-
+        FoodList.clear();
 	argos::Real     foodOffset  = 3.0 * FoodRadius;
 	size_t          foodToPlace = NumberOfClusters * ClusterWidthX * ClusterLengthY;
 	size_t          foodPlaced = 0;
@@ -279,6 +287,7 @@ void CPFA_loop_functions::ClusterFoodDistribution() {
 }
 
 void CPFA_loop_functions::PowerLawFoodDistribution() {
+ FoodList.clear();
 	argos::Real foodOffset     = 3.0 * FoodRadius;
 	size_t      foodPlaced     = 0;
 	size_t      powerLawLength = 1;
@@ -289,6 +298,43 @@ void CPFA_loop_functions::PowerLawFoodDistribution() {
 	std::vector<size_t> clusterSides;
 	argos::CVector2     placementPosition;
 
+    //-----Wayne: Dertermine PowerRank and food per PowerRank group
+    size_t priorPowerRank = 0;
+    size_t power4 = 0;
+    size_t FoodCount = 0;
+    size_t diffFoodCount = 0;
+    size_t singleClusterCount = 0;
+    size_t otherClusterCount = 0;
+    size_t modDiff = 0;
+    
+    //Wayne: priorPowerRank is determined by what power of 4
+    //plus a multiple of power4 increases the food count passed required count
+    //this is how powerlaw works to divide up food into groups
+    //the number of groups is the powerrank
+    while (FoodCount < FoodItemCount){
+        priorPowerRank++;
+        power4 = pow (4.0, priorPowerRank);
+        FoodCount = power4 + priorPowerRank * power4;
+    }
+    
+    //Wayne: Actual powerRank is prior + 1
+    PowerRank = priorPowerRank + 1;
+    
+    //Wayne: Equalizes out the amount of food in each group, with the 1 cluster group taking the
+    //largest loss if not equal, when the powerrank is not a perfect fit with the amount of food.
+    diffFoodCount = FoodCount - FoodItemCount;
+    modDiff = diffFoodCount % PowerRank;
+    
+    if (FoodItemCount % PowerRank == 0){
+        singleClusterCount = FoodItemCount / PowerRank;
+        otherClusterCount = singleClusterCount;
+    }
+    else {
+        otherClusterCount = FoodItemCount / PowerRank + 1;
+        singleClusterCount = otherClusterCount - modDiff;
+    }
+    //-----Wayne: End of PowerRank and food per PowerRank group
+    
 	for(size_t i = 0; i < PowerRank; i++) {
 		powerLawClusters.push_back(powerLawLength * powerLawLength);
 		powerLawLength *= 2;
@@ -299,6 +345,9 @@ void CPFA_loop_functions::PowerLawFoodDistribution() {
 		clusterSides.push_back(powerLawLength);
 	}
 
+    /*Wayne: Modified to break from loops if food count reached.
+     Provides support for unequal clusters and odd food numbers.
+     Necessary for DustUp and Jumble Distribution changes. */
 	for(size_t h = 0; h < powerLawClusters.size(); h++) {
 		for(size_t i = 0; i < powerLawClusters[h]; i++) {
 			placementPosition.Set(RNG->Uniform(ForageRangeX), RNG->Uniform(ForageRangeY));
@@ -313,17 +362,21 @@ void CPFA_loop_functions::PowerLawFoodDistribution() {
 				}
 			}
 
+            trialCount = 0;
 			for(size_t j = 0; j < clusterSides[h]; j++) {
 				for(size_t k = 0; k < clusterSides[h]; k++) {
 					foodPlaced++;
 					FoodList.push_back(placementPosition);
 					FoodColoringList.push_back(argos::CColor::BLACK);
 					placementPosition.SetX(placementPosition.GetX() + foodOffset);
+                    if (foodPlaced == singleClusterCount + h * otherClusterCount) break;
 				}
 
 				placementPosition.SetX(placementPosition.GetX() - (clusterSides[h] * foodOffset));
 				placementPosition.SetY(placementPosition.GetY() + foodOffset);
+                if (foodPlaced == singleClusterCount + h * otherClusterCount) break;
 			}
+            if (foodPlaced == singleClusterCount + h * otherClusterCount) break;
 		}
 	}
 
