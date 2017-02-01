@@ -30,14 +30,9 @@ and apply the changes:
 
 Copy the ssh key to the cluster machines and follow the instructions that come up:
 
-    $ ssh-copy-id eros
-    $ ssh-copy-id pragma
-    $ ssh-copy-id ludus
-    $ ssh-copy-id philia
-    $ ssh-copy-id philautia
-    $ ssh-copy-id agape
+    $ ssh-copy-id clotho
 
-Now when you run the CPFA evolution run script MPI will work correctly.
+We only need to copy the key to one machine since they share a file system. Now when you run the CPFA evolution run script MPI will work correctly.
 
 In order to use the iAnt CPFA in ARGoS, you must first install ARGoS on your system then download and compile the code in this repo to run with ARGoS.
 
