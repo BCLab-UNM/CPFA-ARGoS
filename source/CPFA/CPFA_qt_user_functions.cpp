@@ -86,10 +86,9 @@ void CPFA_qt_user_functions::DrawFood() {
 void CPFA_qt_user_functions::DrawFidelity() {
 
 	Real x, y;
-
-	for(size_t i = 0; i < loopFunctions.FidelityList.size(); i++) {
-		x = loopFunctions.FidelityList[i].GetX();
-		y = loopFunctions.FidelityList[i].GetY();
+        for(map<string, CVector2>::iterator it= loopFunctions.FidelityList.begin(); it!=loopFunctions.FidelityList.end(); ++it) {
+            x = it->second.GetX();
+            y = it->second.GetY();
 		DrawCylinder(CVector3(x, y, 0.0), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::CYAN);
 	}
 }

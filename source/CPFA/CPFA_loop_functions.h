@@ -7,6 +7,7 @@
 #include <source/CPFA/CPFA_controller.h>
 
 using namespace argos;
+using namespace std;
 
 static const size_t GENOME_SIZE = 7; // There are 7 parameters to evolve
 
@@ -68,7 +69,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		void setScore(double s);
 
 		argos::CRandom::CRNG* RNG;
-
+        size_t NumDistributedFood; 
 		size_t MaxSimTime;
 		size_t ResourceDensityDelay;
 		size_t RandomSeed;
@@ -107,12 +108,15 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		/* list variables for food & pheromones */
 		std::vector<argos::CVector2> FoodList;
 		std::vector<argos::CColor>   FoodColoringList;
-		std::vector<argos::CVector2> FidelityList;
+        map<string, argos::CVector2> FidelityList; 
 		std::vector<Pheromone>   PheromoneList;
 		std::vector<argos::CRay3>    TargetRayList;
 		argos::CRange<argos::Real>   ForageRangeX;
 		argos::CRange<argos::Real>   ForageRangeY;
 
+        size_t currNumCollectedFood;
+        size_t Num_robots;
+        vector<size_t>			ForageList;
 		argos::CVector2 NestPosition;
 
 	private:
