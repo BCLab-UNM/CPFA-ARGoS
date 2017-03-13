@@ -14,7 +14,7 @@ CPFA_qt_user_functions::CPFA_qt_user_functions() :
 void CPFA_qt_user_functions::DrawOnRobot(CFootBotEntity& entity) {
 	CPFA_controller& c = dynamic_cast<CPFA_controller&>(entity.GetControllableEntity().GetController());
 
-	if(c.IsHoldingFood() == true) {
+	if(c.IsHoldingFood()) {
 		DrawCylinder(CVector3(0.0, 0.0, 0.3), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::BLACK);
 	}
 

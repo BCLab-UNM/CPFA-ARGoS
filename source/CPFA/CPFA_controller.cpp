@@ -452,7 +452,7 @@ void CPFA_controller::Returning() {
 	//SetTarget(LoopFunctions->NestPosition);
 
 	// Are we there yet? (To the nest, that is.)
-	if(IsInTheNest() == true) {
+	if(IsInTheNest() ) {
 		// Based on a Poisson CDF, the robot may or may not create a pheromone
 		// located at the last place it picked up food.
 		argos::Real poissonCDF_pLayRate    = GetPoissonCDF(ResourceDensity, LoopFunctions->RateOfLayingPheromone);
@@ -481,7 +481,7 @@ void CPFA_controller::Returning() {
 		//log_output_stream << "At the nest." << endl;	    
 		 
 		// use site fidelity
-		if((updateFidelity == true) && (poissonCDF_sFollowRate > r2)) {
+		if((updateFidelity ) && (poissonCDF_sFollowRate > r2)) {
 			//log_output_stream << "Using site fidelity" << endl;
 	
 			SetIsHeadingToNest(false);
@@ -489,7 +489,7 @@ void CPFA_controller::Returning() {
 			isInformed = true;
 		}
 		// use pheromone waypoints
-		else if(SetTargetPheromone() == true) {
+		else if(SetTargetPheromone()) {
 			//log_output_stream << "Using site pheremone" << endl;	    
 			isInformed = true;
 			isUsingSiteFidelity = false;
@@ -596,7 +596,7 @@ void CPFA_controller::SetHoldingFood() {
 		}
 }
 		// We picked up food. Update the food list minus what we picked up.
-		if(IsHoldingFood() == true) {
+		if(IsHoldingFood()) {
 			SetIsHeadingToNest(true);
 			SetTarget(LoopFunctions->NestPosition);
 			LoopFunctions->FoodList = newFoodList;
@@ -613,7 +613,7 @@ void CPFA_controller::SetHoldingFood() {
 
 	// We are carrying food and haven't reached the nest, keep building up the
 	// pheromone trail attached to this found food item.
-	if(IsHoldingFood() == true && SimulationTick() % LoopFunctions->DrawDensityRate == 0) {
+	if(IsHoldingFood() && SimulationTick() % LoopFunctions->DrawDensityRate == 0) {
 			TrailToShare.push_back(GetPosition());
 	}
 }
@@ -706,7 +706,6 @@ void CPFA_controller::SetFidelityList() {
 	}*/
 
 	/* Update the global fidelity list. */
-	//LoopFunctions->FidelityList = newFidelityList;
 }
 
 /*****

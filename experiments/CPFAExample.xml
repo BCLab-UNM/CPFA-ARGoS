@@ -78,7 +78,6 @@
 	     NumberOfClusters = "4"
 	     ClusterWidthX = "8"
 	     ClusterLengthY = "8"
-	     PowerRank = "4"
 	     FoodRadius = "0.05"
 	     NestRadius = "0.25"
 	     NestElevation = "0.01"/>

@@ -87,6 +87,7 @@ void CPFA_loop_functions::Init(argos::TConfigurationNode &node) {
 	ForageRangeX.Set(-rangeX, rangeX);
 	ForageRangeY.Set(-rangeY, rangeY);
 
+    ArenaWidth = ArenaSize[0];
 	// Send a pointer to this loop functions object to each controller.
 	argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
 	argos::CSpace::TMapPerType::iterator it;
@@ -202,7 +203,7 @@ void CPFA_loop_functions::UpdatePheromoneList() {
 
 		PheromoneList[i].Update(t);
 
-		if(PheromoneList[i].IsActive() == true) {
+		if(PheromoneList[i].IsActive()) {
 			new_p_list.push_back(PheromoneList[i]);
 		}
 	}
