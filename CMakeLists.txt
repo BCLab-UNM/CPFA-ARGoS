@@ -55,13 +55,14 @@ pkg_check_modules(ARGOS REQUIRED argos3_simulator)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
 
 # Find the GSL package.
-find_package(GSL REQUIRED)
+# find_package(GSL REQUIRED)
 
 # Find the LUA package.
 find_package(Lua52 REQUIRED)
 
 # Set ARGoS include directory.
-include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${LUA_INCLUDE_DIR} source)
+#include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${LUA_INCLUDE_DIR} source)
+include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${LUA_INCLUDE_DIR} source)
 
 link_directories(${ARGOS_LIBRARY_DIRS} build)
 
