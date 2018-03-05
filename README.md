@@ -16,6 +16,10 @@ The CPFA-ARGoS system has two components: the CPFA logic controllers that implem
 
 Add keychain key manager to your ~/.bashrc login script:
 
+'''
+sudo apt install keychain
+'''
+
      ### START-Keychain ###
      # Let  re-use ssh-agent and/or gpg-agent between logins
      /usr/bin/keychain $HOME/.ssh/id_rsa
