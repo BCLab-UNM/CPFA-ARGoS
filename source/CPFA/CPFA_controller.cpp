@@ -470,10 +470,7 @@ void CPFA_controller::Surveying() {
 	else {
 		SetIsHeadingToNest(true); // Turn off error for this
 		SetTarget(ClosestNest->GetLocation()); //qilu 07/26/2016
-		MPFA_state = RETURNING;
-		searchingTime+=SimulationTick()-startTime;//qilu 10/22
-        startTime = SimulationTick();//qilu 10/22
-        
+		CPFA_state = RETURNING;
 		survey_count = 0; // Reset
 	}
 }
@@ -739,6 +736,7 @@ void CPFA_controller::SetLocalResourceDensity() {
     isUsingSiteFidelity = true;
     updateFidelity = true; //qilu 09/07/2016
     TrailToShare.push_back(SiteFidelityPosition);//qilu 09/07/2016
+ 
     //ClosestNest->FidelityList[controllerID] = GetPosition(); //qilu 09/07/2016
     //LOG<<"ClosestNest->FidelityList["<<controllerID<<"]="<<endl;
     //ClosestNest->FidelityList.size()<<endl;

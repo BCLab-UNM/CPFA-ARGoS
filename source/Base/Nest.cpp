@@ -18,10 +18,6 @@
     FidelityList.clear();
     DensityOnFidelity.clear(); //qilu 09/11/2016
     FoodList.clear(); //qilu 09/07/2016
-    NewLocation = location; //qilu 09/19/2016
-    num_collected_tags=0;
-    visited_time_point_in_minute=0;
-    nest_idx=-1;
 }
 
 /*****
@@ -53,9 +49,8 @@ size_t Nest:: GetNestIdx(){
 
 void Nest::UpdateNestLocation(){ //qilu 09/10/2016
     CVector2 Sum_locations = CVector2(0.0, 0.0);
-    CVector2 placementPosition;
     size_t Num_points = 0;
-    CVector2 offset;
+
 
     for(size_t i =0; i<PheromoneList.size(); i++){
 //        Sum_locations += PheromoneList[i].GetLocation() * PheromoneList[i].GetResourceDensity();

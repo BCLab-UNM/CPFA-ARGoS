@@ -4,7 +4,6 @@
 #include <map> //qilu 09/11/2016
 #include <argos3/core/utility/math/vector2.h>
 //#include <argos3/core/utility/math/ray3.h>
-#include <argos3/core/utility/logging/argos_log.h>
 #include "Pheromone.h"
 using namespace argos;
 using namespace std;

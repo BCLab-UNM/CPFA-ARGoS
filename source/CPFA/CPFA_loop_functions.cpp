@@ -187,6 +187,7 @@ void CPFA_loop_functions::Reset() {
       }
     
     argos::CSpace::TMapPerType& footbots = GetSpace().GetEntitiesByType("foot-bot");
+    argos::CSpace::TMapPerType::iterator it;
    
     Num_robots = footbots.size();
     for(argos::CSpace::TMapPerType::iterator it = footbots.begin(); it != footbots.end(); it++) {
