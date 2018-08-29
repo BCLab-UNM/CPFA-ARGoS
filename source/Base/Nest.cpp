@@ -18,6 +18,10 @@
     FidelityList.clear();
     DensityOnFidelity.clear(); //qilu 09/11/2016
     FoodList.clear(); //qilu 09/07/2016
+    NewLocation = location; //qilu 09/19/2016
+    num_collected_tags=0;
+    visited_time_point_in_minute=0;
+    nest_idx=-1;
 }
 
 /*****
@@ -38,10 +42,20 @@ void Nest::SetLocation(CVector2 newLocation) {
     nestLocation = newLocation;
 }
 
+void Nest:: SetNestIdx(size_t idx){
+     nest_idx = idx;
+ }
+ 
+size_t Nest:: GetNestIdx(){
+     return nest_idx;
+ } 
+
+
 void Nest::UpdateNestLocation(){ //qilu 09/10/2016
     CVector2 Sum_locations = CVector2(0.0, 0.0);
+    CVector2 placementPosition;
     size_t Num_points = 0;
-
+    CVector2 offset;
 
     for(size_t i =0; i<PheromoneList.size(); i++){
 //        Sum_locations += PheromoneList[i].GetLocation() * PheromoneList[i].GetResourceDensity();
@@ -56,10 +70,30 @@ void Nest::UpdateNestLocation(){ //qilu 09/10/2016
     }
 
     //if (FoodList.size() !=0)
-    for (size_t i=0; i<FoodList.size(); i++) {
+    /*for (size_t i=0; i<FoodList.size(); i++) {
         Sum_locations += FoodList[i];
         Num_points ++;
-    }
-    if (Num_points !=0) SetLocation(Sum_locations / Num_points);
+    }*/
+    NewLocation = Sum_locations / Num_points;
+    //offset = (NewLocation - GetLocation()).Normalize();
+    //NewLocation -= offset*0.25;
+     
+     //keep away from the site fidelity or pheromone waypoints
+    /*for(size_t i=0; i<PheromoneList.size(); i++){
+        if ((NewLocation-PheromoneList[i].location).SquareLength()<=0.25){
+            NewLocation -= offset*0.25;               
+         } 
+     }
+
+     for(map<string, argos::CVector2>::iterator it= FidelityList.begin(); it!=FidelityList.end(); ++it){
+        if ((NewLocation-it->second).SquareLength()<=0.25){
+            NewLocation -= offset*0.25;               
+         }
+    }*/
+
+
+    /* if((GetLocation() - NewLocation).SquareLength() < 0.25){
+         NewLocation = GetLocation();//qilu 09/25/2016 Do not update to a new location if the new location is too close to current location
+     }*/
 }
         

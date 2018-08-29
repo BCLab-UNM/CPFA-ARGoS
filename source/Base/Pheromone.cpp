@@ -14,14 +14,14 @@ Pheromone::Pheromone(argos::CVector2              newLocation,
                              std::vector<argos::CVector2> newTrail,
                              argos::Real                  newTime,
                              argos::Real                  newDecayRate,
-                                size_t      density)
+                             size_t                       density)
 {
     /* required initializations */
 	location    = newLocation;
-  trail       = newTrail;
+    trail       = newTrail;
 	lastUpdated = newTime;
 	decayRate   = newDecayRate;
-    ResourceDensity = density; //qilu 09/11/2016
+    ResourceDensity = density;
     /* standardized initializations */
 	weight      = 1.0;
 	threshold   = 0.001;

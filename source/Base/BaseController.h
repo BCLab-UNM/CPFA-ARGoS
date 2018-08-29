@@ -24,6 +24,7 @@ class BaseController : public argos::CCI_Controller {
 		argos::CRadians GetHeading();
 		argos::CVector2 GetPosition();
 		argos::CVector2 GetTarget();
+  unsigned int GetCollisionTime();//qilu 09/26/2016
 		void SetTarget(argos::CVector2 t);
 		void SetStartPosition(argos::CVector3 sp);
 		argos::CVector3 GetStartPosition();
@@ -52,7 +53,9 @@ class BaseController : public argos::CCI_Controller {
 		float PositionNoiseStdev; // for introducing error in current position
 
 		size_t WaitTime;
-
+        size_t collisionDelay;
+        bool collisionFlag;
+                
 		argos::CRadians TargetAngleTolerance;
 		argos::Real NestDistanceTolerance;
 		argos::CRadians NestAngleTolerance;

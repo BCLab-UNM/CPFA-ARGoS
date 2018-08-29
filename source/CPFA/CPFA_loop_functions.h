@@ -5,6 +5,7 @@
 #include <argos3/plugins/robots/foot-bot/simulator/footbot_entity.h>
 #include <argos3/core/simulator/entity/floor_entity.h>
 #include <source/CPFA/CPFA_controller.h>
+#include <argos3/plugins/simulator/entities/cylinder_entity.h>
 
 using namespace argos;
 
@@ -47,7 +48,6 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		void SetTrial(UInt32 un_trial);
 	
 		/* public helper functions */
-        //vector<CVector2> UpdateCollectedFoodList(vector<CVector2> foodList); //qilu 09/12/2016
 		void UpdatePheromoneList();
 		void SetFoodDistribution();
 
@@ -69,7 +69,8 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		void setScore(double s);
 
 		argos::CRandom::CRNG* RNG;
-
+                size_t NumDistributedFood; //qilu 11/10/2016
+		
 		size_t MaxSimTime;
 		size_t ResourceDensityDelay;
 		size_t RandomSeed;
@@ -83,13 +84,17 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		size_t DrawTargetRays;
 		size_t FoodDistribution;
 		size_t FoodItemCount;
+		size_t PowerlawFoodUnitCount;
 		size_t NumberOfClusters;
 		size_t ClusterWidthX;
 		size_t ClusterLengthY;
 		size_t PowerRank;
-  size_t SimTime; //qilu 09/13/2016
-  size_t curr_time_in_minutes; //qilu 09/13/2016
-  size_t last_time_in_minutes; //qilu 09/13/2016
+                size_t ArenaWidth;
+                size_t SimTime;
+                Real curr_time_in_minutes;
+                Real last_time_in_minutes;
+                int Nest_travel_time_in_ticks;
+                size_t Num_robots;
   
 		/* CPFA variables */
 		argos::Real ProbabilityOfSwitchingToSearching;
@@ -112,6 +117,9 @@ class CPFA_loop_functions : public argos::CLoopFunctions
   argos::Real NestPosition_1;
   argos::Real NestPosition_2;
   argos::Real NestPosition_3;
+
+  vector<CCylinderEntity> Cylinders; //qilu 10/18/2016
+
   
 		/* list variables for food & pheromones */
 		std::vector<argos::CVector2> FoodList;
@@ -123,6 +131,14 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		argos::CRange<argos::Real>   ForageRangeX;
 		argos::CRange<argos::Real>   ForageRangeY;
   
+  //vector<size_t>			CollisionTimeList;//qilu 09/26
+  Real           CollisionTime;//qilu 09/26
+  size_t currCollisionTime; //qilu 10/30
+        size_t lastCollisionTime; //qilu 10/30
+        size_t lastNumCollectedFood; //qilu 08/19
+        size_t currNumCollectedFood; //qilu 08/19
+    
+      
   std::vector<Nest> Nests; //qilu 09/06
   vector<size_t>			ForageList; //qilu 09/13
 		//argos::CVector2 NestPosition;

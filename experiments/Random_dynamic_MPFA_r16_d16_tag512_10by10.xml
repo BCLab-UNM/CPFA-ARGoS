@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<argos-configuration>
+
+  <!-- ************************* -->
+  <!-- * General configuration * -->
+  <!-- ************************* -->
+  <framework>
+    <system threads="0" />
+    <experiment length="600"
+                ticks_per_second="32"
+		random_seed="0"/>
+  </framework>
+
+  <!-- *************** -->
+  <!-- * Controllers * -->
+  <!-- *************** -->
+  <controllers>
+
+    <CPFA_controller id="CPFA"
+                     library="build/source/CPFA/libCPFA_controller">
+      <actuators>
+        <differential_steering implementation = "default"/>
+      </actuators>
+
+      <sensors>
+        <footbot_proximity    implementation = "default" show_rays = "false"/>
+
+	<positioning          implementation = "default"
+					/>	
+
+        <footbot_motor_ground implementation = "rot_z_only"/>
+      </sensors>
+
+      <params>
+
+        <settings TargetDistanceTolerance           = "0.05"
+		  TargetAngleTolerance               = "0.1"
+		  FoodDistanceTolerance              = "0.13"
+                  NestDistanceTolerance = "0.05"  
+                  NestAngleTolerance = "0.1"
+                  SearchStepSize                    = "0.08"
+                  RobotForwardSpeed                 = "16.0"
+                  RobotRotationSpeed                = "8.0"
+		  DestinationNoiseStdev             = "0.0"
+		  PositionNoiseStdev             = "0.00"
+		  ResultsDirectoryPath              = "results/"/>
+      </params>
+
+    </CPFA_controller>
+
+  </controllers>
+
+  <loop_functions library = "build/source/CPFA/libCPFA_loop_functions"
+                  label   = "CPFA_loop_functions">
+
+    <!-- evolvable parameters -->
+        <CPFA       ProbabilityOfSwitchingToSearching = "0.862018953444"
+                    ProbabilityOfReturningToNest      = "0.00688369218936"
+                    UninformedSearchVariation         = "1.80214009862"
+                    RateOfInformedSearchDecay         = "0.29857781164"
+                    RateOfSiteFidelity                = "16.8699397382"
+                    RateOfLayingPheromone             = "18.0791490976"
+                    RateOfPheromoneDecay              = "0.0585866594122"
+		    PrintFinalScore = "1"
+		    />
+
+         <settings
+	     MaxSimTimeInSeconds = "600"
+	     MaxSimCounter = "1"
+	     VariableFoodPlacement = "0"
+	     OutputData = "0"
+	     DrawDensityRate = "4"
+	     DrawIDs = "1"
+	     DrawTrails = "1"
+	     DrawTargetRays = "0"
+	     FoodDistribution = "0"
+	     FoodItemCount = "512"
+	     NumberOfClusters = "8"
+	     ClusterWidthX = "8"
+	     ClusterLengthY = "8"
+	     FoodRadius = "0.05"
+	     NestRadius = "0.25"
+	     NestElevation = "0.01"
+      NestPosition_0="3.75, 3.75" 
+      NestPosition_1="3.75, 1.25" 
+      NestPosition_2="3.75, -1.25" 
+      NestPosition_3="3.75, -3.75"
+      NestPosition_4="1.25, 3.75" 
+      NestPosition_5="1.25, 1.25" 
+      NestPosition_6="1.25, -1.25" 
+      NestPosition_7="1.25, -3.75"
+      NestPosition_8="-1.25, 3.75" 
+      NestPosition_9="-1.25, 1.25" 
+      NestPosition_10="-1.25, -1.25" 
+      NestPosition_11="-1.25, -3.75"
+      NestPosition_12="-3.75, 3.75" 
+      NestPosition_13="-3.75, 1.25" 
+      NestPosition_14="-3.75, -1.25" 
+      NestPosition_15="-3.75, -3.75"
+      />
+
+  </loop_functions>
+
+  <!-- *********************** -->
+  <!-- * Arena configuration * -->
+  <!-- *********************** -->
+  <arena size="10.0, 10.0, 1" center="0,0,0.5">
+
+    <floor id="floor" source="loop_functions" pixels_per_meter="10"/>
+
+    <distribute>
+            <position max="3, 3.0, 0.0" method="uniform" min="2, 2, 0.0"/>
+            <orientation mean="0, 0, 0" method="gaussian" std_dev="360, 0, 0"/>
+            <entity max_trials="100" quantity="4">
+                <foot-bot id="CPFA_0"><controller config="CPFA"/></foot-bot>
+            </entity>
+        </distribute>
+        <distribute>
+            <position max="3, -2, 0.0" method="uniform" min="2, -3, 0.0"/>
+            <orientation mean="0, 0, 0" method="gaussian" std_dev="360, 0, 0"/>
+            <entity max_trials="100" quantity="4">
+                <foot-bot id="CPFA_1"><controller config="CPFA"/></foot-bot>
+            </entity>
+        </distribute>
+        <distribute>
+            <position max="-2, 3.0, 0.0" method="uniform" min="-3, 2, 0.0"/>
+            <orientation mean="0, 0, 0" method="gaussian" std_dev="360, 0, 0"/>
+            <entity max_trials="100" quantity="4">
+                <foot-bot id="CPFA_2"><controller config="CPFA"/></foot-bot>
+            </entity>
+        </distribute>
+        <distribute>
+            <position max="-2, -2, 0.0" method="uniform" min="-3, -3, 0.0"/>
+            <orientation mean="0, 0, 0" method="gaussian" std_dev="360, 0, 0"/>
+            <entity max_trials="100" quantity="4">
+                <foot-bot id="CPFA_3"><controller config="CPFA"/></foot-bot>
+            </entity>
+        </distribute>
+
+
+     <cylinder id="cyl1" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="3.75, 3.75,0" orientation="45,0,0" />
+    </cylinder>
+    
+    <cylinder id="cyl2" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="3.75,1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl3" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="3.75, -1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl4" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="3.75,-3.75,0" orientation="45,0,0" />
+    </cylinder>
+ 
+    <cylinder id="cyl5" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="1.25, 3.75,0" orientation="45,0,0" />
+    </cylinder>
+    
+    <cylinder id="cyl6" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="1.25, 1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl7" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="1.25, -1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl8" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="1.25,-3.75,0" orientation="45,0,0" />
+    </cylinder>
+
+   <cylinder id="cyl9" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-1.25, 3.75,0" orientation="45,0,0" />
+    </cylinder>
+    
+    <cylinder id="cyl10" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-1.25,1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl11" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-1.25, -1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl12" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-1.25,-3.75,0" orientation="45,0,0" />
+    </cylinder>
+
+   <cylinder id="cyl13" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-3.75, 3.75,0" orientation="45,0,0" />
+    </cylinder>
+    
+    <cylinder id="cyl14" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-3.75,1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl15" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-3.75, -1.25,0" orientation="45,0,0" />
+    </cylinder>
+
+    <cylinder id="cyl16" radius="0.15" height="0.1"
+              movable="false" mass="2.5">
+      <body position="-3.75,-3.75,0" orientation="45,0,0" />
+    </cylinder> 
+
+  </arena> 
+    
+  <!-- ******************* -->
+  <!-- * Physics engines * -->
+  <!-- ******************* -->
+  <physics_engines>
+    <dynamics2d id="dyn2d" />
+  </physics_engines>
+
+  <!-- ********* -->
+  <!-- * Media * -->
+  <!-- ********* -->
+  <media><led id="leds"/></media>
+  <!-- ****************** -->
+  <!-- * Visualization * -->
+  <!-- ****************** -->
+
+<!--
+  <visualization>
+
+<qt-opengl>
+      <camera>
+        <placement idx="0" position="  0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
+      </camera>
+      <user_functions label="CPFA_qt_user_functions"/>
+    </qt-opengl>
+
+  </visualization>
+-->
+</argos-configuration>

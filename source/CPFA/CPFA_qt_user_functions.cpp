@@ -14,7 +14,7 @@ CPFA_qt_user_functions::CPFA_qt_user_functions() :
 void CPFA_qt_user_functions::DrawOnRobot(CFootBotEntity& entity) {
 	CPFA_controller& c = dynamic_cast<CPFA_controller&>(entity.GetControllableEntity().GetController());
 
-	if(c.IsHoldingFood() == true) {
+	if(c.IsHoldingFood()) {
 		DrawCylinder(CVector3(0.0, 0.0, 0.3), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::BLACK);
 	}
 
@@ -48,7 +48,7 @@ void CPFA_qt_user_functions::DrawOnArena(CFloorEntity& entity) {
 	DrawFood();
 	DrawFidelity();
 	DrawPheromones();
-	DrawNest();
+	//DrawNest();
 
 	if(loopFunctions.DrawTargetRays == 1) DrawTargetRays();
 }
@@ -74,7 +74,7 @@ for (size_t i=0; i< loopFunctions.Nests.size(); i++){
 
     	/* Draw the nest on the arena. */
 	    //DrawCircle(nest_3d, CQuaternion(), loopFunctions.NestRadius, CColor::GRAY50);
-     DrawCylinder(CVector3(x_coordinate, y_coordinate, 0.0), CQuaternion(), loopFunctions.NestRadius, 0.025, CColor::RED);
+     DrawCylinder(CVector3(x_coordinate, y_coordinate, 0.0), CQuaternion(), loopFunctions.NestRadius, 0.1, CColor::RED);
     }
 }
 
@@ -89,13 +89,13 @@ void CPFA_qt_user_functions::DrawFood() {
 	}
  
  //draw food in nests
- for (size_t i=0; i< loopFunctions.Nests.size(); i++){ 
+ /*for (size_t i=0; i< loopFunctions.Nests.size(); i++){ 
    for (size_t j=0; j< loopFunctions.Nests[i].FoodList.size(); j++){
         x = loopFunctions.Nests[i].FoodList[j].GetX();
         y = loopFunctions.Nests[i].FoodList[j].GetY();
         DrawCylinder(CVector3(x, y, 0.002), CQuaternion(), loopFunctions.FoodRadius, 0.025, CColor::YELLOW);
      }
-  }
+  } */
   
 }
 
@@ -125,6 +125,7 @@ void CPFA_qt_user_functions::DrawPheromones() {
 		       if(loopFunctions.DrawTrails == 1) {
 			          trail  = loopFunctions.Nests[n].PheromoneList[i].GetTrail();
 			          weight = loopFunctions.Nests[n].PheromoneList[i].GetWeight();
+                
 
              if(weight > 0.25 && weight <= 1.0)        // [ 100.0% , 25.0% )
                  pColor = trailColor = CColor::GREEN;
@@ -138,7 +139,11 @@ void CPFA_qt_user_functions::DrawPheromones() {
       
              for(j = 1; j < trail.size(); j++) {
                  ray = CRay3(CVector3(trail[j - 1].GetX(), trail[j - 1].GetY(), 0.01),
-                 CVector3(trail[j].GetX(), trail[j].GetY(), 0.01));
+                 CVector3(loopFunctions.Nests[n].GetLocation().GetX(), loopFunctions.Nests[n].GetLocation().GetY(), 0.01));
+                 
+                 //ray = CRay3(CVector3(loopFunctions.Nests[n].GetLocation().GetX(), loopFunctions.Nests[n].GetLocation().GetY(), 0.01),
+                 //CVector3(trail[j].GetX(), trail[j].GetY(), 0.01));
+                 
                  DrawRay(ray, trailColor, 1.0);
              }
 

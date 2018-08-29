@@ -32,6 +32,14 @@ class CPFA_controller : public BaseController {
 
 		void SetLoopFunctions(CPFA_loop_functions* lf);
   void SetClosestNest();//qilu 07/26/2016
+  
+  size_t     GetSearchingTime();//qilu 09/26/2016
+  size_t      GetTravelingTime();//qilu 09/26/2016
+  string      GetStatus();//qilu 09/26/2016
+  //void        AddTravelingTime(size_t remainderTime);//qilu 09/26/2016
+  //void        AddSearchingTime(size_t remainderTime);//qilu 09/26/2016
+  size_t      startTime;//qilu 09/26/2016
+        
 
 	private:
   Nest* ClosestNest; //qilu 07/26/2016
@@ -59,15 +67,19 @@ class CPFA_controller : public BaseController {
   
 		size_t ResourceDensity;
 		size_t MaxTrailSize;
-		size_t SearchTime;
+		size_t SearchTime;//for informed search
+  
+  size_t           searchingTime; //qilu 09/26
+  size_t           travelingTime;//qilu 09/26
+        
   
 		/* iAnt CPFA state variable */
-		enum CPFA_state {
+		enum MPFA_state {
 			DEPARTING = 0,
 			SEARCHING = 1,
 			RETURNING = 2,
 			SURVEYING = 3
-		} CPFA_state;
+		} MPFA_state;
 
 		/* iAnt CPFA state functions */
 		void CPFA();

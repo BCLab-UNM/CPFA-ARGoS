@@ -88,6 +88,7 @@ target_link_libraries(cpfa_evolver CPFA_controller
 				   GA-MPI   
 				   ${MPI_LIBRARIES}
 		   		   ${Boost_LIBRARIES}
-				   argos3core_simulator)
+				   argos3core_simulator
+                                   argos3plugin_simulator_entities)
 else()
 endif()

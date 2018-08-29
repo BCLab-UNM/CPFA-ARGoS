@@ -5,9 +5,6 @@
 add_library(BaseController SHARED BaseController.h
                                   BaseController.cpp)
 
-add_library(Food           SHARED Food.h
-                                  Food.cpp)
-
 add_library(Pheromone      SHARED Pheromone.h
                                   Pheromone.cpp)
 
@@ -21,10 +18,10 @@ add_library(Nest      SHARED Nest.h
 
 target_link_libraries(BaseController
                       argos3core_simulator
+                      argos3plugin_simulator_entities
                       argos3plugin_simulator_footbot
                       argos3plugin_simulator_genericrobot)
 target_link_libraries(Nest)
-target_link_libraries(Food)
 target_link_libraries(Pheromone)
 
 ###############################################
