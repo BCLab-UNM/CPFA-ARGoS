@@ -225,7 +225,7 @@ int main(int argc, char **argv)
        <<  now->tm_sec << ".csv";
 
     string results_file_name = ss.str();
-
+	printf("the result file name is %s", results_file_name);
     if (mpi_rank == 0)
       {
     // Write output file header
