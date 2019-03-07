@@ -502,23 +502,6 @@ void CPFA_controller::Returning() {
 			isUsingSiteFidelity = false;
 		}
 
-		// Record that a target has been retrieved
-		if (isHoldingFood) {
-			num_targets_collected++;
-
-			/*
-			ofstream results_output_stream;
-			results_output_stream.open(results_full_path, ios::app);
-			results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << num_targets_collected << endl;	    
-			results_output_stream.close();
-			*/
-
-			LoopFunctions->setScore(num_targets_collected);
-			
-			 // We dropped off food. Clear the built-up pheromone trail.
-			TrailToShare.clear();
-		}
-
 		isGivingUpSearch = false;
 		CPFA_state = DEPARTING;   
 		isHoldingFood = false;

@@ -86,6 +86,7 @@ class CPFA_loop_functions : public argos::CLoopFunctions
 		size_t NumberOfClusters;
 		size_t ClusterWidthX;
 		size_t ClusterLengthY;
+		size_t PowerRank;
 		size_t ArenaWidth;
 
 		/* CPFA variables */
