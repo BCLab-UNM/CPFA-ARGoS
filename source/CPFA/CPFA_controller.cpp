@@ -472,6 +472,7 @@ void CPFA_controller::Returning() {
 				TrailToShare.clear();
 				sharedPheromone.Deactivate(); // make sure this won't get re-added later...
 			}
+            TrailToShare.clear();
 		}
 
 		// Determine probabilistically whether to use site fidelity, pheromone
@@ -500,23 +501,6 @@ void CPFA_controller::Returning() {
 			SetRandomSearchLocation();
 			isInformed = false;
 			isUsingSiteFidelity = false;
-		}
-
-		// Record that a target has been retrieved
-		if (isHoldingFood) {
-			num_targets_collected++;
-
-			/*
-			ofstream results_output_stream;
-			results_output_stream.open(results_full_path, ios::app);
-			results_output_stream << LoopFunctions->getSimTimeInSeconds() << ", " << num_targets_collected << endl;	    
-			results_output_stream.close();
-			*/
-
-			LoopFunctions->setScore(num_targets_collected);
-			
-			 // We dropped off food. Clear the built-up pheromone trail.
-			TrailToShare.clear();
 		}
 
 		isGivingUpSearch = false;
