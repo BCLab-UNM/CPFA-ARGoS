@@ -6,7 +6,7 @@
 set(loop_source_files CPFA_loop_functions.h CPFA_loop_functions.cpp)
 
 if (ARGOS_COMPILE_QTOPENGL)
-   set(source_files ${loop_source_files} CPFA_qt_user_functions.h CPFA_qt_user_functions.cpp)
+   set(loop_source_files ${loop_source_files} CPFA_qt_user_functions.h CPFA_qt_user_functions.cpp)
 endif()
 
 add_library(CPFA_loop_functions SHARED ${loop_source_files})
