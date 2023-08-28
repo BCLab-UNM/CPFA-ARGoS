@@ -41,24 +41,41 @@ endif()
 # Set the path where CMake will find additional scripts.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
-# Find the ARGoS package.
-find_package(PkgConfig)
-pkg_check_modules(ARGOS REQUIRED argos3_simulator)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
+## Find the ARGoS package, make sure to save the ARGoS prefix
+#find_package(ARGoS REQUIRED)
+#include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS})
+#link_directories(${ARGOS_LIBRARY_DIR})
+#link_libraries(${ARGOS_LDFLAGS})
 
-# Check for required libraries to compile code depending on Qt and OpenGL.
-include(ARGoSCheckQTOpenGL)
+#
+# Check ARGoS
+#
+find_package(ARGoS REQUIRED)
+include_directories(${ARGOS_INCLUDE_DIRS})
+link_directories(${ARGOS_LIBRARY_DIR})
+link_libraries(${ARGOS_LDFLAGS})
+string(REPLACE "/lib/argos3" "" ARGOS_PREFIX "${ARGOS_LIBRARY_DIR}")
+set(CMAKE_INSTALL_PREFIX ${ARGOS_PREFIX} CACHE STRING "Install path prefix, prepended onto install directories." FORCE)
 
-# Find the ARGoS package
-find_package(PkgConfig)
-pkg_check_modules(ARGOS REQUIRED argos3_simulator)
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
+## Find the ARGoS package.
+#find_package(PkgConfig)
+#pkg_check_modules(ARGOS REQUIRED argos3_simulator)
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
+
+## Check for required libraries to compile code depending on Qt and OpenGL.
+#include(ARGoSCheckQTOpenGL)
+
+## Find the ARGoS package
+#find_package(PkgConfig)
+#pkg_check_modules(ARGOS REQUIRED argos3_simulator)
+#set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${ARGOS_PREFIX}/share/argos3/cmake)
 
 # Find the GSL package.
 # find_package(GSL REQUIRED)
 
 # Find the LUA package.
-find_package(Lua52 REQUIRED)
+#find_package(Lua52 REQUIRED)
+find_package(Lua REQUIRED)
 
 # Set ARGoS include directory.
 #include_directories(${CMAKE_SOURCE_DIR} ${ARGOS_INCLUDE_DIRS} ${GSL_INCLUDE_DIR} ${LUA_INCLUDE_DIR} source)
@@ -86,6 +103,7 @@ add_executable(cpfa_evolver source/evolver.cpp)
 # Specify the libraries needed to compile the evolver.
 target_link_libraries(cpfa_evolver CPFA_controller
 				   CPFA_loop_functions
+                                   CPFA_qt_user_functions
 				   GA-MPI   
 				   ${MPI_LIBRARIES}
 		   		   ${Boost_LIBRARIES}

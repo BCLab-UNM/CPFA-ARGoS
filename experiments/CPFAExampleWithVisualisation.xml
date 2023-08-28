@@ -126,9 +126,10 @@
 
 <qt-opengl>
       <camera>
-        <placement idx="0" position="  0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
+        <placement index="0" position="0, 0, 10" look_at="0, 0, 0" lens_focal_length="25"/>
       </camera>
-      <user_functions label="CPFA_qt_user_functions"/>
+      <user_functions library="build/source/CPFA/libCPFA_qt_user_functions"
+                      label="CPFA_qt_user_functions"/>
     </qt-opengl>
 
   </visualization>
