@@ -4,6 +4,7 @@
 #include <source/Base/BaseController.h>
 #include <source/Base/Pheromone.h>
 #include <source/CPFA/CPFA_loop_functions.h>
+#include <source/CPFA/CPFA_qt_user_functions.h>
 
 using namespace std;
 using namespace argos;

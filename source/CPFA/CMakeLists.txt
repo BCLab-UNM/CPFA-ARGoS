@@ -14,7 +14,12 @@ add_library(CPFA_loop_functions SHARED ${loop_source_files})
 add_library(CPFA_controller     SHARED CPFA_controller.h
                                        CPFA_controller.cpp
                                        CPFA_loop_functions.h
-                                       CPFA_loop_functions.cpp)
+                                       CPFA_loop_functions.cpp
+				       CPFA_qt_user_functions.h
+                                       CPFA_qt_user_functions.cpp)
+
+add_library(CPFA_qt_user_functions	SHARED CPFA_qt_user_functions.h
+                                       	       CPFA_qt_user_functions.cpp)
 
 ###############################################
 # link shared object files to dependencies
